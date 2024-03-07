@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="1stTest2ndPartStyles.css">
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
+</head>
+<body>
+    <section class="container">
+        <h1 class="h1">Оценивание характеристик</h1>
+        <div class="table_main">
+            <% if (profession) {%>
+                <h1 class="profession_name" id="profession-heading"><%= profession %></h1>
+            <%}%>
+            <form method="POST" id="test2">
+                <table class="table">
+                    <thead>
+                        <tr class="tr_style">
+                            <th>Характеристика</th>
+                            <th>Оценка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% if (characteristics) {%>
+                        <% characteristics.forEach((characteristic) => { %>
+                        <tr class="tr_style">
+                            <td><%= characteristic.name%></td>
+                            <td>
+                                <select name="value<%=characteristic.id%>">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% }%>
+                    </tbody>
+                </table>
+                <button class="next-btn" type="submit">Отправить</button>
+            </form>
+        </div>    
+    </section>
+</body>
+
+<script>
+    const url = new URL(window.location.href);
+    let data = {};
+
+    if (url.searchParams.has('data')) {
+        data.pollData = JSON.parse(url.searchParams.get('data'));
+    } else {
+        data.pollData = {};
+    }
+
+    const professionHeading = document.getElementById('profession-heading');
+    if (professionHeading) {
+        data.pollData.profession = professionHeading.textContent;
+    }
+
+    document.getElementById('test2').action = '/1st_test?data=' + encodeURIComponent(JSON.stringify(data));
+</script>
+</html>

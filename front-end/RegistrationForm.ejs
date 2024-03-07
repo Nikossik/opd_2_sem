@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="RegistrationFormStyles.css">
+  <title>Registration</title>
+  <style>
+    body {
+    background-image: url('images/background_gradient.png');
+    background-size: cover; 
+    background-position: center; 
+    }
+  </style>
+</head>
+
+<body>
+<section class = "container">
+  <header>
+    <div>
+      <h1>Регистрация</h1>
+    </div>
+  </header>
+  <form id="login-form" method="POST" action="/register">
+    <input type="text" name="login" id="user-name" placeholder="Login" required class = "input">
+    <br>
+    <input type="password" name="password" id="user-password" placeholder="Password" required class = "input">
+    <div class="form-group">
+      <label for="id-select">Возраст</label>
+      <select class="select-style" name="age" id="id-select"></select>
+    </div>
+    <br>
+    <div class="form-group">
+        <label for="id-sex">Пол:</label>
+        <div class="select-wrapper">
+          <select class="select-style" name="sex" id="id-sex">
+            <option value="m">Мужчина</option>
+            <option value="f">Женщина</option>
+          </select>
+        </div>
+    </div>
+    <br>
+    <button class="first-button" type="submit" id="register">Создать аккаунт</button>
+  </form>
+
+  <div id="error-message">
+    <% if (errorMessage) { %>
+      <p class = "error-message"><%= errorMessage %></p>
+    <% } %>
+  </div>
+
+  <div id="login-button">
+    <a class = "second-button" href="/login"><p><u>Уже есть аккаунт?</u></p></a>
+  </div>
+</section>
+</body>
+<script>
+  const ageSelect = document.getElementById("id-select");
+
+  for (let i = 18; i <= 45; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = i;
+    ageSelect.appendChild(option);
+  }
+</script>
+</html>

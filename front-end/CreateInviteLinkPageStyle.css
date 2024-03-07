@@ -1,0 +1,76 @@
+:root{
+    --primary-color: rgba(33, 223, 230, 0.95);
+    --overlay-color: linear-gradient(244deg, #e70af2,#009bff,#4abde3);
+    --addl-color: rgba(74, 189, 227);
+    --font-family: Verdana, Geneva, sans-serif
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    width: 100%; 
+}
+
+body {
+    background-color: rgba(33, 223, 230, 0.95);
+    font-weight: 500;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: var(--font-style);
+}
+
+select {
+    display: flex;
+    flex-direction: column;
+    background-color:  white;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    color: black;
+    background-position: center right; 
+    text-align-last: center;
+    /* font-family: var(--font-style); */
+    font-size: 1.2em;
+    letter-spacing: .18em;
+    align-self: center;
+    justify-content: center;
+    height: 3.5em;
+    text-transform: uppercase;
+    text-align: center;
+    -webkit-text-align: center;
+}
+
+button {
+    background-color: rgb(123, 83, 234);
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    padding: 1.15em 4em;
+    transition:  opacity 0.2s ease-in-out;
+    cursor: pointer;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin-top: 3em;
+
+}
+
+button:hover {
+    opacity: .9;
+}
+
+#invite-link-enclosing {
+    margin-top: 24px;
+}
+
+#link-copied {
+    margin-top: 12px;
+    font-size: 14px;
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль Эксперта</title>
+</head>
+<body>
+    <section class="expert-info">
+        <h1>Профиль Эксперта</h1>
+        <p>Никнейм: <%= user.login %></p>
+        <p>ID: <%= user.id %></p>
+    </section>
+    <section class="characteristics">
+        <h2>Качества которые выбрал эксперт</h2>
+        <ul>
+            <% polls.forEach(function(poll) { %>
+                <li><%= poll.profession %>: <%= poll.characteristics %></li>
+            <% }); %>
+        </ul>
+        
+    </section>
+</body>
+</html>
