@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить профессию</title>
+</head>
+<body>
+    <h2>Форма добавления профессии</h2>
+    <form action="/add_profession" method="POST">
+        <div>
+            <label for="profession">Название профессии:</label>
+            <input type="text" id="profession" name="profession" required>
+        </div>
+        <div>
+            <label for="competition">Конкуренция:</label>
+            <select id="competition" name="competition">
+                <option value="Низкая">Низкая</option>
+                <option value="Средняя">Средняя</option>
+                <option value="Высокая">Высокая</option>
+            </select>
+        </div>
+        <div>
+            <label for="salary">Зарплата:</label>
+            <input type="text" id="salary" name="salary" placeholder="60-500" required>
+        </div>
+        <div>
+            <label for="study">Сложность обучения:</label>
+            <select id="study" name="study">
+                <option value="Низкая">Низкая</option>
+                <option value="Средняя">Средняя</option>
+                <option value="Высокая">Высокая</option>
+            </select>
+        </div>
+        <div>
+            <label for="description">Описание:</label>
+            <textarea id="description" name="description" rows="4" cols="50" required></textarea>
+        </div>
+        <div>
+            <label for="task">Задачи:</label>
+            <textarea id="task" name="task" rows="4" cols="50" required></textarea>
+        </div>
+        <button type="submit">Добавить профессию</button>
+    </form>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        form.onsubmit = function(event) {
+
+            const salaryInput = document.querySelector('#salary');
+            const salaryValue = salaryInput.value;
+            const salaryRange = salaryValue.split('-').map(Number);
+
+            if (salaryRange.length !== 2 || isNaN(salaryRange[0]) || isNaN(salaryRange[1])) {
+                alert('Зарплата должна быть указана в формате "min-max".');
+                event.preventDefault(); 
+                return false;
+            }
+
+
+            const [minSalary, maxSalary] = salaryRange;
+            if (minSalary < 60 || maxSalary > 500 || minSalary >= maxSalary) {
+                alert('Зарплата должна быть в диапазоне от 60 до 500.');
+                event.preventDefault(); 
+                return false;
+            }
+
+
+            return true;
+        };
+    });
+</script>
+</html>

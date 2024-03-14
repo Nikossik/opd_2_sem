@@ -15,6 +15,7 @@ const char_dict = {0: 'Стремление к профессиональном�
 
 server.use(express.json());
 server.use(express.static('front-end'));
+server.use('/expert', express.static('front-end/expert'))
 server.use(express.static('resources'));
 server.use(express.static('public'));
 server.use('js-script', express.static('js-scripts'));
@@ -119,22 +120,6 @@ server.get('/adminRegister', (req, res) => {
     }
 })
 
-server.get('/adminPage', async (req, res) => {
-    if(req.isAuthenticated()){
-        username = req.user.login;
-        adminUser = req.user.isAdmin;
-        loggedIn = true;
-
-        const adminLogins = await getAdmins();
-        res.render('AdminPage', { logins: adminLogins });
-    } else{
-        username = "";
-        adminUser = false;
-        loggedIn = false;
-        res.redirect('/login')
-    }
-});
-
 server.get('/characteristics', (req, res) => {
     res.render('SecondPage');
 })
@@ -181,8 +166,15 @@ server.get('/math_sound', (req, res) => {
 
 server.get('/create_invite', (req, res) => {
     if(!req.isAuthenticated()){
+        username = "";
+        adminUser = false;
+        loggedIn = false;
         res.redirect('/login')
     } else {
+        
+        username = req.user.login;
+        adminUser = req.user.isAdmin;
+        loggedIn = true;
         res.render('CreateInviteLinkPage')
     }
 })
@@ -538,27 +530,53 @@ server.post('/create_invite', async (req, res) => {
         console.log(e)
     }
 })
+server.get('/adminPage', async (req, res) => {
+    if(req.isAuthenticated()){
+        username = req.user.login;
+        adminUser = req.user.isAdmin;
+        loggedIn = true;
 
-server.get('/expert/:id', async (req, res) => {
+        const adminLogins = await getAdmins();
+        res.render('AdminPage', { logins: adminLogins });
+    } else{
+        username = "";
+        adminUser = false;
+        loggedIn = false;
+        res.redirect('/login')
+    }
+});
+
+server.get('/expert_:id', async (req, res) => {
     function getCharacteristics(characteristicsString, characteristicsDict) {
         let characteristicsList = [];
-
+    
         if (typeof characteristicsString !== 'string') {
             return characteristicsList;
         }
     
         let characteristicsArray = characteristicsString.split('');
-        
+    
         characteristicsArray.forEach((characteristic, index) => {
             if (characteristic != '0' && characteristicsDict.hasOwnProperty(index)) {
-                characteristicsList.push(" " + characteristicsDict[index]);
+                
+                characteristicsList.push({ 
+                    characteristic: characteristicsDict[index], 
+                    importance: parseInt(characteristic, 10) 
+                });
             }
         });
     
-        return characteristicsList;
+        characteristicsList.sort((a, b) => b.importance - a.importance);
+    
+        
+        return characteristicsList.map(item => item.characteristic);
     }
     if(req.isAuthenticated()) {
         try {
+            username = req.user.login;
+            adminUser = req.user.isAdmin;
+            loggedIn = true;
+
             const id = req.params.id;
             const user = await User.findOne({ where: { id: id } });
             console.log(user);
@@ -579,6 +597,34 @@ server.get('/expert/:id', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+server.get('/second-page', async (req, res) => {
+    const professions = await Profession.findAll();
+    res.render('SecondPage', { professions: professions });
+});
+
+server.get('/add_profession', (req, res) => {
+    res.render('AddProfession');
+});
+
+server.post('/add_profession', async (req, res) => {
+    const { profession, competition, salary, study, description, task } = req.body;
+    try {
+        await Profession.create({
+            profession,
+            competition,
+            salary,
+            study,
+            description,
+            task
+        });
+        res.redirect('/second-page');
+    } catch (error) {
+        res.render('AddProfession', { error: error.message });
+    }
+});
+
+
 
 
 // HERE IS YOUR CODE
