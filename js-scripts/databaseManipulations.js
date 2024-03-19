@@ -1,5 +1,5 @@
 const { getHashes } = require('crypto')
-const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest} = require('../models')
+const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession} = require('../models')
 
 async function filterTest(type, username, testId, testType){
     let userId = null
@@ -135,6 +135,20 @@ async function getExpertPolls(userId) {
     return polls; 
 }
 
+async function getProfessionCharacteristics(professionId) {
+    try {
+        const characteristics = await Profession.findAll({
+            where: {
+                id: professionId
+            }
+        });
+        return characteristics;
+    } catch (err) {
+        console.error('Ошибка при получении характеристик профессии из базы данных', err);
+        throw err;
+    }
+}
+
 // HERE IS YOUR CODE
 
-module.exports = {filterTest, getUsers, getAdmins, getExpertPolls}
+module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics}

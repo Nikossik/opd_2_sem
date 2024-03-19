@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title><%= profession.name %></title>
+</head>
+<body>
+    <h1><%= profession.name %></h1>
+    <p><%= profession.description %></p>
+
+    <% if (characteristics.length > 0) { %>
+        <h2>Характеристики</h2>
+        <ul>
+            <% characteristics.forEach(function(characteristic) { %>
+                <li><%= characteristic.competition%></li>
+                <li><%= characteristic.salary %></li>
+                <li><%= characteristic.study %></li>
+                <li><%= characteristic.description %></li>
+                <li><%= characteristic.task %></li>
+            <% }); %>
+        </ul>
+    <% } else { %>
+        <p>Характеристики для этой профессии отсутствуют.</p>
+    <% } %>
+</body>
+</html>
