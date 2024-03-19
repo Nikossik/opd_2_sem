@@ -91,9 +91,13 @@ server.get('/login', (req, res) => {
 });
 
 server.get('/logout', (req, res) => {
-    req.logout(() => {
-        res.redirect('/');
-    });
+    if(req.isAuthenticated()){
+        req.logout(() => {
+            res.redirect('/');
+        });
+    } else {
+        res.redirect('/login');
+    }
 });
 
 
@@ -176,10 +180,19 @@ server.get('/create_invite', (req, res) => {
 })
 
 server.get('/tests_list', (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
     res.render('TestListPage')
 })
 
 server.post('/get_tests_from_db', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const type = req.body.type
     const testId = req.body.testId
     const username = req.body.username
@@ -194,6 +207,11 @@ server.post('/get_tests_from_db', async (req, res) => {
 })
 
 server.post('/get_users_from_db', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const users = await getUsers()
 
     if (users !== []){
@@ -218,6 +236,11 @@ server.get('/hard_action', async (req, res) => {
 })
 
 server.get('/invite/:code', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const link = await InviteLink.findOne({
         where: {
             code: req.params.code
@@ -326,6 +349,11 @@ server.get('/poll_1_part_1', (req, res) => {
 })
 
 server.get('/poll_1_part_2', (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     if (!req.flash("passed_1_part")[0]){
         res.redirect('/')
     }
@@ -413,17 +441,27 @@ server.post("/1st_test", async (req, res) => {
 
 
 server.get('/polls_results', async (req, res) => {
-        try {
-            const polls = await Poll.findAll();
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
 
-            res.render('ResultsPage', { polls });
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Internal Server Error');
-        }
+    try {
+        const polls = await Poll.findAll();
+
+        res.render('ResultsPage', { polls });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 })
 
 server.post('/reaction_test', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const user = req.user.id
     const type = req.body.testType
     const reactionTime = req.body.reactionTime
@@ -453,6 +491,11 @@ server.post('/reaction_test', async (req, res) => {
 })
 
 server.post('/complex_reaction_test', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const user = req.user.id
     const type = req.body.testType
     const reactionTime1 = req.body.reactionTimings[0]
@@ -485,6 +528,11 @@ server.post('/complex_reaction_test', async (req, res) => {
 })
 
 server.post('/accuracy_test', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const user = req.user.id
     const type = req.body.testType
     const accuracy = req.body.accuracy
@@ -514,6 +562,11 @@ server.post('/accuracy_test', async (req, res) => {
 
 
 server.post('/create_invite', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const userWhoCreated = req.user.id;
     const used = false;
     const tests = req.body.tests;
@@ -600,6 +653,11 @@ server.get('/expert_:id', async (req, res) => {
 
 
 server.get('/characteristics', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+    
     username = req.user.login;
     adminUser = req.user.isAdmin;
     loggedIn = true;
@@ -609,10 +667,20 @@ server.get('/characteristics', async (req, res) => {
 });
 
 server.get('/add_profession', (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     res.render('AddProfession');
 });
 
 server.post('/add_profession', async (req, res) => {
+    if(!req.isAuthenticated()){
+        res.redirect('/login')
+        return
+    }
+
     const { profession, competition, salary, study, description, task } = req.body;
     try {
         await Profession.create({
@@ -629,32 +697,7 @@ server.post('/add_profession', async (req, res) => {
     }
 });
 
-server.get('/professions_:id', async (req, res) => {
-    function getCharacteristics(characteristicsString, characteristicsDict) {
-        let characteristicsList = [];
-    
-        if (typeof characteristicsString !== 'string') {
-            return characteristicsList;
-        }
-    
-        let characteristicsArray = characteristicsString.split('');
-    
-        characteristicsArray.forEach((characteristic, index) => {
-            if (characteristic != '0' && characteristicsDict.hasOwnProperty(index)) {
-                
-                characteristicsList.push({ 
-                    characteristic: characteristicsDict[index], 
-                    importance: parseInt(characteristic, 10) 
-                });
-            }
-        });
-    
-        characteristicsList.sort((a, b) => b.importance - a.importance);
-    
-        
-        return characteristicsList.map(item => item.characteristic);
-    }
-    
+server.get('/professions_:id', async (req, res) => {    
     if (req.isAuthenticated()) {
         try {
             const id = req.params.id;
@@ -674,9 +717,6 @@ server.get('/professions_:id', async (req, res) => {
         res.redirect('/login');
     }
 });
-
-
-
 
 
 // HERE IS YOUR CODE
