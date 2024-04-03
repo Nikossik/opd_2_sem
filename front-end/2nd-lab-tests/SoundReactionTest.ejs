@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <link rel = "stylesheet" href = "2nd-lab-tests/SoundReactionTestStyle.css">
+    <style>
+                body {
+                background-image: url('images/background_gradient.png');
+                background-size: cover;
+                background-position: center;
+                }
+            </style>
     <title>Sound Reaction Test</title>
 </head>
 <body>
@@ -13,10 +20,10 @@
 let bodyElement = document.getElementsByTagName("body")[0];
 let startTime, testStarted = false, testPassed = false;
 let testResults = []
-const numTests = 30; // number of times to play the sound
+const numTests = 2; // number of times to play the sound
 let currentTestNum = 0;
 
-const audio = new Audio("./voice_sans.mp3")
+const audio = new Audio("images/sound.mp3")
 
 async function sendData(){
     if(testPassed){
