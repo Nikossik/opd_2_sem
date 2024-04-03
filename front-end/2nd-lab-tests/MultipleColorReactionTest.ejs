@@ -89,6 +89,7 @@
     function startTest(event) {
         if(event.keyCode !== 32 && currentColor === 0){
             testStarted = true;
+            startButton.style.display = "none";
             changeColor();
             startTime = new Date().getTime(); // сохраняем время начала изменения цвета фона
             // добавляем фокус на страницу, чтобы пользователь мог нажать на клавишу без необходимости клика на страницу
