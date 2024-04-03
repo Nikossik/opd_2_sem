@@ -141,3 +141,36 @@ form {
     display: inline-block;
     width: 100%; 
 }
+
+/*toggler animation
+checked makes elem clickable*/
+.menu-wrap .toggler:checked + .main-menu-icon > div {
+    transform: rotate(135deg);
+}
+
+/*turn into x*/
+.menu-wrap .toggler:checked + .main-menu-icon > div:before,
+.menu-wrap .toggler:checked + .main-menu-icon > div:after {
+    top: 0;
+    transform: rotate(90deg);
+}
+
+/*rotate on hover*/
+.menu-wrap .toggler:checked:hover + .main-menu-icon > div {
+    transform: rotate(225deg);
+}
+
+/*show menu*/
+.menu-wrap .toggler:checked ~ .menu {
+    visibility: visible;
+}
+/*tilda applies the same style to the sibling selector*/
+.menu-wrap .toggler:checked ~ .menu > div {
+    transform: scale(1);
+    transition-duration: var(--menu-speed);
+}
+
+.menu-wrap .toggler:checked ~ .menu > div > div {
+    opacity: 1;
+    transition: opacity 0.4s ease 0.4s;
+}
