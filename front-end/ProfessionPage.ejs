@@ -2,9 +2,52 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="ProfessionPageStyle.css">
     <title><%= profession.name %></title>
 </head>
 <body>
+    <div class="menu-wrap">
+        <input type="checkbox" class="toggler">
+        <div class="main-menu-icon"><div></div></div>
+        <div class="menu">
+            <div>
+                <div>
+                    <ul>
+                        <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
+    
+                        <% if (!loggedIn) { %>
+                            <li><a href="/login">ВОЙТИ</a></li>
+                        <% } %>
+                    
+                        <% if (loggedIn) { %>
+                            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
+                        <% } %>
+                    
+                        <% if (adminUser) { %>
+                            <li><a href="/poll_1_part_1">ОПРОС</a></li>
+                        <% } %>
+                        
+                        <% if (adminUser) { %>
+                            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
+                        <% } %>
+<!--                        <% if (adminUser) { %>-->
+<!--                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>-->
+<!--                        <% } %>-->
+                        <% if (loggedIn) { %>
+                            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/logout">ВЫЙТИ</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <h1><%= profession.name %></h1>
     <p><%= profession.description %></p>
 
@@ -12,11 +55,11 @@
         <h2>Характеристики</h2>
         <ul>
             <% characteristics.forEach(function(characteristic) { %>
-                <li><%= characteristic.competition%></li>
-                <li><%= characteristic.salary %></li>
-                <li><%= characteristic.study %></li>
-                <li><%= characteristic.description %></li>
-                <li><%= characteristic.task %></li>
+                <li>Конкуренция: <%= characteristic.competition%></li>
+                <li>Зарплата: <%= characteristic.salary %></li>
+                <li>Сложность обучения: <%= characteristic.study %></li>
+                <li>Описания профессии: <%= characteristic.description %></li>
+                <li>Основные задачи: <%= characteristic.task %></li>
             <% }); %>
         </ul>
     <% } else { %>
