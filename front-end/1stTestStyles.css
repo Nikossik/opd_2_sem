@@ -150,7 +150,7 @@ h1{
     --primary-color: rgba(33, 223, 230, 0.95);
     --overlay-color: linear-gradient(244deg, #e70af2,#009bff,#4abde3);
     --addl-color: rgba(74, 189, 227);
-    --font-family: Verdana, Geneva, sans-serif
+    --font-family: Verdana, Geneva, sans-serif;
     --menu-speed: 0.75s;
 }
 * {

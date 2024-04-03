@@ -62,14 +62,14 @@
         </div>
     </header>
     <form id = "test1" method="POST">
-        <select name="profession" id="profression-selector">
+        <label for="profession-selector">Выберите профессию:</label>
+        <select name="professions" id="profession-selector">
             <option value="">Выберите профессию</option>
-            <option value= "Data Scientist">Data Scientist</option>
-            <option value= "Backend developer">Backend developer</option>
-            <option value= "Frontend developer">Frontend developer</option>
-            <option value= "QA-engineer">QA-engineer</option>
-            <option value= "Cyber security specialist">Cyber security specialist</option>
+            <% professions.forEach(profession => { %>
+                <option value="<%= profession %>"><%= profession %></option>
+            <% }); %>
         </select>
+
         <div class="table">
             <table>
                 <thead>
