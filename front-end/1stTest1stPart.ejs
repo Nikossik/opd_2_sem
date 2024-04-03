@@ -65,9 +65,9 @@
         <label for="profession-selector">Выберите профессию:</label>
         <select name="professions" id="profession-selector">
             <option value="">Выберите профессию</option>
-            <% professions.forEach(profession => { %>
-                <option value="<%= profession %>"><%= profession %></option>
-            <% }); %>
+            <% professions.forEach(function(profession) { %>
+                <option value="<%= profession.id %>"><%= profession.profession %></option>
+            <% }) %>
         </select>
 
         <div class="table">
