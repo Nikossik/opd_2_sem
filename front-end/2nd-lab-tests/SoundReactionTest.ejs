@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <link rel = "stylesheet" href = "2nd-lab-tests/SoundReactionTestStyle.css">
     <style>
-                body {
-                background-image: url('images/background_gradient.png');
-                background-size: cover;
-                background-position: center;
-                }
-            </style>
+        body {
+            background-image: url('images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
     <title>Sound Reaction Test</title>
 </head>
 <body>
+<h1>Sound Reaction Test</h1>
 <div id="send-button-enclosing"></div>
+<div id="restart-button-enclosing"></div>
 <div id="reaction-time-enclosing"></div>
 </body>
 <script>
@@ -88,11 +90,15 @@ function startTest() {
         if (currentTestNum >= numTests) {
             clearInterval(playSoundInterval); // stop playing the sound after numTests times
             if (!testPassed) {
-                document.getElementById("reaction-time-enclosing").innerHTML = "";
+                document.getElementById("reaction-time-enclosing").innerHTML = "Результаты теста: " + testResults.join(" мс, ") + " мс.";
+                
                 const submitButton = document.createElement("button");
                 submitButton.innerHTML = "ОТПРАВИТЬ РЕЗУЛЬТАТ";
                 submitButton.onclick = sendData;
                 document.getElementById("send-button-enclosing").appendChild(submitButton);
+
+
+
             }
             testPassed = true;
         } else {
