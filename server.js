@@ -70,20 +70,15 @@ server.use(passport.initialize());
 server.use(passport.session());
 
 server.get('/', (req, res) => {
-    let username, adminUser, loggedIn;
+    let username = "", adminUser = false, loggedIn = req.isAuthenticated();
     if(req.isAuthenticated()){
         username = req.user.login;
         adminUser = req.user.isAdmin;
-        loggedIn = true;
-    }
-    else{
-        username = "";
-        adminUser = false;
-        loggedIn = false;
     }
 
     res.render('MenuPageDraft', {username, adminUser, loggedIn})
 });
+
 
 server.get('/login', (req, res) => {
     const errorMessage = req.flash('error')[0]
@@ -338,20 +333,18 @@ server.post('/adminRegister', async (req, res, next) => {
     }
 });
 
-server.get('/poll_1_part_1', (req, res) => {
-    if(!req.isAuthenticated()){
+server.get('/poll_1_part_1', async (req, res) => {
+    if (!req.isAuthenticated()) {
         res.redirect('/login')
         return
     }
 
     const checkAdmin = req.user.isAdmin;
-
-    if(!checkAdmin){
+    const professions = await Profession.findAll({attributes: ['profession']});
+    if (!checkAdmin) {
         res.redirect('/')
-    }
-
-    else{
-        res.render('1stTest1stPart');
+    } else {
+        res.render('1stTest1stPart', {professions});
     }
 })
 
@@ -375,6 +368,7 @@ server.get('/poll_1_part_2', (req, res) => {
                 characteristics.push({id: i, name:data["question" + i]})
             }
         }
+
         console.log({ profession, characteristics });
         res.render('1stTest2ndPart', {profession, characteristics})
     }
