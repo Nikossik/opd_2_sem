@@ -35,26 +35,27 @@ h1 {
     font-weight: 500;
     cursor: pointer;
 }
+#answer_buttons {
+    text-align: center;
+    margin-top: 3rem;
+}
 
 #answer_buttons button {
-    display: inline-block;
     border: none;
     border-radius: 3px;
     background-color: white;
     color: var(--primary-color);
     padding: 1.2rem 2.8rem;
-    margin-top: 5rem;
-    transition: opacity .6s ease-in-out;
-    text-decoration: none;
+    margin-left: 1rem;
     font-size: 1.2rem;
     letter-spacing: 0.1rem;
     font-weight: 500;
-    position: relative;
-    left: 19%;
-    transform: translate(-50%, 0);
     cursor: pointer;
+    transition: opacity .6s ease-in-out;
 }
-
+#answer_buttons button:hover {
+    opacity: 0.7;
+}
 #answer_buttons button {
     margin-left: 7%;
 }
@@ -131,16 +132,16 @@ progress {
     margin-left: 5%;
     width: 90%;
     height: 1.5em;
-    background-color: var(--addl-color);
+    background-color: #D660CC;
 }
 
 progress::-webkit-progress-bar {
-    background-color: var(--overlay-color);
+    background-color: #7908AA;
     border-radius: 3px;
 }
 
 progress::-webkit-progress-value {
-    background-color: var(--addl-color);
+    background-color: #4E026E;
     border-radius: 3px;
 }
 

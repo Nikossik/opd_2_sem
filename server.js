@@ -132,11 +132,18 @@ server.get('/light_test', (req, res) => {
     }
 })
 {}
-server.get('/multiple_colours_test', (req, res) => {
+server.get('/colours_test', (req, res) => {
     if(!req.isAuthenticated()){
         res.redirect('/login')
     } else {
         res.render('2nd-lab-tests/ColorReactionTest')
+    }
+})
+server.get('/multiple_colours_test', (req, res) => {
+    if (!req.isAuthenticated()){
+        res.redirect('/login')
+    } else {
+        res.render('2nd-lab-tests/MultipleColorReactionTest')
     }
 })
 
@@ -171,7 +178,7 @@ server.get('/create_invite', (req, res) => {
         loggedIn = false;
         res.redirect('/login')
     } else {
-        
+
         username = req.user.login;
         adminUser = req.user.isAdmin;
         loggedIn = true;
@@ -383,10 +390,10 @@ server.post("/poll_1_part_2", async (req, res) => {
     let data = {};
 
     if (req.query.data) {
-        data = JSON.parse(decodeURIComponent(req.query.data)); 
+        data = JSON.parse(decodeURIComponent(req.query.data));
     }
 
-    data.pollData = req.body; 
+    data.pollData = req.body;
     console.log('111')
     console.log(data.pollData)
     console.log('111')
@@ -598,26 +605,26 @@ server.get('/adminPage', async (req, res) => {
 server.get('/expert_:id', async (req, res) => {
     function getCharacteristics(characteristicsString, characteristicsDict) {
         let characteristicsList = [];
-    
+
         if (typeof characteristicsString !== 'string') {
             return characteristicsList;
         }
-    
+
         let characteristicsArray = characteristicsString.split('');
-    
+
         characteristicsArray.forEach((characteristic, index) => {
             if (characteristic != '0' && characteristicsDict.hasOwnProperty(index)) {
-                
-                characteristicsList.push({ 
-                    characteristic: characteristicsDict[index], 
-                    importance: parseInt(characteristic, 10) 
+
+                characteristicsList.push({
+                    characteristic: characteristicsDict[index],
+                    importance: parseInt(characteristic, 10)
                 });
             }
         });
-    
+
         characteristicsList.sort((a, b) => b.importance - a.importance);
-    
-        
+
+
         return characteristicsList.map(item => item.characteristic);
     }
     if(req.isAuthenticated()) {
@@ -657,11 +664,11 @@ server.get('/characteristics', async (req, res) => {
         res.redirect('/login')
         return
     }
-    
+
     username = req.user.login;
     adminUser = req.user.isAdmin;
     loggedIn = true;
-    
+
     const professions = await Profession.findAll();
     res.render('SecondPage', { professions: professions });
 });
@@ -697,7 +704,7 @@ server.post('/add_profession', async (req, res) => {
     }
 });
 
-server.get('/professions_:id', async (req, res) => {    
+server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
             const id = req.params.id;
