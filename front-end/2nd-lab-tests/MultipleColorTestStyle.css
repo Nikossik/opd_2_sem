@@ -13,6 +13,17 @@ body {
     letter-spacing: 0.1rem;
 }
 
+h1{
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1rem;
+    color: black;
+    text-align: center;
+    text-transform: uppercase;
+    margin-top: 2em;
+    margin-bottom: -3em;
+}
+
 #progress {
     color: white;
     width: 90%;
@@ -52,7 +63,7 @@ button {
 }
 
 button:hover {
-    background-color: white;
+    background-color: pink;
     color: var(--primary-color);
     transition: opacity .6s ease-in-out;
 
@@ -62,3 +73,19 @@ button:focus {
     outline: none;
 }
 
+#submit-button {
+    display: block;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+#reaction-time-enclosing{
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 0.1rem;
+    text-align: center;
+    color: black;
+    margin-top: 3em;
+    font-family: var(--font-style);
+}

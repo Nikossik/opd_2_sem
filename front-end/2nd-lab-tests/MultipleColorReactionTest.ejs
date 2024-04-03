@@ -6,7 +6,9 @@
     <title>Multiple Color Test</title>
 </head>
 <body>
-<progress id="progress" value="0" max="100"></progress>
+    <h1>Multiple Color Reaction Test</h1>
+    <progress id="progress" value="0" max="100"></progress>
+    <div id="reaction-time-enclosing"></div>
 </body>
 <script>
     let initialColor = "white";
@@ -65,6 +67,7 @@
         if (event.keyCode === 32 && testStarted && newColor) {
             let endTime = new Date().getTime(); // сохраняем время завершения изменения цвета фона
             let reactionTime = endTime - startTime; // вычисляем время реакции пользователя
+            document.getElementById("reaction-time-enclosing").innerHTML = "Результаты попытки: " + reactionTime + " мс.";
             reactionTimings.push(reactionTime);
             currentColor++; // переходим к следующему цвету
             newColor = false;
@@ -105,10 +108,15 @@
         reactionTimings = [];
 
         if (!testPassed){
+            bodyElement.style.backgroundColor = initialColor;
+
             const submitButton = document.createElement("button")
+            submitButton.id = "submit-button"
             submitButton.innerHTML = "ОТПРАВИТЬ РЕЗУЛЬТАТ"
             submitButton.onclick = sendData
             bodyElement.appendChild(submitButton)
+
+            document.getElementById("reaction-time-enclosing").innerHTML = "Результаты теста: " + results.join(" мс, ") + " мс.";
         }
 
         testPassed = true;
@@ -124,5 +132,6 @@
     startButton.innerHTML = "НАЧАТЬ ТЕСТ";
     startButton.onclick = startTest;
     bodyElement.appendChild(startButton);
+    alert("Нажмите на клавишу пробел, когда увидите изменение цвета фона страниц");
 </script>
 </html>
