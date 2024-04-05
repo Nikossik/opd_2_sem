@@ -298,7 +298,8 @@
         resultEnclosing.innerText = message;
     }
     function runTest() {
-        document.getElementById("progress").value = 0;
+        window.location.href = window.location.origin + window.location.pathname;
+        /* document.getElementById("progress").value = 0;
 
         testCounter = 0;
         match = 0;
@@ -324,7 +325,7 @@
 
         canvas.style.display = "block";
         calculatePosition();
-        hideButton();
+        hideButton(); */
     }
 
 </script>

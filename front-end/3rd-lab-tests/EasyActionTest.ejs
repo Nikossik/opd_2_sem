@@ -277,8 +277,11 @@
   }
   // restart test
   function runTest() {
-    document.getElementById("progress").value = 0;
+    window.location.href = window.location.origin + window.location.pathname;
+    // Обнуляем прогресс
+    /* document.getElementById("progress").value = 0;
 
+    // Сбрасываем счетчики и флаги
     testCounter = 0;
     match = 0;
     accuracy = 0;
@@ -287,6 +290,18 @@
     totalAccuracy = 0;
     hit = 0;
 
+    // Очищаем содержимое блока с результатами
+    const resultEnclosing = document.getElementById("result-enclosing");
+    resultEnclosing.innerHTML = '';
+
+    // Показываем канвас
+    canvas.style.display = "block";
+
+    // Сбрасываем скорости и позицию круга
+    speedX = 0;
+    speedY = 0;
+    calculatePosition();
+
     const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
     if (submitButtonEnclosing.firstChild) {
       submitButtonEnclosing.removeChild(submitButtonEnclosing.firstChild);
@@ -294,14 +309,29 @@
     const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
     if (restartButtonEnclosing.firstChild) {
       restartButtonEnclosing.removeChild(restartButtonEnclosing.firstChild);
-    }
-    document.getElementById("result-enclosing").innerHTML = '';
+        }
 
-    canvas.style.display = "block";
-    speedX = 0;
-    speedY = 0;
-    calculatePosition();
-    hideButton();
+    // Показываем кнопку прерывания теста
+    const stopButtonEnclosing = document.getElementById("stop-button-enclosing");
+    stopButtonEnclosing.style.display = "block";
+
+    // Запускаем функцию изменения фона канваса
+    changeBackgroundColor();
+
+    // Запускаем функцию отрисовки кадра и кругов
+    drawFrame();
+    drawCircles();
+
+    // Запускаем движение круга
+    moveCircle();
+
+    // Запускаем таймер
+    const selectedTime = document.getElementById("time-select").value;
+    const endTime = new Date().getTime() + (selectedTime * 1000);
+    updateTimeLeft(endTime);
+
+    // Показываем время, оставшееся до конца теста
+    document.getElementById("time-left").style.display = "block"; */
   }
 </script>
 </html>
