@@ -1,8 +1,8 @@
-:root{
+:root {
     --primary-color: rgba(33, 223, 230, 0.95);
     --overlay-color: linear-gradient(244deg, #e70af2,#009bff,#4abde3);
     --addl-color: rgba(74, 189, 227);
-    --font-family: Verdana, Geneva, sans-serif
+    --font-family: Verdana, Geneva, sans-serif;
     --menu-speed: 0.75s;
 }
 
@@ -12,67 +12,67 @@
     box-sizing: border-box;
 }
 
-.container{
-    border-radius: 20px;
-    block-size: 33em;
-    box-shadow: 0 0 1px .6em rgba(0, 0, 0, 0.004), 0 1px 1em rgba(0, 0, 0, 0.06);
-    inline-size: 375px;
-    overflow: auto;
-    padding: 2em;
-    background-color: white;
-    margin: 0 auto;
-    display: block;
-}
-
-
 body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     background-image: url('images/background_gradient.png');
     background-size: cover;
     background-position: center;
+    font-family: var(--font-family);
 }
 
-h1{
-    font-size: 1.8rem;
+.container {
+    border-radius: 20px;
+    min-height: auto;
+    box-shadow: 0 0 1px 0.6em rgba(0, 0, 0, 0.1), 0 1px 1em rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    padding: 2em;
+    background-color: white;
+    margin: 1em;
+    text-align: center;
+}
+
+h1 {
+    font-size: calc(1.5rem + 1vw);
     font-weight: 500;
     letter-spacing: 0.1rem;
     color: black;
-    text-align: center;
-    text-transform: uppercase;
-    margin-top: 2em;
+    margin-bottom: 1em;
 }
 
-h2{
-    font-size: 1.2rem;
+h2 {
+    font-size: calc(1rem + 0.5vw);
     font-weight: 400;
     letter-spacing: 0.1rem;
     color: black;
-    text-align: center;
-    text-transform: uppercase;
-    margin-top: 2em;
+    margin-bottom: 1em;
 }
 
-p{
-    font-size: 1.2rem;
+p {
+    font-size: calc(0.8rem + 0.3vw);
     font-weight: 350;
     letter-spacing: 0.1rem;
     color: black;
-    text-align: center;
-    text-transform: uppercase;
-    margin-top: 2em;
+    margin-bottom: 1em;
 }
 
-ul{
-    font-size: 0.8rem;
+ul, li {
+    font-size: calc(0.8rem + 0.3vw);
     font-weight: 300;
     letter-spacing: 0.1rem;
     color: black;
-    text-align: center;
-    text-transform: uppercase;
-    margin-top: 2em;
+    margin-top: 0.8em;
 }
 
-li{
-    margin-top: 0.8em;
+@media (max-width: 768px) {
+    body {
+        padding: 1em;
+    }
+    .container {
+        padding: 1.5em;
+    }
 }
 
 .menu-wrap {

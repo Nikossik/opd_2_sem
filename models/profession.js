@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 
 module.exports = function (sequelize){
-    const Profession = sequelize.define('prefession',{
+    const Profession = sequelize.define('profession',{
         profession: Sequelize.STRING,
         competition: Sequelize.ENUM('Низкая', 'Средняя', 'Высокая'),
         salary: {
@@ -16,8 +16,8 @@ module.exports = function (sequelize){
             }
         },
         study: Sequelize.ENUM('Низкая', 'Средняя', 'Высокая'),
-        description: Sequelize.STRING,
-        task: Sequelize.STRING
+        description: Sequelize.TEXT,
+        task: Sequelize.TEXT
     })
 
     return Profession;

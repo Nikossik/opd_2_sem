@@ -315,6 +315,7 @@ server.post('/register', async (req, res, next) => {
 server.post('/adminRegister', async (req, res, next) => {
     const { login, password } = req.body;
     const isAdmin = true;
+
     const sex = req.body.sex;
     const age = req.body.age;
 
@@ -338,7 +339,8 @@ server.get('/poll_1_part_1', async (req, res) => {
         res.redirect('/login')
         return
     }
-
+    loggedIn = true;
+    
     const checkAdmin = req.user.isAdmin;
     const professions = await Profession.findAll({attributes: ['profession']});
     if (!checkAdmin) {
@@ -349,6 +351,7 @@ server.get('/poll_1_part_1', async (req, res) => {
 })
 
 server.get('/poll_1_part_2', (req, res) => {
+    loggedIn = true;
     if(!req.isAuthenticated()){
         res.redirect('/login')
         return
@@ -359,8 +362,8 @@ server.get('/poll_1_part_2', (req, res) => {
     }
     else {
         const data = JSON.parse(decodeURIComponent(req.query.data)).pollData;
-
-        const profession = data.profession
+        console.log({data});
+        const profession = data.professions
         let characteristics = []
 
         for (let i = 0; i<169; i++){
@@ -368,7 +371,6 @@ server.get('/poll_1_part_2', (req, res) => {
                 characteristics.push({id: i, name:data["question" + i]})
             }
         }
-
         console.log({ profession, characteristics });
         res.render('1stTest2ndPart', {profession, characteristics})
     }
@@ -380,7 +382,6 @@ server.post("/poll_1_part_2", async (req, res) => {
         res.redirect("/login");
         return;
     }
-
     let data = {};
 
     if (req.query.data) {
@@ -388,9 +389,7 @@ server.post("/poll_1_part_2", async (req, res) => {
     }
 
     data.pollData = req.body;
-    console.log('111')
     console.log(data.pollData)
-    console.log('111')
     req.flash("passed_1_part", true);
 
     res.redirect(`/poll_1_part_2?data=${encodeURIComponent(JSON.stringify(data))}`);
@@ -449,7 +448,7 @@ server.get('/polls_results', async (req, res) => {
 
     try {
         const polls = await Poll.findAll();
-
+        console.log(JSON.stringify(polls));
         res.render('ResultsPage', { polls });
     } catch (error) {
         console.error(error);
@@ -654,14 +653,19 @@ server.get('/expert_:id', async (req, res) => {
 
 
 server.get('/characteristics', async (req, res) => {
-    if(!req.isAuthenticated()){
-        res.redirect('/login')
-        return
+    if(req.isAuthenticated()){
+        username = req.user.login;
+        adminUser = req.user.isAdmin;
+        adminUser = true;
+        loggedIn = true;
+    }
+    else{
+    username='';
+    adminUser = false;
+    loggedIn = false;
     }
 
-    username = req.user.login;
-    adminUser = req.user.isAdmin;
-    loggedIn = true;
+
 
     const professions = await Profession.findAll();
     res.render('SecondPage', { professions: professions });
@@ -699,23 +703,30 @@ server.post('/add_profession', async (req, res) => {
 });
 
 server.get('/professions_:id', async (req, res) => {
-    if (req.isAuthenticated()) {
-        try {
-            const id = req.params.id;
-            const profession = await Profession.findOne({ where: { id: id } });
-            if (!profession) {
-                res.status(404).send('Профессия не найдена');
-                return;
-            }
-
-            const characteristics = await getProfessionCharacteristics(profession.id);
-            res.render('ProfessionPage', { profession: profession, characteristics: characteristics});
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Ошибка при получении информации о профессии');
+    if(req.isAuthenticated()){
+        username = req.user.login;
+        adminUser = req.user.isAdmin;
+        adminUser = true;
+        loggedIn = true;
+    }
+    else{
+    username='';
+    adminUser = false;
+    loggedIn = false;
+    }
+    try {
+        const id = req.params.id;
+        const profession = await Profession.findOne({ where: { id: id } });
+        if (!profession) {
+            res.status(404).send('Профессия не найдена');
+            return;
         }
-    } else {
-        res.redirect('/login');
+
+        const characteristics = await getProfessionCharacteristics(profession.id);
+        res.render('ProfessionPage', { profession: profession, characteristics: characteristics});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Ошибка при получении информации о профессии');
     }
 });
 
