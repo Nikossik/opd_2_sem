@@ -16,7 +16,6 @@
   <body>
     <h1>Easy Action Test</h1>
     <p id="time-left"></p>
-    <progress id="progress" value="0" max="100"></progress>
     <p id="instruction">Нужно нажимать на пробел, когда шарик будет максимально близко к центру</p>
     <select id="time-select">
       <option value="10">10 секунд</option>
@@ -136,7 +135,6 @@
         document.getElementById("stop-button-enclosing").style.display = "none";
         document.getElementById("time-left").style.display = "none";
 
-        document.getElementById("progress").value = 0
         const resultEnclosing = document.getElementById("result-enclosing");
         resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
       }
@@ -192,7 +190,8 @@
     context.fillStyle = "rgba(0, 103, 187)";
     context.fill();
   }
-//draw moving and fixed circles with frame restrictions
+
+  //draw moving and fixed circles with frame restrictions
   function moveCircle() {
     directionX += speedX;
     directionY += speedY;
@@ -213,39 +212,11 @@
   window.addEventListener("keydown", function (event) {
     if (event.code === "Space" && testPassed === false) {
       testCounter++;
-      document.getElementById("progress").value = testCounter * 10;
       checkHit();
-      if (testCounter > 10 && testPassed === false) {
-        testPassed = true;
-
-        if (document.getElementById("time-left").style.display != "none") {
-          document.getElementById("time-left").style.display = "none";
-        }
-
-        if (document.getElementById("restart-button-enclosing").style.display != "none" && document.getElementById("submit-button-enclosing").style.display != "none"){
-          canvas.style.display = "none";
-          const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-          const submitButton = document.createElement("button");
-          submitButton.textContent = "Отправить результат"
-          submitButton.onclick = sendData
-          submitButtonEnclosing.appendChild(submitButton);
-
-          const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-          const restartButton = document.createElement("button");
-          restartButton.textContent = "Пройти заново"
-          restartButton.addEventListener('click', runTest);
-          restartButtonEnclosing.appendChild(restartButton);
-
-          document.getElementById("stop-button-enclosing").style.display = "none";
-
-          document.getElementById("progress").value = 0
-          const resultEnclosing = document.getElementById("result-enclosing");
-          resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
-        }
-      }
     }
   });
-// calculate distance and check match
+
+  // calculate distance and check match
   function checkHit() {
     const distance = Math.sqrt((directionX - fixedCircleX) ** 2 + (directionY - fixedCircleY) ** 2);
     if (distance <= circleRadius * 2) {
@@ -258,7 +229,8 @@
       showReactionAndAccuracy();
     }
   }
-//calculate and show accuracy
+
+  //calculate and show accuracy
   function showReactionAndAccuracy() {
     const resultEnclosing = document.getElementById("result-enclosing");
     let message;
@@ -275,63 +247,10 @@
     }
     resultEnclosing.innerText = message;
   }
+
   // restart test
   function runTest() {
     window.location.href = window.location.origin + window.location.pathname;
-    // Обнуляем прогресс
-    /* document.getElementById("progress").value = 0;
-
-    // Сбрасываем счетчики и флаги
-    testCounter = 0;
-    match = 0;
-    accuracy = 0;
-    testPassed = false;
-    averageAccuracy = 0;
-    totalAccuracy = 0;
-    hit = 0;
-
-    // Очищаем содержимое блока с результатами
-    const resultEnclosing = document.getElementById("result-enclosing");
-    resultEnclosing.innerHTML = '';
-
-    // Показываем канвас
-    canvas.style.display = "block";
-
-    // Сбрасываем скорости и позицию круга
-    speedX = 0;
-    speedY = 0;
-    calculatePosition();
-
-    const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-    if (submitButtonEnclosing.firstChild) {
-      submitButtonEnclosing.removeChild(submitButtonEnclosing.firstChild);
-    }
-    const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-    if (restartButtonEnclosing.firstChild) {
-      restartButtonEnclosing.removeChild(restartButtonEnclosing.firstChild);
-        }
-
-    // Показываем кнопку прерывания теста
-    const stopButtonEnclosing = document.getElementById("stop-button-enclosing");
-    stopButtonEnclosing.style.display = "block";
-
-    // Запускаем функцию изменения фона канваса
-    changeBackgroundColor();
-
-    // Запускаем функцию отрисовки кадра и кругов
-    drawFrame();
-    drawCircles();
-
-    // Запускаем движение круга
-    moveCircle();
-
-    // Запускаем таймер
-    const selectedTime = document.getElementById("time-select").value;
-    const endTime = new Date().getTime() + (selectedTime * 1000);
-    updateTimeLeft(endTime);
-
-    // Показываем время, оставшееся до конца теста
-    document.getElementById("time-left").style.display = "block"; */
   }
 </script>
 </html>

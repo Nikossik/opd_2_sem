@@ -16,7 +16,6 @@
     <body>
         <h1>Hard Action Test</h1>
         <p id="time-left"></p>
-        <progress id="progress" value="0" max="100"></progress>
         <p id="instruction">Нужно нажимать на пробел, когда шарик будет максимально близко к центру</p>
         <select id="time-select">
             <option value="10">10 секунд</option>
@@ -136,7 +135,6 @@
                 document.getElementById("stop-button-enclosing").style.display = "none";
                 document.getElementById("time-left").style.display = "none";
 
-                document.getElementById("progress").value = 0
                 const resultEnclosing = document.getElementById("result-enclosing");
                 resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
             }
@@ -229,36 +227,10 @@
     window.addEventListener("keydown", function (event) {
         if (event.code === "Space" && testPassed === false) {
             testCounter++;
-            document.getElementById("progress").value = testCounter * 10;
             checkHit();
-            if (testCounter > 10 && testPassed === false) {
-                testPassed = true;
-
-                if (document.getElementById("time-left").style.display != "none") {
-                    document.getElementById("time-left").style.display = "none";
-                }
-
-                canvas.style.display = "none";
-                const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-                const submitButton = document.createElement("button");
-                submitButton.textContent = "Отправить результат"
-                submitButton.onclick = sendData
-                submitButtonEnclosing.appendChild(submitButton);
-
-                const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-                const restartButton = document.createElement("button");
-                restartButton.textContent = "Пройти заново"
-                restartButton.addEventListener('click', runTest);
-                restartButtonEnclosing.appendChild(restartButton);
-
-                document.getElementById("stop-button-enclosing").style.display = "none";
-
-                document.getElementById("progress").value = 0
-                const resultEnclosing = document.getElementById("result-enclosing");
-                resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
-            }
         }
     });
+
     function checkHit() {
         const distance1 = Math.sqrt((directionX1 - fixedCircleX) ** 2 + (directionY1 - fixedCircleY) ** 2);
         const distance2 = Math.sqrt((directionX2 - fixedCircleX) ** 2 + (directionY2 - fixedCircleY) ** 2);
@@ -281,6 +253,7 @@
             showReactionAndAccuracy();
         }
     }
+
     function showReactionAndAccuracy() {
         const resultEnclosing = document.getElementById("result-enclosing");
         let message;
@@ -297,35 +270,9 @@
         }
         resultEnclosing.innerText = message;
     }
+
     function runTest() {
         window.location.href = window.location.origin + window.location.pathname;
-        /* document.getElementById("progress").value = 0;
-
-        testCounter = 0;
-        match = 0;
-        accuracy = 0;
-        testPassed = false;
-        averageAccuracy = 0;
-        totalAccuracy = 0;
-        hit = 0;
-        speedX1 = 0;
-        speedY1 = 0;
-        speedX2 = 0;
-        speedY2 = 0;
-
-        const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-        if (submitButtonEnclosing.firstChild) {
-            submitButtonEnclosing.removeChild(submitButtonEnclosing.firstChild);
-        }
-        const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-        if (restartButtonEnclosing.firstChild) {
-            restartButtonEnclosing.removeChild(restartButtonEnclosing.firstChild);
-        }
-        document.getElementById("result-enclosing").innerHTML = '';
-
-        canvas.style.display = "block";
-        calculatePosition();
-        hideButton(); */
     }
 
 </script>

@@ -38,7 +38,7 @@ h1{
     color: white;
     text-align: center;
     text-transform: uppercase;
-    margin-top: 2em;
+    margin-top: 1.3em;
 }
 
 p{
@@ -48,7 +48,7 @@ p{
     color: white;
     text-align: center;
     text-transform: uppercase;
-    margin-top: 1.8em;
+    margin-top: 1.6em;
 }
 
 ::-moz-selection {
@@ -78,7 +78,7 @@ p{
     font-weight: 500;
     margin-left: 0;
     margin-right: 0;
-    margin-top: 2.5em;
+    margin-top: 1.6em;
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
@@ -91,32 +91,15 @@ p{
     letter-spacing: 0.1rem;
     text-align: center;
     color: white;
-    margin-top: 2em;
+    margin-top: 1.8em;
     font-family: var(--font-style);
-}
-
-#progress {
-    width: 90%;
-    height: 1em;
-    margin-top: 2em;
-    margin-left: 5%;
-    background-color: #D660CC;
-    border-radius: 3px;
-}
-#progress::-webkit-progress-bar {
-    border-radius: 3px;
-    background-color: #7908AA;
-}
-
-#progress::-webkit-progress-value {
-    border-radius: 3px;
-    background-color: #4E026E;
 }
 
 canvas {
     margin-left: 0;
     margin-right: 0;
-    margin-top: 2em;
+    margin-top: 1.6em;
+    margin-bottom: -0.8em;
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
