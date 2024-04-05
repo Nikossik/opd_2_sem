@@ -3,19 +3,37 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="3rd-lab-tests/EasyActionTestStyle.css" type="text/css">
+    <style>
+      body {
+          background-image: url('images/background_gradient.png');
+          background-size: cover;
+          background-position: center;
+      }
+  </style>
     <title>Easy Action Test</title>
   </head>
 
   <body>
+    <h1>Easy Action Test</h1>
+    <p id="time-left"></p>
     <progress id="progress" value="0" max="100"></progress>
+    <p id="instruction">Нужно нажимать на пробел, когда шарик будет максимально близко к центру</p>
+    <select id="time-select">
+      <option value="10">10 секунд</option>
+      <option value="120">2 минуты</option>
+      <option value="300">5 минут</option>
+      <option value="600">10 минут</option>
+      <option value="1500">25 минут</option>
+      <option value="2700">45 минут</option>
+    </select>
     <div id="start-button-enclosing">
       <button id="start-button" onclick="hideButton()">Начать тест</button>
     </div>
+    <div id="result-enclosing"></div>
     <div id="submit-button-enclosing"></div>
     <div id="restart-button-enclosing"></div>
-    <div id="result-enclosing"></div>
-
     <canvas id="canvas" width="550" height="400"></canvas>
+    <div id="stop-button-enclosing"></div>
   </body>
 
 <script>
@@ -40,11 +58,26 @@
   function changeBackgroundColor() {
     canvas.style.backgroundColor = "#fff";
   }
+
 // draw canvas with circles
   function hideButton() {
+    const selectedTime = document.getElementById("time-select").value;
+    const endTime = new Date().getTime() + (selectedTime * 1000);
+    updateTimeLeft(endTime);
+    setTimeout(stopTest, selectedTime * 1000); 
+
     //const newColor = prompt("Введите новый цвет фона:");
     //canvas.style.backgroundColor = newColor;
     document.getElementById("start-button").style.display = "none";
+    document.getElementById("instruction").style.display = "none";
+    document.getElementById("time-select").style.display = "none";
+
+    const stopButtonEnclosing = document.getElementById("stop-button-enclosing");
+    const stopButton = document.createElement("button");
+    stopButton.textContent = "Прервать тест"
+    stopButton.onclick = stopTest
+    stopButtonEnclosing.appendChild(stopButton);
+
     changeBackgroundColor();
     drawFrame();
     drawCircles();
@@ -80,6 +113,57 @@
               .catch(error => console.error(error));
 
     }
+  }
+
+  function stopTest() {
+    if (!testPassed) {
+      testPassed = true; // Устанавливаем флаг окончания теста
+      
+      if (document.getElementById("restart-button-enclosing").style.display != "none" && document.getElementById("submit-button-enclosing").style.display != "none"){
+        canvas.style.display = "none";
+        const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
+        const submitButton = document.createElement("button");
+        submitButton.textContent = "Отправить результат"
+        submitButton.onclick = sendData
+        submitButtonEnclosing.appendChild(submitButton);
+
+        const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
+        const restartButton = document.createElement("button");
+        restartButton.textContent = "Пройти заново"
+        restartButton.addEventListener('click', runTest);
+        restartButtonEnclosing.appendChild(restartButton);
+
+        document.getElementById("stop-button-enclosing").style.display = "none";
+        document.getElementById("time-left").style.display = "none";
+
+        document.getElementById("progress").value = 0
+        const resultEnclosing = document.getElementById("result-enclosing");
+        resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
+      }
+    }
+  }
+
+  function updateTimeLeft(endTime) {
+    const timeLeftElement = document.getElementById("time-left");
+
+    function update() {
+      const currentTime = new Date().getTime();
+      const timeRemaining = endTime - currentTime;
+
+      const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+      timeLeftElement.textContent = `Осталось времени: ${minutes} минут ${seconds} секунд`;
+
+      if (timeRemaining <= 0) {
+        document.getElementById("time-left").style.display = "none";
+        return;
+      }
+
+      setTimeout(update, 1000); // Обновляем каждую секунду
+    }
+
+    update();
   }
 
   //draw canvas
@@ -134,22 +218,30 @@
       if (testCounter > 10 && testPassed === false) {
         testPassed = true;
 
-        canvas.style.display = "none";
-        const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-        const submitButton = document.createElement("button");
-        submitButton.textContent = "Отправить результат"
-        submitButton.onclick = sendData
-        submitButtonEnclosing.appendChild(submitButton);
+        if (document.getElementById("time-left").style.display != "none") {
+          document.getElementById("time-left").style.display = "none";
+        }
 
-        const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-        const restartButton = document.createElement("button");
-        restartButton.textContent = "Пройти заново"
-        restartButton.addEventListener('click', runTest);
-        restartButtonEnclosing.appendChild(restartButton);
+        if (document.getElementById("restart-button-enclosing").style.display != "none" && document.getElementById("submit-button-enclosing").style.display != "none"){
+          canvas.style.display = "none";
+          const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
+          const submitButton = document.createElement("button");
+          submitButton.textContent = "Отправить результат"
+          submitButton.onclick = sendData
+          submitButtonEnclosing.appendChild(submitButton);
 
-        document.getElementById("progress").value = 0
-        const resultEnclosing = document.getElementById("result-enclosing");
-        resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
+          const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
+          const restartButton = document.createElement("button");
+          restartButton.textContent = "Пройти заново"
+          restartButton.addEventListener('click', runTest);
+          restartButtonEnclosing.appendChild(restartButton);
+
+          document.getElementById("stop-button-enclosing").style.display = "none";
+
+          document.getElementById("progress").value = 0
+          const resultEnclosing = document.getElementById("result-enclosing");
+          resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
+        }
       }
     }
   });
