@@ -57,11 +57,15 @@
     let totalAccuracy = 0;
     let hit = 0;
 
+    canvas.style.display = "none";
+
     function changeBackgroundColor() {
         canvas.style.backgroundColor = "#fff";
     }
 
     function hideButton() {
+        canvas.style.display = "block";
+
         const selectedTime = document.getElementById("time-select").value;
         const endTime = new Date().getTime() + (selectedTime * 1000);
         updateTimeLeft(endTime);
@@ -224,8 +228,9 @@
         drawCircles();
         requestAnimationFrame(moveCircle);
     }
+
     window.addEventListener("keydown", function (event) {
-        if (event.code === "Space" && testPassed === false) {
+        if (event.code === "Space" && testPassed === false && canvas.style.display != "none") {
             testCounter++;
             checkHit();
         }

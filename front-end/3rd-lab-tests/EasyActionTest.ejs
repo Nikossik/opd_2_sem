@@ -9,7 +9,7 @@
           background-size: cover;
           background-position: center;
       }
-  </style>
+    </style>
     <title>Easy Action Test</title>
   </head>
 
@@ -53,6 +53,8 @@
   let totalAccuracy = 0; //accuracy sum
   let hit = 0; //
 
+  canvas.style.display = "none";
+
 // open canvas when start button onclick
   function changeBackgroundColor() {
     canvas.style.backgroundColor = "#fff";
@@ -60,6 +62,8 @@
 
 // draw canvas with circles
   function hideButton() {
+    canvas.style.display = "block";
+
     const selectedTime = document.getElementById("time-select").value;
     const endTime = new Date().getTime() + (selectedTime * 1000);
     updateTimeLeft(endTime);
@@ -171,6 +175,7 @@
     context.fillStyle = canvas.style.backgroundColor;
     context.fillRect(frameX, frameY, canvas.width, canvas.height); // draw frame
   }
+
   // calculate position and speed of moving circle
   function calculatePosition(){
     directionX = Math.floor(Math.random() * 350) + 30;
@@ -178,7 +183,8 @@
     speedX = Math.floor(Math.random() * 5) + 3;
     speedY = Math.floor(Math.random() * 5) + 3;
   }
-//draw fixed and moving circles
+  
+  //draw fixed and moving circles
   function drawCircles() {
     context.beginPath();
     context.arc(fixedCircleX, fixedCircleY, circleRadius, 0, 2 * Math.PI); // draw fixed circle
@@ -210,7 +216,7 @@
   }
 
   window.addEventListener("keydown", function (event) {
-    if (event.code === "Space" && testPassed === false) {
+    if (event.code === "Space" && testPassed === false && canvas.style.display != "none") {
       testCounter++;
       checkHit();
     }
