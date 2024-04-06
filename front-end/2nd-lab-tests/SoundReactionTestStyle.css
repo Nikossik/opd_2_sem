@@ -32,7 +32,9 @@ button{
     text-align: center;
     text-decoration: none;
     transition: opacity .6s ease-in-out;
-    margin: 9em 0;
+    margin-top: 4em;
+    margin-left: 0em;
+    margin-right: 0em;
     position: relative;
     left: 50%;
     transform: translate(-50%, 0);
@@ -43,13 +45,32 @@ button:hover {
     opacity: .9;
 }
 
+progress {
+    margin-top: 1.8em;
+    margin-bottom: 2em;
+    margin-left: 5%;
+    width: 90%;
+    height: 1.5em;
+    background-color: #D660CC;
+}
+
+progress::-webkit-progress-bar {
+    background-color: #7908AA;
+    border-radius: 3px;
+}
+
+progress::-webkit-progress-value {
+    background-color: #4E026E;
+    border-radius: 3px;
+}
+
 #reaction-time-enclosing{
     font-size: 1.2rem;
     font-weight: 500;
     letter-spacing: 0.1rem;
     text-align: center;
     color: white;
-    margin-top: 2em;
+    margin-top: 0em;
     font-family: var(--font-style);
 }
 
