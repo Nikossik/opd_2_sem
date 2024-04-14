@@ -3,21 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="4th-lab-tests/StalkingTest.css">
+  <style>
+      body {
+          background-image: url('images/background_gradient.png');
+          background-size: cover;
+          background-position: center;
+      }
+  </style>
   <title>Stalking Test</title>
 </head>
 <body>
-<progress id="progress" value="0" max="100"></progress>
-<div id="start-button-enclosing">
-  <button id="start-button" onclick="hideButton()">Начать тест</button>
-</div>
-<div id="timer"></div>
-<div id="submit-button-enclosing"></div>
-<div id="restart-button-enclosing"></div>
-<div id="result-enclosing"></div>
-
-<canvas id="canvas" width="550" height="400"></canvas>
+  <h1>Stalking Test</h1>
+  <progress id="progress" value="0" max="100"></progress>
+  <p id="timer"></p>
+  <p id="instruction">Необходимо стрелочками "влево" и "вправо" следить кружочком за другим кружочком</p>
+  <select id="time-select">
+      <option value="10">10 секунд</option>
+      <option value="120">2 минуты</option>
+      <option value="300">5 минут</option>
+      <option value="600">10 минут</option>
+      <option value="1500">25 минут</option>
+      <option value="2700">45 минут</option>
+  </select>
+  <div id="start-button-enclosing">
+    <button id="start-button" onclick="hideButton()">Начать тест</button>
+  </div>
+  <div id="result-enclosing"></div>
+  <div id="finish-result"></div>
+  <div id="submit-button-enclosing"></div>
+  <div id="restart-button-enclosing"></div>
+  <canvas id="canvas" width="550" height="400"></canvas>
+  <div id="stop-button-enclosing"></div>
 </body>
 <script>
+  const selectedTime = document.getElementById("time-select").value;
   let canvas = document.getElementById("canvas");
   let context = canvas.getContext("2d");
   let ballX = canvas.width / 2;
@@ -36,12 +55,21 @@
   let totalAccuracy = 0;
   let accuracies = [];
   let countDownDate, timerInterval;
-  let timeLimit = 25000;
+  let timeLimit = selectedTime * 1000;
   let testPassed = false;
+
+  function changeBackgroundColor() {
+    canvas.style.backgroundColor = "#fff";
+  }
 
 
   function drawFrame() {
     context.clearRect(0, 0, canvas.width, canvas.height);
+
+    const frameX = canvas.width;
+    const frameY = canvas.height;
+    context.fillStyle = '#fff';
+    context.fillRect(frameX, frameY, canvas.width, canvas.height);
 
     context.beginPath();
     context.arc(userX, userY, radius, 0, Math.PI*2);
@@ -57,7 +85,7 @@
 
     // calculate accuracy
     const distance = Math.sqrt((userX - targetX) ** 2);
-    accuracy = (1 - distance / (canvas.width - 4 * radius)) * 100;
+    accuracy = Math.abs((1 - distance / (canvas.width - 4 * radius)) * 100);
     accuracies.push(accuracy);
 
     // update average accuracy every 5 seconds
@@ -112,13 +140,13 @@
     let distance = countDownDate - now;
     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    let timerText = "До конца теста: " + minutes + "мин " + seconds + "сек ";
-    document.getElementById("timer").textContent = timerText
-    context.font = "1.2em Verdana";
-    context.fillStyle = "#fff";
+    let timerText = `Осталось времени: ${minutes} минут ${seconds + 1} секунд`;
+    document.getElementById("timer").textContent = timerText;
+    //context.font = "1.2em Verdana";
+    //context.fillStyle = "#fff";
     //context.fillText(timerText, canvas.width - 150, 30);
     const progress = document.getElementById("progress");
-    progress.value = ((timeLimit - distance) / timeLimit) * 100;
+    progress.value = (((timeLimit - distance) / timeLimit)) * 100;
     if (distance < 0) {
       clearInterval(timerInterval);
       updateAverageAccuracy();
@@ -127,7 +155,10 @@
 
   function hideButton() {
     document.getElementById("start-button-enclosing").style.display = "none";
-    canvas.style.display = "block"
+    document.getElementById("instruction").style.display = "none";
+    document.getElementById("time-select").style.display = "none";
+    canvas.style.display = "block";
+    changeBackgroundColor();
     countDownDate = new Date().getTime() + timeLimit;
     timerInterval = setInterval(updateTimer, 1000);
     setInterval(function() {
@@ -155,11 +186,11 @@
   // Функция для показа итогового результата
   function showResult() {
     testPassed = true;
-    document.getElementById("result-enclosing").style.display = "none"
+    document.getElementById("result-enclosing").style.display = "none";
     clearInterval(timerInterval);
     document.getElementById("timer").textContent = "";
     canvas.style.display = "none";
-    document.getElementById("progress").value = 0;
+    //document.getElementById("progress").value = 0;
 
     let submitButton = document.createElement("button");
     submitButton.textContent = "Отправить результат"
@@ -172,8 +203,9 @@
     restartButton.addEventListener('click', restartTest);
     document.getElementById("restart-button-enclosing").appendChild(restartButton);
 
-    const resultEnclosing = document.getElementById("result-enclosing");
-    resultEnclosing.innerHTML = `Your accuracy is ${accuracy.toFixed(2)}%`;
+    const resultEnclosing = document.getElementById("finish-result");
+    totalAccuracy = accuracies.reduce((sum, currentValue) => sum + currentValue, 0) / accuracies.length;
+    resultEnclosing.innerHTML = `Ваша точность: ${totalAccuracy.toFixed(2)}%`;
   }
 
   async function sendData(){
@@ -212,7 +244,8 @@
   }
 
   function restartTest() {
-    clearInterval(timerInterval);
+    window.location.href = window.location.origin + window.location.pathname;
+    /* clearInterval(timerInterval);
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
     dx = ballSpeed;
@@ -232,7 +265,7 @@
       restartButtonEnclosing.removeChild(restartButtonEnclosing.firstChild);
     }
     document.getElementById("result-enclosing").innerHTML = '';
-    hideButton();
+    hideButton(); */
   }
 
   document.addEventListener("keydown", keyDownHandler, false);
