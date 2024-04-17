@@ -14,29 +14,38 @@
 </head>
 
 <body>
-<section class = "container">
+<section class="container">
   <header>
     <div>
       <h1>Регистрация</h1>
     </div>
   </header>
   <form id="login-form" method="POST" action="/register">
-    <input type="text" name="login" id="user-name" placeholder="Login" required class = "input">
+    <input type="text" name="login" id="user-name" placeholder="Login" required class="input">
     <br>
-    <input type="password" name="password" id="user-password" placeholder="Password" required class = "input">
+    <input type="email" name="email" id="email" placeholder="Email" class="email hidden">
+    <div class="error-message hidden" id="email-error">Пожалуйста, введите почту в правильном формате</div>
+    <br>
+    <input type="password" name="password" id="user-password" placeholder="Password" required class="input">
+    <br>
     <div class="form-group">
       <label for="id-select">Возраст</label>
       <select class="select-style" name="age" id="id-select"></select>
     </div>
     <br>
     <div class="form-group">
-        <label for="id-sex">Пол:</label>
-        <div class="select-wrapper">
-          <select class="select-style" name="sex" id="id-sex">
-            <option value="m">Мужчина</option>
-            <option value="f">Женщина</option>
-          </select>
-        </div>
+      <label for="id-sex">Пол:</label>
+      <div class="select-wrapper">
+        <select class="select-style" name="sex" id="id-sex">
+          <option value="m">Мужчина</option>
+          <option value="f">Женщина</option>
+        </select>
+      </div>
+    </div>
+    <br>
+    <div class="form-group">
+      <input type="checkbox" id="respondent-check" name="respondent">
+      <label for="respondent-check">Я являюсь ответчиком</label>
     </div>
     <br>
     <button class="first-button" type="submit" id="register">Создать аккаунт</button>
@@ -44,17 +53,20 @@
 
   <div id="error-message">
     <% if (errorMessage) { %>
-      <p class = "error-message"><%= errorMessage %></p>
+      <p class="error-message"><%= errorMessage %></p>
     <% } %>
   </div>
 
   <div id="login-button">
-    <a class = "second-button" href="/login"><p><u>Уже есть аккаунт?</u></p></a>
+    <a class="second-button" href="/login"><p><u>Уже есть аккаунт?</u></p></a>
   </div>
 </section>
-</body>
 <script>
   const ageSelect = document.getElementById("id-select");
+  const respondentCheck = document.getElementById("respondent-check");
+  const emailInput = document.getElementById("email");
+  const emailError = document.getElementById("email-error");
+  const form = document.getElementById("login-form");
 
   for (let i = 18; i <= 45; i++) {
     const option = document.createElement("option");
@@ -62,5 +74,24 @@
     option.textContent = i;
     ageSelect.appendChild(option);
   }
+
+  respondentCheck.addEventListener('change', function() {
+    if (this.checked) {
+      emailInput.classList.remove('hidden');
+      emailInput.required = true;
+    } else {
+      emailInput.classList.add('hidden');
+      emailInput.required = false;
+      emailError.classList.add('hidden'); // Hide error message when not needed
+    }
+  });
+
+  form.addEventListener('submit', function(event) {
+    if (emailInput.required && !emailInput.value.match(/^\S+@\S+\.\S+$/)) {
+      emailError.classList.remove('hidden');
+      event.preventDefault(); // Prevent form submission if email is invalid
+    }
+  });
 </script>
-</html>
+</body>
+</html></html>

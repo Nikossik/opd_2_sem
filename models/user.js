@@ -10,7 +10,12 @@ module.exports = function(sequelize) {
         password: Sequelize.STRING,
         isAdmin: Sequelize.BOOLEAN,
         age: Sequelize.INTEGER,
-        sex: Sequelize.STRING
+        sex: Sequelize.STRING,
+        respondent: Sequelize.BOOLEAN,
+        email: {
+            type: Sequelize.STRING,
+            unique: true
+        }
     });
 
     User.beforeCreate(async (user, options) => {

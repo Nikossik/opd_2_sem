@@ -7,7 +7,7 @@
 
 .container{
     border-radius: 20px;
-    block-size: 33em;
+    block-size: 40em;
     box-shadow: 0 0 1px .6em rgba(0, 0, 0, 0.004), 0 1px 1em rgba(0, 0, 0, 0.06);
     inline-size: 375px;
     overflow: auto;
@@ -15,6 +15,14 @@
     background-color: white;
     margin: 0 auto;
     display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+.error-message {
+    color: red;
 }
 
 *{
@@ -101,6 +109,11 @@ form {
     padding: 0.9rem 0.9rem;
     width: 100%;
 }
+.email{
+    padding: 0.9rem 0.9rem;
+    width: 100%;
+}
+
 .error-message{
     font-size: 1.15rem;
     color: black;
