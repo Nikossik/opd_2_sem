@@ -404,11 +404,6 @@ server.get('/hard_action', async (req, res) => {
 })
 
 server.get('/invite/:code', async (req, res) => {
-    if (!req.isAuthenticated()) {
-        res.redirect('/login')
-        return
-    }
-
     const link = await InviteLink.findOne({
         where: {
             code: req.params.code
@@ -430,13 +425,10 @@ server.get('/invite/:code', async (req, res) => {
 })
 
 server.get('/analog_tracking_test', (req, res) => {
-
     res.render('4th-lab-tests/AnalogTrackingTest')
-
 })
 
 server.get('/stalking_test', (req, res) => {
-
     res.render('4th-lab-tests/StalkingTest')
 })
 
@@ -606,10 +598,13 @@ server.get('/polls_results', async (req, res) => {
         return
     }
 
+    const loggedIn = true
+    const adminUser = req.user.isAdmin;
+
     try {
         const polls = await Poll.findAll();
 
-        res.render('ResultsPage', {polls});
+        res.render('ResultsPage', {polls, loggedIn, adminUser});
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
