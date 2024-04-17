@@ -9,6 +9,18 @@
           background-size: cover;
           background-position: center;
           }
+          #squares {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+          }
+          .square {
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px; 
+          }
       </style>
   <title>Color Reaction Test</title>
 </head>
@@ -82,9 +94,11 @@
     document.getElementById("start-button").style.display = "none";
     const squaresDiv = document.createElement("div");
     squaresDiv.id = "squares";
+    const squareLetters = ['Z', 'X', 'C']; 
     for (let i = 0; i < 3; i++) {
       const squareDiv = document.createElement("div");
       squareDiv.className = "square";
+      squareDiv.textContent = squareLetters[i]; 
       squaresDiv.appendChild(squareDiv);
     }
     document.body.appendChild(squaresDiv);

@@ -3,18 +3,36 @@
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="3rd-lab-tests/EasyActionTestStyle.css">
+        <style>
+            body {
+                background-image: url('images/background_gradient.png');
+                background-size: cover;
+                background-position: center;
+            }
+        </style>
         <title>Hard Action Test</title>
     </head>
 
     <body>
-        <progress id="progress" value="0" max="100"></progress>
+        <h1>Hard Action Test</h1>
+        <p id="time-left"></p>
+        <p id="instruction">Нужно нажимать на пробел, когда шарик будет максимально близко к центру</p>
+        <select id="time-select">
+            <option value="10">10 секунд</option>
+            <option value="120">2 минуты</option>
+            <option value="300">5 минут</option>
+            <option value="600">10 минут</option>
+            <option value="1500">25 минут</option>
+            <option value="2700">45 минут</option>
+        </select>
         <div id="start-button-enclosing">
             <button id="start-button" onclick="hideButton()">Начать тест</button>
         </div>
+        <div id="result-enclosing"></div>
         <div id="submit-button-enclosing"></div>
         <div id="restart-button-enclosing"></div>
-        <div id="result-enclosing"></div>
         <canvas id="canvas" width="550" height="400"></canvas>
+        <div id="stop-button-enclosing"></div>
     </body>
 
 <script>
@@ -39,12 +57,30 @@
     let totalAccuracy = 0;
     let hit = 0;
 
+    canvas.style.display = "none";
+
     function changeBackgroundColor() {
         canvas.style.backgroundColor = "#fff";
     }
 
     function hideButton() {
+        canvas.style.display = "block";
+
+        const selectedTime = document.getElementById("time-select").value;
+        const endTime = new Date().getTime() + (selectedTime * 1000);
+        updateTimeLeft(endTime);
+        setTimeout(stopTest, selectedTime * 1000); 
+
         document.getElementById("start-button").style.display = "none";
+        document.getElementById("instruction").style.display = "none";
+        document.getElementById("time-select").style.display = "none";
+
+        const stopButtonEnclosing = document.getElementById("stop-button-enclosing");
+        const stopButton = document.createElement("button");
+        stopButton.textContent = "Прервать тест"
+        stopButton.onclick = stopTest
+        stopButtonEnclosing.appendChild(stopButton);
+
         changeBackgroundColor();
         drawFrame();
         drawCircles();
@@ -80,6 +116,56 @@
                 })
                 .catch(error => console.error(error));
         }
+    }
+
+    function stopTest() {
+        if (!testPassed) {
+            testPassed = true; // Устанавливаем флаг окончания теста
+            
+            if (document.getElementById("restart-button-enclosing").style.display != "none" && document.getElementById("submit-button-enclosing").style.display != "none"){
+                canvas.style.display = "none";
+                const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
+                const submitButton = document.createElement("button");
+                submitButton.textContent = "Отправить результат"
+                submitButton.onclick = sendData
+                submitButtonEnclosing.appendChild(submitButton);
+
+                const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
+                const restartButton = document.createElement("button");
+                restartButton.textContent = "Пройти заново"
+                restartButton.addEventListener('click', runTest);
+                restartButtonEnclosing.appendChild(restartButton);
+
+                document.getElementById("stop-button-enclosing").style.display = "none";
+                document.getElementById("time-left").style.display = "none";
+
+                const resultEnclosing = document.getElementById("result-enclosing");
+                resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
+            }
+        }
+    }
+
+    function updateTimeLeft(endTime) {
+        const timeLeftElement = document.getElementById("time-left");
+
+        function update() {
+            const currentTime = new Date().getTime();
+            const timeRemaining = endTime - currentTime;
+
+            const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+            timeLeftElement.textContent = `Осталось времени: ${minutes} минут ${seconds} секунд`;
+
+            if (timeRemaining <= 0) {
+                document.getElementById("time-left").style.display = "none";
+                return;
+            }
+
+            setTimeout(update, 1000); // Обновляем каждую секунду
+        }
+
+        update();
     }
 
     function drawFrame() {
@@ -142,33 +228,14 @@
         drawCircles();
         requestAnimationFrame(moveCircle);
     }
+
     window.addEventListener("keydown", function (event) {
-        if (event.code === "Space" && testPassed === false) {
+        if (event.code === "Space" && testPassed === false && canvas.style.display != "none") {
             testCounter++;
-            document.getElementById("progress").value = testCounter * 10;
             checkHit();
-            if (testCounter > 10 && testPassed === false) {
-                testPassed = true;
-
-                canvas.style.display = "none";
-                const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-                const submitButton = document.createElement("button");
-                submitButton.textContent = "Отправить результат"
-                submitButton.onclick = sendData
-                submitButtonEnclosing.appendChild(submitButton);
-
-                const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-                const restartButton = document.createElement("button");
-                restartButton.textContent = "Пройти заново"
-                restartButton.addEventListener('click', runTest);
-                restartButtonEnclosing.appendChild(restartButton);
-
-                document.getElementById("progress").value = 0
-                const resultEnclosing = document.getElementById("result-enclosing");
-                resultEnclosing.innerText = `Средняя точность попадания: ${averageAccuracy.toFixed(2)}%`;
-            }
         }
     });
+
     function checkHit() {
         const distance1 = Math.sqrt((directionX1 - fixedCircleX) ** 2 + (directionY1 - fixedCircleY) ** 2);
         const distance2 = Math.sqrt((directionX2 - fixedCircleX) ** 2 + (directionY2 - fixedCircleY) ** 2);
@@ -191,6 +258,7 @@
             showReactionAndAccuracy();
         }
     }
+
     function showReactionAndAccuracy() {
         const resultEnclosing = document.getElementById("result-enclosing");
         let message;
@@ -207,34 +275,9 @@
         }
         resultEnclosing.innerText = message;
     }
+
     function runTest() {
-        document.getElementById("progress").value = 0;
-
-        testCounter = 0;
-        match = 0;
-        accuracy = 0;
-        testPassed = false;
-        averageAccuracy = 0;
-        totalAccuracy = 0;
-        hit = 0;
-        speedX1 = 0;
-        speedY1 = 0;
-        speedX2 = 0;
-        speedY2 = 0;
-
-        const submitButtonEnclosing = document.getElementById("submit-button-enclosing");
-        if (submitButtonEnclosing.firstChild) {
-            submitButtonEnclosing.removeChild(submitButtonEnclosing.firstChild);
-        }
-        const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
-        if (restartButtonEnclosing.firstChild) {
-            restartButtonEnclosing.removeChild(restartButtonEnclosing.firstChild);
-        }
-        document.getElementById("result-enclosing").innerHTML = '';
-
-        canvas.style.display = "block";
-        calculatePosition();
-        hideButton();
+        window.location.href = window.location.origin + window.location.pathname;
     }
 
 </script>

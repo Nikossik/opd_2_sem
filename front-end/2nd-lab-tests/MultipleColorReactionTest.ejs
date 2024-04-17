@@ -6,7 +6,9 @@
     <title>Multiple Color Test</title>
 </head>
 <body>
-<progress id="progress" value="0" max="100"></progress>
+    <h1>Multiple Color Reaction Test</h1>
+    <progress id="progress" value="0" max="100"></progress>
+    <div id="reaction-time-enclosing"></div>
 </body>
 <script>
     let initialColor = "white";
@@ -65,6 +67,7 @@
         if (event.keyCode === 32 && testStarted && newColor) {
             let endTime = new Date().getTime(); // сохраняем время завершения изменения цвета фона
             let reactionTime = endTime - startTime; // вычисляем время реакции пользователя
+            document.getElementById("reaction-time-enclosing").innerHTML = "Результаты попытки: " + reactionTime + " мс.";
             reactionTimings.push(reactionTime);
             currentColor++; // переходим к следующему цвету
             newColor = false;
@@ -87,8 +90,10 @@
 
     // задаем функцию, которая начнет тест
     function startTest(event) {
+        alert("Нажмите на клавишу пробел, когда увидите изменение цвета фона страниц");
         if(event.keyCode !== 32 && currentColor === 0){
             testStarted = true;
+            startButton.style.display = "none";
             changeColor();
             startTime = new Date().getTime(); // сохраняем время начала изменения цвета фона
             // добавляем фокус на страницу, чтобы пользователь мог нажать на клавишу без необходимости клика на страницу
@@ -104,10 +109,21 @@
         reactionTimings = [];
 
         if (!testPassed){
+            bodyElement.style.backgroundColor = initialColor;
+
             const submitButton = document.createElement("button")
+            submitButton.id = "submit-button"
             submitButton.innerHTML = "ОТПРАВИТЬ РЕЗУЛЬТАТ"
             submitButton.onclick = sendData
             bodyElement.appendChild(submitButton)
+
+            const restartButton = document.createElement("button");
+            restartButton.id = "restart-button"; 
+            restartButton.innerHTML = "ПРОЙТИ ЗАНОВО";
+            restartButton.onclick = restartTest;
+            bodyElement.appendChild(restartButton);
+
+            document.getElementById("reaction-time-enclosing").innerHTML = "Результаты теста: " + results.join(" мс, ") + " мс.";
         }
 
         testPassed = true;
@@ -115,13 +131,45 @@
         bodyElement.style.backgroundColor = initialColor; // возвращаем начальный цвет фона страницы
         currentColor = 0; // сбрасываем номер текущего цвета
         progressElement.value = 0; // обнуляем индикатор прогресса выполнения теста
-        alert("Тест завершен!"); // выводим сообщение о завершении теста
     }
 
-    // получаем элемент страницы, на который будем добавлять кнопку для старта теста
+    // функция для перезапуска теста
+    function restartTest() {
+        testStarted = false; // устанавливаем флаг начала теста в false
+        testPassed = false; // устанавливаем флаг прохождения теста в false
+        newColor = false; // сбрасываем флаг нового цвета
+
+        // Очищаем результаты
+        reactionTimings = [];
+        results = [];
+
+        // Очищаем отображение результатов
+        document.getElementById("reaction-time-enclosing").innerHTML = "";
+
+        // Показываем кнопку "НАЧАТЬ ТЕСТ"
+        startButton.style.display = "";
+
+        // Удаляем кнопки "ОТПРАВИТЬ РЕЗУЛЬТАТ" и "ПРОЙТИ ЗАНОВО", если они есть
+        const submitButton = document.getElementById("submit-button");
+        if (submitButton) {
+            submitButton.parentNode.removeChild(submitButton);
+        }
+        const restartButton = document.getElementById("restart-button");
+        restartButton.parentNode.removeChild(restartButton);
+
+        // Создаем кнопку "НАЧАТЬ ТЕСТ"
+        createStartButton();
+    }
+
+    // функция для создания кнопки "НАЧАТЬ ТЕСТ"
+    function createStartButton() {
+        startButton.innerHTML = "НАЧАТЬ ТЕСТ";
+        startButton.onclick = startTest;
+        bodyElement.appendChild(startButton);
+    }
+
+    // создаем кнопку "НАЧАТЬ ТЕСТ"
     const startButton = document.createElement("button");
-    startButton.innerHTML = "НАЧАТЬ ТЕСТ";
-    startButton.onclick = startTest;
-    bodyElement.appendChild(startButton);
-</script>
+    createStartButton();
+</script> 
 </html>

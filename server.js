@@ -187,7 +187,6 @@ const char_dict = {
     167: 'Физическая подготовленность к воздействию неблагоприятных факторов профессиональной деятельности'
 };
 
-
 server.use(express.json());
 server.use(express.static('front-end'));
 server.use('/expert', express.static('front-end/expert'))
@@ -200,7 +199,6 @@ server.use(flash())
 server.set('views', path.join(__dirname, 'front-end'))
 server.use(express.static(__dirname + '/front-end'));
 server.set('view engine', 'ejs')
-
 
 passport.use('local', new LocalStrategy({usernameField: 'login'}, async (login, password, done) => {
     try {
@@ -449,9 +447,11 @@ server.post('/register', async (req, res, next) => {
     const isAdmin = false;
     const sex = req.body.sex
     const age = req.body.age
+    const respondent = req.body.respondent
+    const email = req.body.email
 
     try {
-        const user = await User.create({login, password, isAdmin, sex, age});
+        const user = await User.create({ login, password, isAdmin, sex, age, respondent, email});
         req.login(user, (err) => {
             if (err) {
                 console.log(err);
@@ -468,6 +468,7 @@ server.post('/register', async (req, res, next) => {
 server.post('/adminRegister', async (req, res, next) => {
     const {login, password} = req.body;
     const isAdmin = true;
+
     const sex = req.body.sex;
     const age = req.body.age;
 
@@ -491,7 +492,8 @@ server.get('/poll_1_part_1', async (req, res) => {
         res.redirect('/login')
         return
     }
-
+    loggedIn = true;
+    
     const checkAdmin = req.user.isAdmin;
     const professions = await Profession.findAll({attributes: ['profession']});
     if (!checkAdmin) {
@@ -511,8 +513,8 @@ server.get('/poll_1_part_2', (req, res) => {
         res.redirect('/')
     } else {
         const data = JSON.parse(decodeURIComponent(req.query.data)).pollData;
-
-        const profession = data.profession
+        console.log({data});
+        const profession = data.professions
         let characteristics = []
 
         for (let i = 0; i < 169; i++) {
@@ -520,7 +522,6 @@ server.get('/poll_1_part_2', (req, res) => {
                 characteristics.push({id: i, name: data["question" + i]})
             }
         }
-
         console.log({profession, characteristics});
         res.render('1stTest2ndPart', {profession, characteristics})
     }
@@ -532,7 +533,6 @@ server.post("/poll_1_part_2", async (req, res) => {
         res.redirect("/login");
         return;
     }
-
     let data = {};
 
     if (req.query.data) {
@@ -540,9 +540,7 @@ server.post("/poll_1_part_2", async (req, res) => {
     }
 
     data.pollData = req.body;
-    console.log('111')
     console.log(data.pollData)
-    console.log('111')
     req.flash("passed_1_part", true);
 
     res.redirect(`/poll_1_part_2?data=${encodeURIComponent(JSON.stringify(data))}`);
@@ -603,7 +601,6 @@ server.get('/polls_results', async (req, res) => {
 
     try {
         const polls = await Poll.findAll();
-
         res.render('ResultsPage', {polls, loggedIn, adminUser});
     } catch (error) {
         console.error(error);
@@ -815,9 +812,7 @@ server.get('/characteristics', async (req, res) => {
         return
     }
 
-    username = req.user.login;
-    adminUser = req.user.isAdmin;
-    loggedIn = true;
+
 
     const professions = await Profession.findAll();
     res.render('SecondPage', {professions: professions});
@@ -870,8 +865,12 @@ server.get('/professions_:id', async (req, res) => {
             console.error(error);
             res.status(500).send('Ошибка при получении информации о профессии');
         }
-    } else {
-        res.redirect('/login');
+
+        const characteristics = await getProfessionCharacteristics(profession.id);
+        res.render('ProfessionPage', { profession: profession, characteristics: characteristics});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Ошибка при получении информации о профессии');
     }
 });
 
