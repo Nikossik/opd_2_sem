@@ -36,7 +36,7 @@
                         <li><a href="/poll_1_part_1">ОПРОС</a></li>
                     <% } %>
                     
-                    <% if (adminUser) { %>
+                    <% if (adminUser || respondentUser) { %>
                         <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
                     <% } %>
                     <% if (adminUser) { %>
@@ -62,7 +62,7 @@
         <img src="images/itmo_logo_white.png" class="itmo_logo" alt="Logo Picture" style="size: 30%;">
         <div id="username">
             <% if (username) { %>
-                <p style="font-size: 30px";>Здравствуйте, <%= username %>!</p>
+                <p style="font-size: 30px">Здравствуйте, <%= username %>!</p>
             <% } %>
         </div>
         <p style="font-size: 30px;">Узнайте от студентов ITMO о профессиях IT сферы</p>

@@ -241,13 +241,14 @@ server.use(passport.initialize());
 server.use(passport.session());
 
 server.get('/', (req, res) => {
-    let username = "", adminUser = false, loggedIn = req.isAuthenticated();
+    let username = "", adminUser = false, loggedIn = req.isAuthenticated(), respondentUser = false;
     if (req.isAuthenticated()) {
         username = req.user.login;
         adminUser = req.user.isAdmin;
+        respondentUser = req.user.respondent;
     }
 
-    res.render('MenuPageDraft', {username, adminUser, loggedIn})
+    res.render('MenuPageDraft', {username, adminUser, respondentUser, loggedIn})
 });
 
 
