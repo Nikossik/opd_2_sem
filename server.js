@@ -867,10 +867,7 @@ server.get('/professions_:id', async (req, res) => {
         }
 
         const characteristics = await getProfessionCharacteristics(profession.id);
-        res.render('ProfessionPage', { profession: profession, characteristics: characteristics});
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Ошибка при получении информации о профессии');
+        res.render('ProfessionPage', {profession: profession, characteristics: characteristics});
     }
 });
 
