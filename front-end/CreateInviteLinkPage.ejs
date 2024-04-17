@@ -7,8 +7,8 @@
     <style>
         body {
         background-image: url('images/background_gradient.png');
-        background-size: cover; 
-        background-position: center; 
+        background-size: cover;
+        background-position: center;
         }
     </style>
 </head>
@@ -21,19 +21,19 @@
                 <div>
                     <ul>
                         <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
-    
+
                         <% if (!loggedIn) { %>
                             <li><a href="/login">ВОЙТИ</a></li>
                         <% } %>
-                    
+
                         <% if (loggedIn) { %>
                             <li><a href="/characteristics">ПРОФЕССИИ</a></li>
                         <% } %>
-                    
+
                         <% if (adminUser) { %>
                             <li><a href="/poll_1_part_1">ОПРОС</a></li>
                         <% } %>
-                        
+
                         <% if (adminUser) { %>
                             <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
                         <% } %>
@@ -55,9 +55,9 @@
         </div>
     </div>
     <section class="container">
-        <div id="test-type-selects">
-            <select id="test-type-select" required>
-                <option value="">Выберите тест </option>
+        <div class="form-group">
+            <label for="id-select">Тест</label>
+            <label for="test-type-select"></label><select class="select-style" name="test" id="test-type-select">
                 <option value="poll_1_part_1">Тест на характеристики</option>
                 <option value="sound_test">Тест на реакцию на звук</option>
                 <option value="light_test">Тест на реакцию на свет</option>
@@ -77,39 +77,18 @@
 </body>
 <script>
     let inviteLink = null, linkGenerated, i=1
-    testTypeSelects = document.getElementById('test-type-selects')
+    testTypeSelects = document.getElementById('test-type-select')
     getInviteButton = document.getElementById('get-invite-button')
     getInviteButton.addEventListener('click', getLink)
-    testTypeSelects.addEventListener('change', addAnotherButton)
-
-    function addAnotherButton(){
-        const select = document.createElement('select')
-        select.id = "test-type-select-" + i;
-        select.innerHTML += "<option value=\"\">-</option>" +
-            "<option value=\"poll_1_part_1\">Тест на характеристики</option>" +
-            "<option value=\"sound_test\">Тест на реакцию на звук</option>" +
-            "<option value=\"light_test\">Тест на реакцию на свет</option>" +
-            "<option value=\"visual_math_test\">Математические примеры(визуально)</option>" +
-            "<option value=\"math_sound\">Математические примеры (на слух)</option>" +
-            "<option value=\"multiple_colours_test\">Тест на изменение цвета</option>" +
-            "<option value=\"easy_action\">Тест на простое движение (точность)</option>" +
-            "<option value=\"hard_action\">Тест на сложное движение (точность)</option>"
-        testTypeSelects.appendChild(select)
-        i++;
-    }
 
     async function getLink(){
         const data = {
             tests: []
         }
-        for (let j=0;j<=i;j++){
-            if(document.getElementById("test-type-select-" + j) ){
-                if (document.getElementById("test-type-select-" + j).value){
-                    data.tests.push(document.getElementById("test-type-select-" + j).value)
-                }
-            }
-        }
-        console.log(data)
+        console.log(document);
+        const testSelect = document.getElementById("test-type-select");
+        data.tests.push(testSelect.value)
+        console.log(data.tests);
         await fetch('/create_invite', {
             method: "POST",
             body: JSON.stringify(data),
@@ -127,6 +106,7 @@
             })
             .catch(e => console.log(e))
     }
+
     function copyLinkToClipBoard(){
         if (inviteLink){
             navigator.clipboard.writeText(inviteLink).then(function() {
@@ -139,5 +119,6 @@
             }, 3000);
         }
     }
+
 </script>
 </html>
