@@ -13,8 +13,7 @@ module.exports = function(sequelize) {
         sex: Sequelize.STRING,
         respondent: Sequelize.BOOLEAN,
         email: {
-            type: Sequelize.STRING,
-            unique: true
+            type: Sequelize.STRING
         }
     });
 

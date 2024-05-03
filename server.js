@@ -447,23 +447,42 @@ server.post('/login', passport.authenticate('local', {
 
 
 server.post('/register', async (req, res, next) => {
-    const {login, password} = req.body;
-    const isAdmin = false;
-    const sex = req.body.sex
-    const age = req.body.age
-    const respondent = req.body.respondent
-    const email = req.body.email
 
     try {
-        const user = await User.create({ login, password, isAdmin, sex, age, respondent, email});
-        req.login(user, (err) => {
-            if (err) {
-                console.log(err);
-                return next(err);
-            }
-            return res.redirect('/');
-        });
+        if (!req.body.respondent & !req.body.email) {
+            const respondent = false;
+            const {login, password} = req.body;
+            const isAdmin = false;
+            const sex = req.body.sex;
+            const age = req.body.age;
+            const email = "None";
+            const user = await User.create({login, password, isAdmin, sex, age, respondent, email});
+            req.login(user, (err) => {
+                if (err) {
+                    console.log(err);
+                    return next(err);
+                }
+                return res.redirect('/');
+            });
+        }
+        else {
+            const respondent = req.body.respondent;
+            const {login, password} = req.body;
+            const isAdmin = false;
+            const sex = req.body.sex;
+            const age = req.body.age;
+            const email = req.body.email;
+            const user = await User.create({login, password, isAdmin, sex, age, respondent, email});
+            req.login(user, (err) => {
+                if (err) {
+                    console.log(err);
+                    return next(err);
+                }
+                return res.redirect('/');
+            });
+        }
     } catch (err) {
+        console.log(err);
         req.flash('error', 'Пользователь уже существует')
         res.redirect("/register")
     }

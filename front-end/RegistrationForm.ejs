@@ -82,14 +82,14 @@
     } else {
       emailInput.classList.add('hidden');
       emailInput.required = false;
-      emailError.classList.add('hidden'); // Hide error message when not needed
+      emailError.classList.add('hidden'); 
     }
   });
 
   form.addEventListener('submit', function(event) {
     if (emailInput.required && !emailInput.value.match(/^\S+@\S+\.\S+$/)) {
       emailError.classList.remove('hidden');
-      event.preventDefault(); // Prevent form submission if email is invalid
+      event.preventDefault(); 
     }
   });
 </script>
