@@ -275,17 +275,20 @@ server.get('/register', (req, res) => {
 
 server.get('/adminRegister', (req, res) => {
     if (!req.isAuthenticated()) {
+        adminUser = false;
+        loggedIn = false;
         res.redirect('/login')
         return
     }
 
-    const checkAdmin = req.user.isAdmin;
+    adminUser = req.user.isAdmin;
+    loggedIn = true;
 
-    if (!checkAdmin) {
+    if (!adminUser) {
         res.redirect('/')
     } else {
         const errorMessage = req.flash('error')[0]
-        res.render('AdminRegistrationForm', {errorMessage});
+        res.render('AdminRegistrationForm', {errorMessage, adminUser,loggedIn});
     }
 })
 
@@ -469,6 +472,9 @@ server.post('/register', async (req, res, next) => {
 server.post('/adminRegister', async (req, res, next) => {
     const {login, password} = req.body;
     const isAdmin = true;
+    username = req.user.login;
+    adminUser = req.user.isAdmin;
+    loggedIn = true;
 
     const sex = req.body.sex;
     const age = req.body.age;
@@ -809,10 +815,13 @@ server.get('/expert_:id', async (req, res) => {
 
 server.get('/characteristics', async (req, res) => {
     if (!req.isAuthenticated()) {
+        adminUser = false;
+        loggedIn = false;
         res.redirect('/login')
         return
     }
-
+    adminUser = true;
+    loggedIn = true;
 
 
     const professions = await Profession.findAll();
@@ -859,16 +868,12 @@ server.get('/professions_:id', async (req, res) => {
                 res.status(404).send('Профессия не найдена');
                 return;
             }
-
             const characteristics = await getProfessionCharacteristics(profession.id);
             res.render('ProfessionPage', {profession: profession, characteristics: characteristics});
         } catch (error) {
             console.error(error);
             res.status(500).send('Ошибка при получении информации о профессии');
-        }
-
-        const characteristics = await getProfessionCharacteristics(profession.id);
-        res.render('ProfessionPage', {profession: profession, characteristics: characteristics});
+        }    
     }
 });
 
