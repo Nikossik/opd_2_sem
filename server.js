@@ -882,19 +882,62 @@ server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
             const id = req.params.id;
-            const profession = await Profession.findOne({where: {id: id}});
+            const profession = await Profession.findOne({ where: { id: id } });
             if (!profession) {
+                console.error('Профессия с ID', id, 'не найдена');
                 res.status(404).send('Профессия не найдена');
                 return;
             }
-            const characteristics = await getProfessionCharacteristics(profession.id);
-            res.render('ProfessionPage', {profession: profession, characteristics: characteristics});
+            const characteristics = await getProfessionCharacteristics(id);
+            const qualities = await aggregateExpertRatings(profession.profession);
+
+            res.render('ProfessionPage', {
+                profession: profession,
+                characteristics: characteristics,
+                qualities: qualities
+            });
         } catch (error) {
-            console.error(error);
+            console.error('Ошибка при получении информации о профессии:', error);
             res.status(500).send('Ошибка при получении информации о профессии');
-        }    
+        }
+    } else {
+        res.redirect('/login');
     }
 });
+
+
+async function aggregateExpertRatings(professionName) {
+    try {
+        const polls = await Poll.findAll({
+            where: {
+                profession: professionName
+            }
+        });
+        console.log(polls);
+
+        let ratingsSum = new Array(168).fill(0);
+        polls.forEach(poll => {
+            poll.points.split('').forEach((rating, index) => {
+                if (rating !== '0') {
+                    ratingsSum[index] += parseInt(rating, 10);
+                }
+            });
+        });
+
+        let aggregatedRatings = ratingsSum.map((sum, index) => ({
+            characteristic: char_dict[index],
+            totalImportance: sum
+        }))
+            .filter(item => item.totalImportance > 0)
+            .sort((a, b) => b.totalImportance - a.totalImportance)
+            .slice(0, 10);
+
+        return aggregatedRatings;
+    } catch (err) {
+        console.error('Ошибка при агрегации рейтингов:', err);
+        throw err;
+    }
+}
 
 
 // HERE IS YOUR CODE

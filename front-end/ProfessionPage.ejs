@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="ProfessionPageStyle.css">
     <title><%= profession.name %></title>
 </head>
-<body>
+<body class="body-background">
     <section class="container">
     <div class="menu-wrap">
         <input type="checkbox" class="toggler">
@@ -34,9 +34,9 @@
                         <% if (adminUser) { %>
                             <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
                         <% } %>
-<!--                        <% if (adminUser) { %>-->
-<!--                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>-->
-<!--                        <% } %>-->
+                        <% if (adminUser) { %>
+                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                        <% } %>
                         <% if (loggedIn) { %>
                             <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
                         <% } %>
@@ -49,24 +49,36 @@
         </div>
     </div>
 
-    <h1><%= profession.profession %></h1>
-    <p><%= profession.description %></p>
+        <h1><%= profession.profession %></h1>
+        <p><%= profession.description %></p>
 
-    <% if (characteristics.length > 0) { %>
-        <h2>Характеристики</h2>
+        <% if (characteristics.length > 0) { %>
+            <h2>Базовые характеристики</h2>
             <ul>
                 <% characteristics.forEach(function(characteristic) { %>
-                    <li><strong>Конкуренция:</strong> <%= characteristic.competition%></li>
+                    <li><strong>Конкуренция:</strong> <%= characteristic.competition %></li>
                     <li><strong>Зарплата:</strong> <%= characteristic.salary %></li>
                     <li><strong>Сложность обучения:</strong> <%= characteristic.study %></li>
-                    <li><strong>Описания профессии:</strong> <%= characteristic.description %></li>
+                    <li><strong>Описание профессии:</strong> <%= characteristic.description %></li>
                     <li><strong>Основные задачи:</strong> <%= characteristic.task %></li>
                 <% }); %>
             </ul>
+        <% } else { %>
+            <p>Характеристики для этой профессии отсутствуют.</p>
+        <% } %>
 
-    <% } else { %>
-        <p>Характеристики для этой профессии отсутствуют.</p>
-    <% } %>
+        <div class="qualities-container">
+            <div class="qualities-header">Качества</div>
+            <ul>
+                <% qualities.forEach(function(quality) { %>
+                    <li class="quality-item">
+                        <span class="quality-text"><%= quality.characteristic %></span>
+                        <span class="quality-importance"><%= quality.totalImportance %></span>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
+
     </section>
 </body>
 </html>
