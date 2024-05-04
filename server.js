@@ -455,7 +455,7 @@ server.post('/register', async (req, res, next) => {
             const isAdmin = false;
             const sex = req.body.sex;
             const age = req.body.age;
-            const email = "None";
+            const email = null;
             const user = await User.create({login, password, isAdmin, sex, age, respondent, email});
             req.login(user, (err) => {
                 if (err) {
