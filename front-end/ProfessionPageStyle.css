@@ -1,9 +1,9 @@
 :root {
-    --primary-color: rgba(33, 223, 230, 0.95);
-    --overlay-color: linear-gradient(244deg, #e70af2,#009bff,#4abde3);
-    --addl-color: rgba(74, 189, 227);
-    --font-family: Verdana, Geneva, sans-serif;
-    --menu-speed: 0.75s;
+    --primary-color: #ffffff;
+    --secondary-color: #f2f2f2;
+    --accent-color: #4a69bd;
+    --text-color: #333;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 * {
@@ -12,58 +12,57 @@
     box-sizing: border-box;
 }
 
-body {
+html {
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-image: url('images/background_gradient.png');
-    background-size: cover;
-    background-position: center;
+}
+body {
+    background-color: transparent;
     font-family: var(--font-family);
+    background-image: url('images/background_gradient.png');
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
 
 .container {
-    border-radius: 20px;
-    min-height: auto;
-    box-shadow: 0 0 1px 0.6em rgba(0, 0, 0, 0.1), 0 1px 1em rgba(0, 0, 0, 0.2);
-    max-width: 90%;
-    padding: 2em;
+    width: 80%;
+    max-width: 800px;
     background-color: white;
-    margin: 1em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
     text-align: center;
+    padding: 20px;
 }
 
-h1 {
-    font-size: calc(1.5rem + 1vw);
-    font-weight: 500;
-    letter-spacing: 0.1rem;
-    color: black;
-    margin-bottom: 1em;
+.header {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    padding: 20px;
+    font-size: 24px;
 }
 
-h2 {
-    font-size: calc(1rem + 0.5vw);
-    font-weight: 400;
-    letter-spacing: 0.1rem;
-    color: black;
-    margin-bottom: 1em;
+.details {
+    padding: 15px;
+    text-align: left;
 }
 
-p {
-    font-size: calc(0.8rem + 0.3vw);
-    font-weight: 350;
-    letter-spacing: 0.1rem;
-    color: black;
-    margin-bottom: 1em;
+ul {
+    list-style-type: none;
 }
 
-ul, li {
-    font-size: calc(0.8rem + 0.3vw);
-    font-weight: 300;
-    letter-spacing: 0.1rem;
-    color: black;
-    margin-top: 0.8em;
+li {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+li:last-child {
+    border-bottom: none;
 }
 
 @media (max-width: 768px) {

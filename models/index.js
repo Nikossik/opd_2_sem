@@ -7,7 +7,7 @@ const ComplexReactionTestModel = require('./complexReactionTest')
 const InviteLinkModel = require('./inviteLink')
 const AccuracyTestModel = require('./accuracyTest')
 
-const sequelize = new Sequelize('opd_2_sem', 'postgres', '', {
+const sequelize = new Sequelize('opd_2_sem', 'postgres', 'admin', {
     dialect: 'postgres',
     port: 5432,
     host: 'localhost',

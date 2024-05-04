@@ -54,15 +54,16 @@
 
     <% if (characteristics.length > 0) { %>
         <h2>Характеристики</h2>
-        <ul>
-            <% characteristics.forEach(function(characteristic) { %>
-                <li>Конкуренция: <%= characteristic.competition%></li>
-                <li>Зарплата: <%= characteristic.salary %></li>
-                <li>Сложность обучения: <%= characteristic.study %></li>
-                <li>Описания профессии: <%= characteristic.description %></li>
-                <li>Основные задачи: <%= characteristic.task %></li>
-            <% }); %>
-        </ul>
+            <ul>
+                <% characteristics.forEach(function(characteristic) { %>
+                    <li><strong>Конкуренция:</strong> <%= characteristic.competition%></li>
+                    <li><strong>Зарплата:</strong> <%= characteristic.salary %></li>
+                    <li><strong>Сложность обучения:</strong> <%= characteristic.study %></li>
+                    <li><strong>Описания профессии:</strong> <%= characteristic.description %></li>
+                    <li><strong>Основные задачи:</strong> <%= characteristic.task %></li>
+                <% }); %>
+            </ul>
+
     <% } else { %>
         <p>Характеристики для этой профессии отсутствуют.</p>
     <% } %>
