@@ -14,8 +14,13 @@ button {
     height: 200px;
     margin-top: 20px;
 }
-
+.memory-image {
+    width: 100px;
+    height: auto;
+    margin: 5px;
+    transition: transform 0.3s ease;
+}
 .selected-image {
-    border: 3px solid red; /* Используйте красный для проверки */
-    border-radius: 5px;
+    transform: scale(1.2);
+    border: 2px solid red;
 }
