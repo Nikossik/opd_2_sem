@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attention Assessment Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .test-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80%;
+            height: 80%;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .test {
+            padding: 20px;
+            text-align: center;
+        }
+
+        #even-odd-test {
+            border-right: 1px solid #ccc;
+        }
+
+        #reaction-test {
+            border-left: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="test-container">
+    <div class="test-section" id="even-odd-test">
+        <div class="test">
+            <h2>Even/Odd Sum Test</h2>
+            <p>Determine if the sum is even or odd:</p>
+            <p id="even-odd-question"></p>
+            <button id="even-btn">Even</button>
+            <button id="odd-btn">Odd</button>
+        </div>
+    </div>
+    <div class="test-section" id="reaction-test">
+        <div class="test">
+            <h2>Reaction to Light Test</h2>
+            <p>React to the light:</p>
+            <div id="light"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const evenOddQuestion = document.getElementById('even-odd-question');
+    const evenButton = document.getElementById('even-btn');
+    const oddButton = document.getElementById('odd-btn');
+    const lightDiv = document.getElementById('light');
+
+    const difficultyLevels = {
+        easy: 2000,  // 2 seconds
+        medium: 1500,  // 1.5 seconds
+        hard: 750  // 0.75 seconds
+    };
+
+    const testTimes = {
+        easy: 60000,  // 1 minute
+        medium: 120000,  // 2 minutes
+        hard: 150000  // 2.5 minutes
+    };
+
+    let currentDifficulty = 'easy';
+    let startTime;
+
+    function generateRandomNumber() {
+        return Math.floor(Math.random() * 100);
+    }
+
+    function updateEvenOddQuestion() {
+        const number = generateRandomNumber();
+        evenOddQuestion.textContent = `Is ${number} even or odd?`;
+        return number % 2 === 0 ? 'even' : 'odd';
+    }
+
+    function displayLight() {
+        lightDiv.style.backgroundColor = '#fff';  // Turn light off
+        setTimeout(() => {
+            lightDiv.style.backgroundColor = '#f00';  // Turn light on (red)
+            startTime = Date.now();  // Start time when light turns on
+        }, difficultyLevels[currentDifficulty]);
+    }
+
+    function switchTests() {
+        currentDifficulty = currentDifficulty === 'easy' ? 'medium' : 'hard';  // Increase difficulty
+        setTimeout(() => {
+            updateEvenOddQuestion();
+            displayLight();
+        }, difficultyLevels[currentDifficulty]);
+    }
+
+    evenButton.addEventListener('click', () => {
+        const answer = updateEvenOddQuestion();
+        if (answer === 'even') switchTests();
+    });
+
+    oddButton.addEventListener('click', () => {
+        const answer = updateEvenOddQuestion();
+        if (answer === 'odd') switchTests();
+    });
+
+    // Initial test start
+    updateEvenOddQuestion();
+    displayLight();
+
+    // End of test timer
+    setTimeout(() => {
+        const endTime = Date.now();
+        const testTime = endTime - startTime;
+        alert(`Test completed! Your reaction time: ${testTime} milliseconds.`);
+        // Here you can send the test results to a server or perform any other actions
+    }, testTimes[currentDifficulty]);
+</script>
+</body>
+</html>
