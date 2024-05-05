@@ -12,6 +12,7 @@
             display: flex;
             justify-content: space-around;
         }
+
         .test-container {
             width: 45%;
             padding: 20px;
@@ -19,8 +20,10 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
+
         .square {
-            width: 50px; height: 50px; /* Assuming size for visual purposes */
+            width: 50px;
+            height: 50px; /* Assuming size for visual purposes */
             margin: 5px;
         }
     </style>
@@ -83,7 +86,7 @@
     let totalReactionTime = 0;
     let testPassed = false;
 
-    document.getElementById("start-test-button").addEventListener('click', function() {
+    document.getElementById("start-test-button").addEventListener('click', function () {
         let level = document.getElementById("difficulty-select").value;
         startTests(level);
     });
@@ -93,6 +96,7 @@
         startVisualMathTest(level);
         setTimeout(() => startColorReactionTest(level), 5000); // Start color test after 5 seconds
     }
+
     function startVisualMathTest(level) {
         console.log('Visual Math Test started at level:', level);
         generateMathProblem();
@@ -144,7 +148,7 @@
         });
     }
 
-    function hideButton(){
+    function hideButton() {
         document.getElementById("start-test-button").style.display = "none";
         const squaresDiv = document.createElement("div");
         squaresDiv.id = "squares";

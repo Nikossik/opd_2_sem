@@ -299,8 +299,6 @@ server.get('/light_test', (req, res) => {
         res.render('2nd-lab-tests/LightReactionTest')
     }
 })
-{
-}
 server.get('/colours_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
@@ -329,7 +327,13 @@ server.get('/myunsterberg_test', (req, res) => {
         res.render('5th-lab-tests/MyunsterbergTest')
     }
 })
-
+server.get('/abstract_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/AbstractTest')
+    }
+})
 server.get('/sound_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')

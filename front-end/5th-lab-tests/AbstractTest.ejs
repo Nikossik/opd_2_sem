@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест на абстракцию</title>
+    <style>
+        body {
+            background-image: url('images/background_gradient.png');
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        img {
+            width: 300px;
+            height: auto;
+            margin: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Тест на абстракцию</h1>
+<div id="task-container">
+    <img id="task-image" src="" alt="Задание теста">
+    <p id="task-instruction">Введите количество треугольников на картинке:</p>
+    <input type="number" id="user-answer">
+    <button onclick="submitAnswer()">Отправить ответ</button>
+</div>
+<div id="timer"></div>
+<div id="results" class="hidden"></div>
+
+<script>
+    const tasks = [
+        {image: "images/triangle_easy.png", type: "triangle", level: "easy", time: 60, correctAnswer: 24},
+        {image: "images/triangle_medium.png", type: "triangle", level: "medium", time: 90, correctAnswer: 12},
+        {image: "images/triangle_hard.png", type: "triangle", level: "hard", time: 120, correctAnswer: 18},
+        {image: "images/rectangles.png", type: "rectangle", level: "easy", time: 60, correctAnswer: 9},
+        {image: "images/numbers.png", type: "number", level: "hard", time: 120, correctAnswer: 8}
+    ];
+    let currentTaskIndex = 0;
+    let timeoutHandle;
+    let intervalHandle;
+    let correctAnswers = 0;  // For storing the count of correct answers
+
+    function startTask(index) {
+        const task = tasks[index];
+        const imageElement = document.getElementById('task-image');
+        const instructionElement = document.getElementById('task-instruction');
+        const timerElement = document.getElementById('timer');
+
+        imageElement.src = task.image;
+        updateInstruction(task);
+        timerElement.textContent = `Осталось времени: ${task.time} секунд`;
+
+        clearInterval(intervalHandle);
+        intervalHandle = setInterval(() => {
+            task.time--;
+            timerElement.textContent = `Осталось времени: ${task.time} секунд`;
+            if (task.time <= 0) {
+                clearInterval(intervalHandle);
+                timerElement.textContent = '';
+                alert('Время вышло!');
+                showNextTask();
+            }
+        }, 1000);
+    }
+
+    function updateInstruction(task) {
+        let figureType = "";
+        switch (task.type) {
+            case "triangle": figureType = "треугольников"; break;
+            case "rectangle": figureType = "прямоугольников"; break;
+            case "number": figureType = "цифр"; break;
+        }
+        document.getElementById('task-instruction').textContent = `Введите количество ${figureType} на картинке:`;
+    }
+
+    function submitAnswer() {
+        clearInterval(intervalHandle);
+        const userAnswer = parseInt(document.getElementById('user-answer').value);
+        const task = tasks[currentTaskIndex];
+        if (userAnswer === task.correctAnswer) {
+            correctAnswers++;  // Increment the count of correct answers
+        }
+        alert(`Ваш ответ: ${userAnswer}`);
+        showNextTask();
+    }
+
+    function showNextTask() {
+        if (currentTaskIndex < tasks.length - 1) {
+            currentTaskIndex++;
+            startTask(currentTaskIndex);
+        } else {
+            document.getElementById('task-container').classList.add('hidden');
+            document.getElementById('timer').textContent = '';
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('results').textContent = `Тест завершён! Верных ответов: ${correctAnswers} из ${tasks.length}`;
+        }
+    }
+
+    startTask(0);  // Запуск первого задания при загрузке страницы.
+</script>
+</body>
+</html>
