@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест на концентрацию</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-image: url('images/background_gradient.png');
+        }
+
+        .sequence {
+            margin: 20px 0;
+            font-size: 16px;
+            word-wrap: break-word;
+        }
+
+        .words input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Тест на концентрацию</h1>
+<div id="sequence" class="sequence"></div>
+<div id="words" class="words"></div>
+<div id="level-buttons">
+    <button onclick="startTest('easy')">Легкий уровень</button>
+    <button onclick="startTest('medium')">Средний уровень</button>
+    <button onclick="startTest('hard')">Сложный уровень</button>
+</div>
+<button id="stop-button" class="hidden" onclick="stopTest()">Завершить досрочно</button>
+<div id="results"></div>
+
+<script>
+    let timeoutHandle;
+    const data = {
+        easy: {
+            sequence: "Ривырмпиыомпшыибогадельнятиваопрдлабризтмыдмиоытермоситовлимлюырагуашьижыртшкжщталезвиеиылрмивомиюлутшмрзакисьтлмдипкирккабантволюяиомялмиолы",
+            words: ["богадельня", "бриз", "космодром", "термос", "гуашь", "кабан", "носок", "лезвие", "закись", "клетка"],
+            answers: ["богадельня", "бриз", "термос", "гуашь", "кабан", "лезвие", "закись"]
+        },
+        medium: {
+            sequence: "имолвыюткпримгытпщшысливаарщжпимгшжпрмивтикаблуктмрвржишщтилвирщшэьуыпимшакадемияитоылвжришклтиыашжттколбарлоыюиомюаоимоюимолбаркмивмишвдобложкаимолвмиолавмкняжнаимоылмивл",
+            words: ["слива", "видеомагнитофон", "каблук", "колба", "кинокартина", "княжна", "барк", "обложка", "борец", "академия"],
+            answers: ["слива", "каблук", "колба", "княжна", "барк", "обложка", "академия"]
+        },
+        hard: {
+            sequence: "Пвррвоуррвуалгебрадлатзушмтчбсвниманиетбялыцшргррепрогнепроектловшйзкнстьчбяжаоырнгаджетнцшйзмчувытетрадьмйкемтраохьопеналцгнекычбдгсумкавыпчрсншяючемоданчиттвропноекуотпусккапр",
+            words: ["алгебра", "проект", "традиция", "самолет", "радио", "компьютер", "полка", "гаджет", "пенал", "цирк"],
+            answers: ["алгебра", "проект", "традиция", "самолет", "радио", "компьютер", "полка"]
+        }
+    };
+
+    function startTest(level) {
+        const levelData = data[level];
+        const sequenceElement = document.getElementById('sequence');
+        const wordsElement = document.getElementById('words');
+        const resultsElement = document.getElementById('results');
+        const levelButtons = document.getElementById('level-buttons');
+        const stopButton = document.getElementById('stop-button');
+
+        sequenceElement.textContent = levelData.sequence;
+        wordsElement.innerHTML = ''; // Clear previous entries
+        resultsElement.textContent = '';
+        levelButtons.style.display = 'none'; // Hide level buttons
+        stopButton.classList.remove('hidden'); // Show stop button
+
+        // Create checkboxes for each word
+        levelData.words.forEach(word => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = word;
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(word));
+            wordsElement.appendChild(label);
+            wordsElement.appendChild(document.createElement('br'));
+        });
+
+        // Set a timer to evaluate the answers after the specified time
+        timeoutHandle = setTimeout(() => {
+            evaluateResults(levelData);
+            stopButton.classList.add('hidden');
+            levelButtons.style.display = 'block'; // Show level buttons again
+        }, getTestDuration(level));
+    }
+
+    function stopTest() {
+        const levelButtons = document.getElementById('level-buttons');
+        clearTimeout(timeoutHandle); // Clear the timeout
+        evaluateResults(data.easy); // Assuming 'easy' level for demonstration
+        document.getElementById('stop-button').classList.add('hidden');
+        levelButtons.style.display = 'block'; // Show level buttons again
+    }
+
+    function evaluateResults(levelData) {
+        const wordsElement = document.getElementById('words');
+        const resultsElement = document.getElementById('results');
+        const checkedValues = Array.from(wordsElement.querySelectorAll('input[type=checkbox]:checked')).map(el => el.value);
+        const correctCount = checkedValues.filter(value => levelData.answers.includes(value)).length;
+        const incorrectCount = checkedValues.length - correctCount;
+        const missedCount = levelData.answers.length - correctCount;
+        resultsElement.textContent = `Правильных ответов: ${correctCount}, Неправильных выбрано: ${incorrectCount}, Пропущенных правильных слов: ${missedCount}`;
+        wordsElement.innerHTML = ''; // Clear options after showing results
+    }
+
+    function getTestDuration(level) {
+        switch (level) {
+            case 'easy':
+                return 150000; // 2.5 minutes
+            case 'medium':
+                return 120000; // 2 minutes
+            case 'hard':
+                return 60000; // 1 minute
+        }
+    }
+</script>
+</body>
+</html>

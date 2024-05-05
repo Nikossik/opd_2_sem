@@ -2,154 +2,182 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Attention Assessment Test</title>
+    <title>Combined Tests</title>
+    <link rel="stylesheet" href="AttentionAssessmentTest.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            background-image: url('images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
+            justify-content: space-around;
         }
-
         .test-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 80%;
-            height: 80%;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .test-section {
-            flex: 1;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .test {
+            width: 45%;
             padding: 20px;
-            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
-
-        #even-odd-test {
-            border-right: 1px solid #ccc;
-        }
-
-        #reaction-test {
-            border-left: 1px solid #ccc;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
+        .square {
+            width: 50px; height: 50px; /* Assuming size for visual purposes */
+            margin: 5px;
         }
     </style>
 </head>
 <body>
 <div class="test-container">
-    <div class="test-section" id="even-odd-test">
-        <div class="test">
-            <h2>Even/Odd Sum Test</h2>
-            <p>Determine if the sum is even or odd:</p>
-            <p id="even-odd-question"></p>
-            <button id="even-btn">Even</button>
-            <button id="odd-btn">Odd</button>
-        </div>
+    <h1>Visual Math Test</h1>
+    <div id="incorrect_field"></div>
+    <div id="problem">Problem will appear here</div>
+    <div id="select_for_number_of_numbers">
+        <select id="numbers_for_test_time" required>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
     </div>
-    <div class="test-section" id="reaction-test">
-        <div class="test">
-            <h2>Reaction to Light Test</h2>
-            <p>React to the light:</p>
-            <div id="light"></div>
-        </div>
-    </div>
+    <div id="answer_buttons"></div>
+    <br>
+    <progress id="progress" value="0" max="100"></progress>
+</div>
+
+<div class="test-container">
+    <h1>Color Reaction Test</h1>
+    <progress id="reaction-progress" value="0" max="100"></progress>
+    <div id="send-button-enclosing"></div>
+    <div id="result-enclosing"></div> <!-- Added for displaying results -->
+    <!-- Removed button from here -->
+</div>
+
+<div style="text-align: center;">
+    <select id="difficulty-select">
+        <option value="light">Light</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+    </select>
+    <button id="start-test-button">Start Test</button>
 </div>
 
 <script>
-    const evenOddQuestion = document.getElementById('even-odd-question');
-    const evenButton = document.getElementById('even-btn');
-    const oddButton = document.getElementById('odd-btn');
-    const lightDiv = document.getElementById('light');
-
-    const difficultyLevels = {
-        easy: 2000,  // 2 seconds
-        medium: 1500,  // 1.5 seconds
-        hard: 750  // 0.75 seconds
-    };
-
-    const testTimes = {
-        easy: 60000,  // 1 minute
-        medium: 120000,  // 2 minutes
-        hard: 150000  // 2.5 minutes
-    };
-
-    let currentDifficulty = 'easy';
+    const colors = ['red', 'blue', 'green'];
+    let intervalId;
     let startTime;
+    let reactionTime;
+    let correctAnswer; // square number
+    let currentSquare;
+    let testCounter = 0;
+    let correctTestCounter = 0;
+    let totalReactionTime = 0;
+    let testPassed = false;
+    let reactionTimings = [], results = [];
+    let level = "light"; // Default difficulty level
 
-    function generateRandomNumber() {
-        return Math.floor(Math.random() * 100);
-    }
+    const colors = ['red', 'blue', 'green'];
+    const keys = {'Z': 0, 'X': 1, 'C': 2};
+    let testInterval;
+    let testTimeout;
+    let startTime;
+    let testCounter = 0;
+    let totalReactionTime = 0;
+    let testPassed = false;
 
-    function updateEvenOddQuestion() {
-        const number = generateRandomNumber();
-        evenOddQuestion.textContent = `Is ${number} even or odd?`;
-        return number % 2 === 0 ? 'even' : 'odd';
-    }
-
-    function displayLight() {
-        lightDiv.style.backgroundColor = '#fff';  // Turn light off
-        setTimeout(() => {
-            lightDiv.style.backgroundColor = '#f00';  // Turn light on (red)
-            startTime = Date.now();  // Start time when light turns on
-        }, difficultyLevels[currentDifficulty]);
-    }
-
-    function switchTests() {
-        currentDifficulty = currentDifficulty === 'easy' ? 'medium' : 'hard';  // Increase difficulty
-        setTimeout(() => {
-            updateEvenOddQuestion();
-            displayLight();
-        }, difficultyLevels[currentDifficulty]);
-    }
-
-    evenButton.addEventListener('click', () => {
-        const answer = updateEvenOddQuestion();
-        if (answer === 'even') switchTests();
+    document.getElementById("start-test-button").addEventListener('click', function() {
+        let level = document.getElementById("difficulty-select").value;
+        startTests(level);
     });
 
-    oddButton.addEventListener('click', () => {
-        const answer = updateEvenOddQuestion();
-        if (answer === 'odd') switchTests();
-    });
+    function startTests(level) {
+        console.log(`Tests started at level: ${level}`);
+        startVisualMathTest(level);
+        setTimeout(() => startColorReactionTest(level), 5000); // Start color test after 5 seconds
+    }
+    function startVisualMathTest(level) {
+        console.log('Visual Math Test started at level:', level);
+        generateMathProblem();
+        testInterval = setInterval(generateMathProblem, getTestSwitchTime(level));
+    }
 
-    // Initial test start
-    updateEvenOddQuestion();
-    displayLight();
+    function generateMathProblem() {
+        let num1 = Math.floor(Math.random() * 10 + 1);
+        let num2 = Math.floor(Math.random() * 10 + 1);
+        document.getElementById("problem").innerHTML = `${num1} + ${num2}`;
+        let correctAnswer = num1 + num2;
+        let userAnswer = prompt("What is " + num1 + " + " + num2 + "?");
+        if (parseInt(userAnswer) === correctAnswer) {
+            alert("Correct!");
+        } else {
+            alert("Wrong! The correct answer was " + correctAnswer);
+        }
+    }
 
-    // End of test timer
-    setTimeout(() => {
-        const endTime = Date.now();
-        const testTime = endTime - startTime;
-        alert(`Test completed! Your reaction time: ${testTime} milliseconds.`);
-        // Here you can send the test results to a server or perform any other actions
-    }, testTimes[currentDifficulty]);
+    function startColorReactionTest(level) {
+        console.log('Color Reaction Test started at level:', level);
+        clearInterval(testInterval); // Stop the math test
+        hideButton(); // Prepare UI for reaction test
+        let reactionTestCount = 0;
+        let maxTestCount = 10;
+        testInterval = setInterval(() => {
+            if (reactionTestCount++ < maxTestCount) {
+                displayColorSquare();
+            } else {
+                clearInterval(testInterval);
+                alert("Reaction test completed. Average reaction time: " + (totalReactionTime / maxTestCount).toFixed(2) + "ms");
+            }
+        }, getTestSwitchTime(level));
+    }
+
+    function displayColorSquare() {
+        let colorIndex = Math.floor(Math.random() * 3);
+        let square = document.getElementById("squares").children[colorIndex];
+        square.style.backgroundColor = colors[colorIndex];
+        startTime = new Date();
+        document.addEventListener('keydown', event => {
+            if (event.key.toUpperCase() === 'Z' || event.key.toUpperCase() === 'X' || event.key.toUpperCase() === 'C') {
+                if (keys[event.key.toUpperCase()] === colorIndex) {
+                    let reactionTime = new Date() - startTime;
+                    totalReactionTime += reactionTime;
+                    square.style.backgroundColor = 'white'; // Reset color
+                }
+            }
+        });
+    }
+
+    function hideButton(){
+        document.getElementById("start-test-button").style.display = "none";
+        const squaresDiv = document.createElement("div");
+        squaresDiv.id = "squares";
+        document.body.appendChild(squaresDiv);
+        for (let i = 0; i < 3; i++) {
+            const square = document.createElement("div");
+            square.className = "square";
+            squaresDiv.appendChild(square);
+        }
+    }
+
+    function getTestSwitchTime(level) {
+        switch (level) {
+            case "light":
+                return 2000;
+            case "medium":
+                return 1500;
+            case "hard":
+                return 750;
+        }
+    }
+
+    function getTestDuration(level) {
+        switch (level) {
+            case "light":
+                return 60000; // 1 minute
+            case "medium":
+                return 120000; // 2 minutes
+            case "hard":
+                return 180000; // 3 minutes
+        }
+    }
 </script>
+
 </body>
 </html>
