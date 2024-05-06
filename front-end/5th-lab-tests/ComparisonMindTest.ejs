@@ -27,7 +27,7 @@
         ];
 
         let currentTestIndex = 0;
-        const testDuration = [15, 15, 15]; // В секундах
+        const testDuration = [60, 120, 150]; // В секундах
         let results = []; // Сохраняем результаты пользователя
         let timer, inputTimer;
 
@@ -40,7 +40,7 @@
             // Показать окно ввода через 45 секунд
             inputTimer = setTimeout(() => {
                 document.getElementById('inputArea').style.display = 'block';
-            }, 5000);
+            }, 45000);
 
             // Перейти к следующему тесту по истечению времени на вопрос
             timer = setTimeout(nextTest, testDuration[Math.floor(index / 2)] * 1000);
