@@ -365,6 +365,14 @@ server.get('/ram_test', (req, res) => {
     }
 })
 
+server.get('/compare_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/ComparisonMindTest')
+    }
+})
+
 server.get('/memory_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login');
