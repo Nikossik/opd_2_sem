@@ -4,20 +4,70 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="TestListPageStyle.css">
   <title>Test List Page</title>
+  <style>
+    body {
+      background-image: url('images/background_gradient.png');
+      background-size: cover;
+      background-position: center;
+    }
+  </style>
 </head>
 <body>
+<div class="menu-wrap">
+  <input type="checkbox" class="toggler">
+  <div class="main-menu-icon"><div></div></div>
+  <div class="menu">
+    <div>
+      <div>
+        <ul>
+          <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
+
+          <% if (!loggedIn) { %>
+            <li><a href="/login">ВОЙТИ</a></li>
+          <% } %>
+
+          <% if (loggedIn) { %>
+            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
+          <% } %>
+
+          <% if (adminUser) { %>
+            <li><a href="/poll_1_part_1">ОПРОС</a></li>
+          <% } %>
+
+          <% if (adminUser) { %>
+            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
+          <% } %>
+          <% if (adminUser) { %>
+            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
+          <% } %>
+          <% if (adminUser) { %>
+            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+          <% } %>
+          <% if (loggedIn) { %>
+            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+          <% } %>
+          <% if (loggedIn) { %>
+            <li><a href="/logout">ВЫЙТИ</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="container">
   <div class="test-list">
     <ul>
-      <li><a href="/visual_math_test">Visual Math Test</a></li>
-      <li><a href="/math_sound">Sound Math Test</a></li>
-      <li><a href="/multiple_colours_test">Multiple Color Reaction Test</a></li>
-      <li><a href="/light_test">Light Reaction Test</a></li>
-      <li><a href="/sound_test">Sound Reaction Test</a></li>
-      <li><a href="/hard_action">Hard Action Test</a></li>
-      <li><a href="/easy_action">Easy Action Test</a></li>
-      <li><a href="/analog_tracking_test">Analog Tracking Test</a></li>
-      <li><a href="/stalking_test">Stalking Test</a></li>
+      <li class="test_name"><a class="test_a" href="/visual_math_test">Visual Math Test</a></li>
+      <li class="test_name"><a class="test_a" href="/math_sound">Sound Math Test</a></li>
+      <li class="test_name"><a class="test_a" href="/multiple_colours_test">Multiple Color Reaction Test</a></li>
+      <li class="test_name"><a class="test_a" href="/light_test">Light Reaction Test</a></li>
+      <li class="test_name"><a class="test_a" href="/sound_test">Sound Reaction Test</a></li>
+      <li class="test_name"><a class="test_a" href="/hard_action">Hard Action Test</a></li>
+      <li class="test_name"><a class="test_a" href="/easy_action">Easy Action Test</a></li>
+      <li class="test_name"><a class="test_a" href="/analog_tracking_test">Analog Tracking Test</a></li>
+      <li class="test_name"><a class="test_a" href="/stalking_test">Stalking Test</a></li>
     </ul>
+  </div>
   </div>
 </body>
 </html>
