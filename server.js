@@ -357,6 +357,14 @@ server.get('/visual_math_test', (req, res) => {
     }
 })
 
+server.get('/ram_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/RandomAccessMemoryTest')
+    }
+})
+
 server.get('/memory_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login');
