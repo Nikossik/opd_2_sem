@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест на абстрактное мышление</title>
+    <link rel="stylesheet" href="AbstractThinkingTest.css">
+</head>
+<body>
+<div id="app">
+    <h1>Тест на абстрактное мышление</h1>
+    <div id="questionContainer">
+    </div>
+    <div id="result" style="display:none;">
+        <p>Ваш результат: <span id="score"></span> из 6</p>
+    </div>
+</div>
+
+<script>
+    let currentQuestion = 0;
+    let score = 0;
+    const questions = [
+        {
+            image: 'images/abstract_test_1.png',
+            answers: ['images/abstract_test_1_1.png', 'images/abstract_test_1_2.png', 'images/abstract_test_1_3.png'],
+            correct: 0
+        },
+        {
+            image: 'images/abstract_test_2.png',
+            answers: ['images/abstract_test_2_1.png', 'images/abstract_test_2_2.png', 'images/abstract_test_2_3.png'],
+            correct: 2
+        },
+        {
+            image: 'images/abstract_test_3.png',
+            answers: ['images/abstract_test_3_1.png', 'images/abstract_test_3_2.png', 'images/abstract_test_3_3.png'],
+            correct: 1
+        },
+        {
+            image: 'images/abstract_test_4.png',
+            answers: ['images/abstract_test_4_1.png', 'images/abstract_test_4_2.png', 'images/abstract_test_4_3.png'],
+            correct: 0
+        },
+        {
+            image: 'images/abstract_test_5.png',
+            answers: ['images/abstract_test_5_1.png', 'images/abstract_test_5_2.png', 'images/abstract_test_5_3.png'],
+            correct: 1
+        },
+        {
+            image: 'images/abstract_test_6.png',
+            answers: ['images/abstract_test_6_1.png', 'images/abstract_test_6_2.png', 'images/abstract_test_6_3.png'],
+            correct: 1
+        }
+
+    ];
+
+    function loadQuestion(index) {
+        const question = questions[index];
+        const container = document.getElementById('questionContainer');
+        container.innerHTML = `<img src="${question.image}" alt="Вопрос ${index + 1}"><br>`;
+
+        question.answers.forEach((answer, idx) => {
+            container.innerHTML += `<img src="${answer}" class="answer" onclick="checkAnswer(${idx})" alt="Ответ ${idx + 1}">`;
+        });
+    }
+
+    function checkAnswer(index) {
+        if (index === questions[currentQuestion].correct) {
+            score++;
+        }
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            loadQuestion(currentQuestion);
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('questionContainer').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('score').textContent = score;
+    }
+
+    loadQuestion(0);
+</script>
+</body>
+</html>

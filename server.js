@@ -320,6 +320,13 @@ server.get('/attention_assessment_test', (req, res) => {
         res.render('5th-lab-tests/AttentionAssessmentTest')
     }
 })
+server.get('/abstract_thinking_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/AbstractThinkingTest')
+    }
+})
 server.get('/myunsterberg_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
@@ -374,7 +381,7 @@ server.get('/memory_test', (req, res) => {
             "img/6.gif"
         ];
 
-        res.render('5th-lab-tests/Short-termMemoryTest', { images: images, allImages: allImages });
+        res.render('5th-lab-tests/Short-termMemoryTest', {images: images, allImages: allImages});
     }
 });
 

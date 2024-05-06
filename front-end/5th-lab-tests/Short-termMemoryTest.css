@@ -15,6 +15,7 @@ button {
     margin-top: 20px;
 }
 .memory-image {
+    background-image: url('images/background_gradient.png');
     width: 100px;
     height: auto;
     margin: 5px;
