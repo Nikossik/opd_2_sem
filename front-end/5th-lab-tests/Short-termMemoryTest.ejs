@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест на кратковременную память</title>
+    <link rel="stylesheet" href="Short-termMemoryTest.css">
+</head>
+<body>
+<div class="container">
+    <h1>Проверка кратковременной памяти</h1>
+    <div id="difficultySelection">
+        <button onclick="startTest('easy', 150)">Легкий уровень - 2.5 мин</button>
+        <button onclick="startTest('medium', 120)">Средний уровень - 2 мин</button>
+        <button onclick="startTest('hard', 60)">Сложный уровень - 1 мин</button>
+    </div>
+    <div id="memoryImages" style="display: none;">
+        <p>Запомните эти фигуры:</p>
+        <div id="timerDisplay"></div>
+        <% images.forEach(function(image, index) { %>
+            <img src="<%= image %>" data-id="<%= index %>" class="memory-image" onclick="selectImage(this)">
+        <% }); %>
+        <button onclick="showTestPage()">Далее</button>
+    </div>
+    <div id="testImages" style="display: none;">
+        <p>Щелкайте по картинкам, которые вы запомнили.</p>
+        <% allImages.forEach(function(image, index) { %>
+            <img src="<%= image %>" data-id="<%= index %>" class="memory-image" onclick="selectImage(this)">
+        <% }); %>
+        <button onclick="evaluateResults()">Проверить результат</button>
+    </div>
+    <div id="results" class="hidden"></div>
+</div>
+
+<script>
+    var correctImages = []; // Массив с правильными изображениями
+    var selectedImages = []; // Массив с выбранными пользователем изображениями
+
+    function startTest(difficulty, time) {
+        document.getElementById('difficultySelection').style.display = 'none';
+        document.getElementById('memoryImages').style.display = 'block';
+        correctIDs = Array.from(document.querySelectorAll('#memoryImages img')).map(img => img.dataset.id);
+        startTimer(time);
+    }
+
+    function showTestPage() {
+        document.getElementById('memoryImages').style.display = 'none';
+        document.getElementById('testImages').style.display = 'block';
+        selectedImages = []; // Очищаем массив выбранных изображений при начале теста
+    }
+
+    function selectImage(imgElement) {
+        imgElement.classList.toggle('selected-image');
+        if (!imgElement.classList.contains('selected-image')) {
+            selectedImages = selectedImages.filter(id => id !== imgElement.dataset.id);
+        } else {
+            selectedImages.push(imgElement.dataset.id);
+        }
+    }
+
+    function evaluateResults() {
+        let correctCount = selectedImages.filter(id => correctIDs.includes(id)).length;
+        let incorrectCount = selectedImages.length - correctCount;
+        alert(`Вы правильно запомнили: ${correctCount} изображений.\nНеправильных выборов: ${incorrectCount}.`);
+        document.getElementById('testImages').style.display = 'none';
+        document.getElementById('results').classList.remove('hidden');
+        document.getElementById('results').textContent = `Тест завершён! Верных ответов: ${correctCount}, неправильных: ${incorrectCount}`;
+    }
+
+    function startTimer(duration) {
+        var timer = duration, minutes, seconds;
+        var timerDisplay = document.getElementById('timerDisplay');
+        var interval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            timerDisplay.textContent = minutes + ":" + seconds;
+
+            if (--timer < 0) {
+                clearInterval(interval);
+                showTestPage();
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>

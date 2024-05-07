@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест на оперативную память</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Тест на оперативную память</h1>
+        <div id="imagePreview">
+            <img src="img/first.jpg" alt="Image 1">
+        </div>
+        <div id="difficultySelection" style="display: block;">
+            <button onclick="startTest()">Начать</button>
+        </div>
+        <div id="question" style="display: none;">
+            <!-- Вопросы будут отображаться здесь -->
+        </div>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        let correctAnswersCount = 0;
+        let questions = [
+            { 
+                content: '<b>Запомните слова на картинке, они пригодятся чуть позже.</b> <br>А пока ответьте на вопрос, который, возможно, вы помните еще из школьной программы: <b>какой процент суши покрывает вода??</b><br><img src="img/words.jpg" alt="Описательная картинка" style="max-width: 80%; height: auto;"><br>', 
+                answers: ['90%', '71%', '97,5%'], 
+                correctAnswer: '71%' 
+            },
+            { 
+                content: 'Какие слова были перечислены на предыдущей картинке?', 
+                answers: ['Картошка, конфеты, апельсин, литография, яблоко, сон', 'Картошка, поле, клавесин, параграф, блокнот, паркинсон', 'Картошка, полет, ангина, фотография, яблоко, унисон'], 
+                correctAnswer: 'Картошка, полет, ангина, фотография, яблоко, унисон' 
+            },
+            { 
+                content: 'Помните, какой процент воды на планете — это соленая вода <br>(мы писали об этом в первом вопросе)?', 
+                answers: ['97,5%', '71%', '90%'], 
+                correctAnswer: '97,5%' 
+            },
+            { 
+                content: 'Внимательно посмотрите на картинку ниже и <b>постарайтесь запомнить как можно больше деталей.</b> <br>Заодно ответьте на вопрос, <b>кто был изображен на обложке теста?</b><br><img src="img/cats.jpg" alt="Описательная картинка" style="max-width: 80%; height: auto;"><br>', 
+                answers: ['Зебра, мышь, лев', 'Жираф, кошка, тигр', 'Конь, обезьяна, лев'], 
+                correctAnswer: 'Зебра, мышь, лев' 
+            },
+            { 
+                content: 'Сколько на предыдущей картинке было кочанов капусты?', 
+                answers: ['Их не было', 'Был только один', 'Было два'], 
+                correctAnswer: 'Был только один' 
+            },
+            { 
+                content: 'А сколько было котов с поднятым хвостом?', 
+                answers: ['Тоже только один', 'Двое', 'Ни одного'], 
+                correctAnswer: 'Тоже только один' 
+            }
+        ];
+
+        function startTest() {
+            document.getElementById('difficultySelection').style.display = 'none'; // Скрываем кнопку начала теста
+            document.getElementById('imagePreview').style.display = 'none'; // Скрываем картинки
+            document.getElementById('question').style.display = 'block'; // Должны показать вопросы
+            showQuestion(); // Функция для отображения первого вопроса
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            let answersHtml = question.answers.map(answer => 
+                `<button onclick="submitAnswer('${answer}')">${answer}</button>`
+            ).join('');
+
+            document.getElementById('question').innerHTML = `
+                <p>${question.content}</p>
+                <div id="answers">${answersHtml}</div>
+            `;
+        }
+
+        function submitAnswer(answer) {
+            if (answer === questions[currentQuestionIndex].correctAnswer) {
+                correctAnswersCount++;
+                if (currentQuestionIndex == 0){
+                    alert('Верно. Причем 97,5% из нее — соленая вода.');
+                }
+                else {
+                    alert('Правильно!');
+                }
+            } else {
+                alert('Неправильно!');
+            }
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                endTest();
+            }
+        }
+
+        function endTest() {
+            let resultHtml = `
+                <div class="results">
+                    <h2>Ваш результат: ${correctAnswersCount} из ${questions.length}</h2>
+                    <p>Как бы вы ни тренировали ее, продолжайте — это работает!</p>
+                    <button onclick="restartTest()">Хочу еще</button>
+                </div>
+            `;
+            document.getElementById('question').innerHTML = resultHtml;
+        }
+        function restartTest() {
+            currentQuestionIndex = 0;
+            correctAnswersCount = 0;
+            document.getElementById('difficultySelection').style.display = 'block';
+            document.getElementById('question').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

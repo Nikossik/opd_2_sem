@@ -1,0 +1,25 @@
+body {
+    background-image: url('images/background_gradient.png');
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+#questionContainer img {
+    width: 300px;
+}
+
+.answer {
+    display: inline-block;
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.answer:hover {
+    background-color: lightgrey;
+}
+
+.hidden {
+    display: none;
+}

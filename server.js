@@ -288,7 +288,7 @@ server.get('/adminRegister', (req, res) => {
         res.redirect('/')
     } else {
         const errorMessage = req.flash('error')[0]
-        res.render('AdminRegistrationForm', {errorMessage, adminUser,loggedIn});
+        res.render('AdminRegistrationForm', {errorMessage, adminUser, loggedIn});
     }
 })
 
@@ -299,8 +299,6 @@ server.get('/light_test', (req, res) => {
         res.render('2nd-lab-tests/LightReactionTest')
     }
 })
-{
-}
 server.get('/colours_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
@@ -315,7 +313,34 @@ server.get('/multiple_colours_test', (req, res) => {
         res.render('2nd-lab-tests/MultipleColorReactionTest')
     }
 })
-
+server.get('/attention_assessment_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/AttentionAssessmentTest')
+    }
+})
+server.get('/abstract_thinking_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/AbstractThinkingTest')
+    }
+})
+server.get('/myunsterberg_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/MyunsterbergTest')
+    }
+})
+server.get('/abstract_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/AbstractTest')
+    }
+})
 server.get('/sound_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
@@ -331,6 +356,50 @@ server.get('/visual_math_test', (req, res) => {
         res.render('2nd-lab-tests/VisualMathTest')
     }
 })
+
+server.get('/ram_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/RandomAccessMemoryTest')
+    }
+})
+
+server.get('/compare_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+    } else {
+        res.render('5th-lab-tests/ComparisonMindTest')
+    }
+})
+
+server.get('/memory_test', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login');
+    } else {
+        const images = [
+            "img/11.gif",
+            "img/19.gif",
+            "img/28.gif",
+            "img/36.gif"
+        ];
+        const allImages = [
+            "img/11.gif",
+            "img/19.gif",
+            "img/28.gif",
+            "img/36.gif",
+            "img/0.gif",
+            "img/1.gif",
+            "img/2.gif",
+            "img/3.gif",
+            "img/4.gif",
+            "img/5.gif",
+            "img/6.gif"
+        ];
+
+        res.render('5th-lab-tests/Short-termMemoryTest', {images: images, allImages: allImages});
+    }
+});
 
 server.get('/math_sound', (req, res) => {
     if (!req.isAuthenticated()) {
@@ -464,8 +533,7 @@ server.post('/register', async (req, res, next) => {
                 }
                 return res.redirect('/');
             });
-        }
-        else {
+        } else {
             const respondent = req.body.respondent;
             const {login, password} = req.body;
             const isAdmin = false;
@@ -519,7 +587,7 @@ server.get('/poll_1_part_1', async (req, res) => {
         return
     }
     loggedIn = true;
-    
+
     const checkAdmin = req.user.isAdmin;
     const professions = await Profession.findAll({attributes: ['profession']});
     if (!checkAdmin) {
@@ -882,7 +950,7 @@ server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
             const id = req.params.id;
-            const profession = await Profession.findOne({ where: { id: id } });
+            const profession = await Profession.findOne({where: {id: id}});
             if (!profession) {
                 console.error('Профессия с ID', id, 'не найдена');
                 res.status(404).send('Профессия не найдена');

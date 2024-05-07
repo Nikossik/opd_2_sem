@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Combined Tests</title>
+    <link rel="stylesheet" href="AttentionAssessmentTest.css">
+    <style>
+        body {
+            background-image: url('images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .test-container {
+            width: 45%;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .square {
+            width: 50px;
+            height: 50px; /* Assuming size for visual purposes */
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="test-container">
+    <h1>Visual Math Test</h1>
+    <div id="incorrect_field"></div>
+    <div id="problem">Problem will appear here</div>
+    <div id="select_for_number_of_numbers">
+        <select id="numbers_for_test_time" required>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+    <div id="answer_buttons"></div>
+    <br>
+    <progress id="progress" value="0" max="100"></progress>
+</div>
+
+<div class="test-container">
+    <h1>Color Reaction Test</h1>
+    <progress id="reaction-progress" value="0" max="100"></progress>
+    <div id="send-button-enclosing"></div>
+    <div id="result-enclosing"></div> <!-- Added for displaying results -->
+    <!-- Removed button from here -->
+</div>
+
+<div style="text-align: center;">
+    <select id="difficulty-select">
+        <option value="light">Light</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+    </select>
+    <button id="start-test-button">Start Test</button>
+</div>
+
+<script>
+    //const colors = ['red', 'blue', 'green'];
+    let intervalId;
+    //let startTime;
+    let reactionTime;
+    let correctAnswer; // square number
+    let currentSquare;
+    //let testCounter = 0;
+    let correctTestCounter = 0;
+    //let totalReactionTime = 0;
+    //let testPassed = false;
+    let reactionTimings = [], results = [];
+    let level = "light"; // Default difficulty level
+
+    const colors = ['red', 'blue', 'green'];
+    const keys = {'Z': 0, 'X': 1, 'C': 2};
+    let testInterval;
+    let testTimeout;
+    let startTime;
+    let testCounter = 0;
+    let totalReactionTime = 0;
+    let testPassed = false;
+
+    document.getElementById("start-test-button").addEventListener('click', function () {
+        let level = document.getElementById("difficulty-select").value;
+        startTests(level);
+    });
+
+    function startTests(level) {
+        console.log(`Tests started at level: ${level}`);
+        startVisualMathTest(level);
+        setTimeout(() => startColorReactionTest(level), 5000); // Start color test after 5 seconds
+    }
+
+    function startVisualMathTest(level) {
+        console.log('Visual Math Test started at level:', level);
+        generateMathProblem();
+        testInterval = setInterval(generateMathProblem, getTestSwitchTime(level));
+    }
+
+    function generateMathProblem() {
+        let num1 = Math.floor(Math.random() * 10 + 1);
+        let num2 = Math.floor(Math.random() * 10 + 1);
+        document.getElementById("problem").innerHTML = `${num1} + ${num2}`;
+        let correctAnswer = num1 + num2;
+        let userAnswer = prompt("What is " + num1 + " + " + num2 + "?");
+        if (parseInt(userAnswer) === correctAnswer) {
+            alert("Correct!");
+        } else {
+            alert("Wrong! The correct answer was " + correctAnswer);
+        }
+    }
+
+    function startColorReactionTest(level) {
+        console.log('Color Reaction Test started at level:', level);
+        clearInterval(testInterval); // Stop the math test
+        hideButton(); // Prepare UI for reaction test
+        let reactionTestCount = 0;
+        let maxTestCount = 10;
+        testInterval = setInterval(() => {
+            if (reactionTestCount++ < maxTestCount) {
+                displayColorSquare();
+            } else {
+                clearInterval(testInterval);
+                alert("Reaction test completed. Average reaction time: " + (totalReactionTime / maxTestCount).toFixed(2) + "ms");
+            }
+        }, getTestSwitchTime(level));
+    }
+
+    function displayColorSquare() {
+        let colorIndex = Math.floor(Math.random() * 3);
+        let square = document.getElementById("squares").children[colorIndex];
+        square.style.backgroundColor = colors[colorIndex];
+        startTime = new Date();
+        document.addEventListener('keydown', event => {
+            if (event.key.toUpperCase() === 'Z' || event.key.toUpperCase() === 'X' || event.key.toUpperCase() === 'C') {
+                if (keys[event.key.toUpperCase()] === colorIndex) {
+                    let reactionTime = new Date() - startTime;
+                    totalReactionTime += reactionTime;
+                    square.style.backgroundColor = 'white'; // Reset color
+                }
+            }
+        });
+    }
+
+    function hideButton() {
+        document.getElementById("start-test-button").style.display = "none";
+        const squaresDiv = document.createElement("div");
+        squaresDiv.id = "squares";
+        document.body.appendChild(squaresDiv);
+        for (let i = 0; i < 3; i++) {
+            const square = document.createElement("div");
+            square.className = "square";
+            squaresDiv.appendChild(square);
+        }
+    }
+
+    function getTestSwitchTime(level) {
+        switch (level) {
+            case "light":
+                return 2000;
+            case "medium":
+                return 1500;
+            case "hard":
+                return 750;
+        }
+    }
+
+    function getTestDuration(level) {
+        switch (level) {
+            case "light":
+                return 60000; // 1 minute
+            case "medium":
+                return 120000; // 2 minutes
+            case "hard":
+                return 180000; // 3 minutes
+        }
+    }
+</script>
+
+</body>
+</html>

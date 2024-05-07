@@ -1,0 +1,27 @@
+.container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+#imageContainer img {
+    width: 300px;
+    height: 200px;
+    margin-top: 20px;
+}
+.memory-image {
+    background-image: url('images/background_gradient.png');
+    width: 100px;
+    height: auto;
+    margin: 5px;
+    transition: transform 0.3s ease;
+}
+.selected-image {
+    transform: scale(1.2);
+    border: 2px solid red;
+}
