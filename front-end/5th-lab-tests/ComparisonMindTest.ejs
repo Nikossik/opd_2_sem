@@ -3,92 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <title>Оценка мышления</title>
-    <link rel="stylesheet" href="ComparisonMindTest.css">
+    <link rel="stylesheet" href="5th-lab-tests/ComparisonMindTest.css">
+    <style>
+        body, html {
+            background-image: url('images/background_gradient.png');
+        }
+    </style>
 </head>
 <body>
-    <div id="container" class="container">
-        <h1>Оценка мышления: Тест сравнения</h1>
-        <button id="startButton" onclick="startTest(currentTestIndex)">Начать тест</button> <!-- Кнопка начала теста -->
-        <img id="testImage" src="" alt="Тестовое изображение" style="display: none;">
-        <div id="inputArea" style="display: none;">
-            <input type="number" id="userInput" placeholder="Введите количество отличий">
-            <button onclick="submitDifference()">Проверить</button>
-        </div>
+<div id="container" class="container">
+    <h1>Оценка мышления: Тест сравнения</h1>
+    <div id="testArea" style="display: none;">
+        <img id="testImage" src="" alt="Тестовое изображение">
     </div>
+    <div id="inputArea" style="display: none;">
+        <input type="number" id="userInput" placeholder="Введите количество отличий">
+        <button onclick="submitDifference()">Проверить</button>
+    </div>
+    <div id="results" style="display: none;"></div>
+    <div id="test-controls">
+        <button id="startButton" onclick="startTest(0)">Начать тест</button>
+        <button id="final-submit-button" onclick="sendFinalResults()" style="display: none;">Отправить результат</button>
+        <button id="restart-button" onclick="restartTest()" style="display: none">Начать заново</button>
+    </div>
+</div>
 
-    <script>
-        const images = [
-            { src: "img/easy1.png", correctDifferences: 5 },
-            { src: "img/easy2.png", correctDifferences: 3 },
-            { src: "img/medium1.png", correctDifferences: 4 },
-            { src: "img/medium2.png", correctDifferences: 4 },
-            { src: "img/hard1.png", correctDifferences: 12 },
-            { src: "img/hard2.png", correctDifferences: 7 }
-        ];
 
-        let currentTestIndex = 0;
-        const testDuration = [60, 120, 150]; // В секундах
-        let results = []; // Сохраняем результаты пользователя
-        let timer, inputTimer;
+<script>
+    const images = [
+        {src: "images/compareTest/easy1.png", correctDifferences: 5},
+        {src: "images/compareTest/easy2.png", correctDifferences: 3},
+        {src: "images/compareTest/medium1.png", correctDifferences: 4},
+        {src: "images/compareTest/medium2.png", correctDifferences: 4},
+        {src: "images/compareTest/hard1.png", correctDifferences: 12},
+        {src: "images/compareTest/hard2.png", correctDifferences: 7}
+    ];
 
-        function startTest(index) {
-            document.getElementById('startButton').style.display = 'none'; // Скрываем кнопку "Начать тест"
-            document.getElementById('testImage').style.display = 'block';
-            document.getElementById('testImage').src = images[index].src;
-            document.getElementById('inputArea').style.display = 'none'; // Скрываем окно ввода перед началом таймера
-            
-            // Показать окно ввода через 45 секунд
-            inputTimer = setTimeout(() => {
-                document.getElementById('inputArea').style.display = 'block';
-            }, 45000);
+    let currentTestIndex;
+    const testDuration = [60, 120, 150]; // В секундах
+    let results = []; // Сохраняем результаты пользователя
+    let timer, inputTimer;
 
-            // Перейти к следующему тесту по истечению времени на вопрос
-            timer = setTimeout(nextTest, testDuration[Math.floor(index / 2)] * 1000);
+    function startTest(index) {
+        currentTestIndex = index;
+        document.getElementById('startButton').style.display = 'none'; // Скрываем кнопку "Начать тест"
+        document.getElementById('testArea').style.display = 'block';
+        document.getElementById('testImage').src = images[currentTestIndex].src; // Устанавливаем изображение
+        document.getElementById('inputArea').style.display = 'none'; // Скрываем поле ввода
+        document.getElementById('inputArea').style.display = 'block';
+
+    }
+
+
+    function nextTest() {
+        if (currentTestIndex < images.length - 1) {
+            currentTestIndex++;
+            startTest(currentTestIndex); // Начать следующий тест
+        } else {
+            showResults(); // Показать результаты, если это последний тест
         }
+    }
 
-        function nextTest() {
-            clearTimeout(timer);
-            clearTimeout(inputTimer);
-            document.getElementById('inputArea').style.display = 'none'; // Скрываем окно ввода
+    function showResults() {
+        document.getElementById('testArea').style.display = 'none';
+        document.getElementById('inputArea').style.display = 'none';
+        document.getElementById('final-submit-button').style.display = 'block';
+        document.getElementById('restart-button').style.display = 'block';
 
-            if (currentTestIndex < images.length - 1) {
-                currentTestIndex++;
-                startTest(currentTestIndex); // Начать следующий тест
-            } else {
-                showResults(); // Показать результаты, если это последний тест
-            }
-        }
+        let resultHTML = "<h2>Результаты теста:</h2>";
+        results.forEach((result, index) => {
+            resultHTML += `<p>Вопрос ${index + 1}: Найдено ${result.found} из ${result.total} отличий.</p>`;
+        });
+        document.getElementById('results').innerHTML = resultHTML; // Отображаем результаты
+        document.getElementById('results').style.display = 'block'; // Показываем блок результатов
+    }
 
-        function showResults() {
-            let resultHTML = "<h2>Результаты теста:</h2>";
-            results.forEach((result, index) => {
-                resultHTML += `<p>Вопрос ${index + 1}: Найдено ${result.found} из ${result.total} отличий.</p>`;
+
+    function sendFinalResults() {
+        const data = {results};
+        fetch('/submit-results', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Результаты успешно отправлены!');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Ошибка при отправке результатов.');
             });
-            document.getElementById('container').innerHTML = resultHTML; // Убедитесь, что у вас есть элемент с id="container"
+    }
+
+    function submitDifference() {
+        clearTimeout(timer);
+        clearTimeout(inputTimer);
+        const userDifference = parseInt(document.getElementById('userInput').value, 10);
+        const correctDifference = images[currentTestIndex].correctDifferences;
+
+        // Сохраняем результаты
+        results.push({found: userDifference, total: correctDifference});
+
+        let message;
+        if (userDifference === correctDifference) {
+            message = "Вы правильно нашли все отличия!";
+        } else if (userDifference < correctDifference) {
+            message = `Вы нашли меньше на ${correctDifference - userDifference} отличий.`;
+        } else {
+            message = `${userDifference - correctDifference} отличий нет в действительности (лишние).`;
         }
 
-        function submitDifference() {
-            clearTimeout(timer);
-            clearTimeout(inputTimer);
-            const userDifference = parseInt(document.getElementById('userInput').value, 10);
-            const correctDifference = images[currentTestIndex].correctDifferences;
+        alert(message);
+        document.getElementById('userInput').value = ''; // Очищаем поле ввода
+        nextTest(); // Переход к следующему тесту
+    }
 
-            // Сохраняем результаты
-            results.push({ found: userDifference, total: correctDifference });
-            
-            let message;
-            if (userDifference === correctDifference) {
-                message = "Вы правильно нашли все отличия!";
-            } else if (userDifference < correctDifference) {
-                message = `Вы нашли меньше на ${correctDifference - userDifference} отличий.`;
-            } else {
-                message = `${userDifference - correctDifference} отличий нет в действительности (лишние).`;
-            }
-
-            alert(message);
-            document.getElementById('userInput').value = ''; // Очищаем поле ввода
-            nextTest(); // Переход к следующему тесту
-        }
-    </script>
+    function restartTest() {
+        currentTestIndex = 0;
+        results = [];
+        document.getElementById('final-submit-button').style.display = 'none';
+        document.getElementById('restart-button').style.display = 'none';
+        startTest(0);
+    }
+</script>
 </body>
 </html>
