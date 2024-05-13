@@ -5,14 +5,17 @@ const flash = require('connect-flash')
 const path = require('path')
 const crypto = require('crypto')
 const LocalStrategy = require('passport-local').Strategy;
-const {Profession, sequelize, User, Poll, ReactionTest, HeartRate} = require('./models/index');
+const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
 const {
     filterTest,
     getUsers,
     getAdmins,
     getExpertPolls,
-    getProfessionCharacteristics
+    getProfessionCharacteristics,
+    getHeartCheck,
+    getResultNumberTest,
+    getHeartRateCheck
 } = require('./js-scripts/databaseManipulations')
 const {login} = require("passport/lib/http/request");
 const server = express();
@@ -910,6 +913,57 @@ server.get('/characteristics', async (req, res) => {
     adminUser = true;
     loggedIn = true;
 
+    await StatisticAll.destroy({ where: {} });
+
+    const users = await getUsers();
+
+    for (const user of users) {
+        console.log(user);
+        const reactionTests = ['sound'];
+        for (const testType of reactionTests) {
+            const result = await getResultNumberTest(user, 'reaction', testType);
+            console.log(result);
+            
+            const heartRateCheck = await getHeartRateCheck(user, testType);
+
+            await HeartRate.create({
+                user: user,
+                type: testType,
+                result: result,
+                heartRateCheck: heartRateCheck ? true : false
+            });
+        }
+
+        const accuracyTests = ['hard_action', 'easy_action', 'analog_tracking_test'];
+        for (const testType of accuracyTests) {
+            const result = await getResultNumberTest(user, 'accuracy', testType);
+            console.log(result);
+            
+            const heartRateCheck = await getHeartRateCheck(user, testType);
+
+            await StatisticAll.create({
+                user: user,
+                type: testType,
+                result: result,
+                heartRateCheck: heartRateCheck ? true : false
+            });
+        }
+
+        const complex_reaction = ['3_colors', 'math_sound_test', 'math_vis'];
+        for (const testType of complex_reaction) {
+            const result = await getResultNumberTest(user, 'complex_reaction', testType);
+            
+            const heartRateCheck = await getHeartRateCheck(user, testType);
+
+            await StatisticAll.create({
+                user: user,
+                type: testType,
+                result: result,
+                heartRateCheck: heartRateCheck ? true : false
+            });
+        }
+    }
+
 
     const professions = await Profession.findAll();
     res.render('SecondPage', {professions: professions});
@@ -990,19 +1044,21 @@ server.post('/add_heart_rate', async (req, res) => {
     }
 
     const {respondentID, testType, heartRateBefore, heartRateDuring, heartRateAfter} = req.body;
+    const check = await getHeartCheck(heartRateBefore, heartRateAfter);
     try {
         await HeartRate.create({
             respondentID,
             testType,
             heartRateBefore,
             heartRateDuring,
-            heartRateAfter
+            heartRateAfter,
+            check
         });
+
         res.redirect('/add_heart_rate');
     } catch (error) {
         res.render('AddHeartRate', {error: error.message});
     }
-    
 });
 
 async function aggregateExpertRatings(professionName) {

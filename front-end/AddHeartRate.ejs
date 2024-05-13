@@ -14,52 +14,10 @@
     </style>
 </head>
 <body>
-    <div class="menu-wrap">
-        <input type="checkbox" class="toggler">
-        <div class="main-menu-icon"><div></div></div>
-        <div class="menu">
-            <div>
-                <div>
-                    <ul>
-                        <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
-    
-                        <% if (!loggedIn) { %>
-                            <li><a href="/login">ВОЙТИ</a></li>
-                        <% } %>
-                    
-                        <% if (loggedIn) { %>
-                            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
-                        <% } %>
-                    
-                        <% if (adminUser) { %>
-                            <li><a href="/poll_1_part_1">ОПРОС</a></li>
-                        <% } %>
-                        
-                        <% if (adminUser || respondentUser) { %>
-                            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
-                        <% } %>
-                        <% if (adminUser) { %>
-                            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
-                        <% } %>
-                        <% if (adminUser) { %>
-                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
-                        <% } %>
-                        <% if (adminUser) { %>
-                            <li><a href="/add_heart_rate">ПУЛЬС</a></li>
-                        <% } %>
-                        <% if (loggedIn) { %>
-                            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
-                        <% } %>
-                        <% if (loggedIn) { %>
-                            <li><a href="/logout">ВЫЙТИ</a></li>
-                        <% } %>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <section class="container">
+        
+
+    
         <h1>Добавление данных о пульсе</h1>
 
         <form action="/add_heart_rate" method="POST">
@@ -72,25 +30,24 @@
             <div>
                 <label for="testType">Название пройденного теста:</label>
                 <select class="select-style" id="testType" name="testType">
-                    <option value="ColorReactionTest">Color Reaction Test</option>
-                    <option value="LightReactionTest">Light Reaction Test</option>
-                    <option value="MultipleReactionTest">Multiple Reaction Test</option>
-                    <option value="SoundReactionTest">Sound Reaction Test</option>
-                    <option value="SoundMathTest">Sound Math Test</option>
-                    <option value="VisualMathTest">Visual Math Test</option>
-                    <option value="EasyActionTest">Easy Action Test</option>
-                    <option value="HardActionTest">Hard Action Test</option>
-                    <option value="AnalogTrackingTest">Analog Tracking Test</option>
-                    <option value="StalkingTest">Stalking Test</option>
-                    <option value="AbstractTest">Abstract Test</option>
+                    <option value="3_colors">Color Reaction Test</option>
+                    <option value="light">Light Reaction Test</option>
+                    <option value="3_colors">Multiple Reaction Test</option>
+                    <option value="sound">Sound Reaction Test</option>
+                    <option value="math_sound_test">Sound Math Test</option>
+                    <option value="math_vis">Visual Math Test</option>
+                    <option value="easy_action">Easy Action Test</option>
+                    <option value="hard_action">Hard Action Test</option>
+                    <option value="analog_tracking_test">Analog Tracking Test</option>
+                    <option value="analog_tracking_test">Stalking Test</option>
+                    <!-- <option value="AbstractTest">Abstract Test</option>
                     <option value="AbstractThinkingTest">Abstract Thinking Test</option>
                     <option value="AttentionAssessmentTest">Attention Assessment Test</option>
                     <option value="ComprasionMindTest">Comprasion Mind Test</option>
                     <option value="MyunsterbergTest">Myunsterberg Test</option>
                     <option value="RandomAccessMemoryTest">Random Access Memory Test</option>
-                    <option value="Short-termMemoryTest">Short-term Memory Test</option>
+                    <option value="Short-termMemoryTest">Short-term Memory Test</option> -->
                 </select>
-                <!-- <input type="text" id="testType" name="testType"> -->
             </div>
 
             <div>

@@ -1,5 +1,5 @@
 const { getHashes } = require('crypto')
-const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession} = require('../models')
+const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession, HeartRate} = require('../models')
 
 async function filterTest(type, username, testId, testType){
     let userId = null
@@ -106,7 +106,7 @@ async function getUsers(){
 
     if(users) {
         users.forEach(user => {
-            logins.push(user.login)
+            logins.push(user.id)
         })
     }
 
@@ -149,6 +149,65 @@ async function getProfessionCharacteristics(professionId) {
     }
 }
 
+async function getHeartCheck(HeartRateBefore, HeartRateAfter) {
+    if (HeartRateBefore <= HeartRateAfter) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+async function getResultNumberTest(user, testType, type) {
+    try {
+        let result;
+
+        if (testType === 'complex_reaction') {
+            result = await ComplexReactionTest.min('reactionTime1', {
+                where: {
+                    user: user,
+                    type: type
+                }
+            });
+        } else if (testType === 'accuracy') {
+            result = await AccuracyTest.max('accuracy', {
+                where: {
+                    user: user,
+                    type: type
+                }
+            });
+        } else if (testType === 'reaction') {
+            result = await ReactionTest.min('reactionTime', {
+                where: {
+                    user: user,
+                    type: type
+                }
+            });
+        } else {
+            throw new Error('Invalid test type');
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error executing query:', error);
+        throw error;
+    }
+}
+
+async function getHeartRateCheck(user, type) {
+    try {
+        const check = await HeartRate.findOne({
+            where: {
+                respondentID: user,
+                testType: type
+            }
+        });
+        return check;
+    } catch (err) {
+        console.error('Ошибка при получении данных о пульсе', err);
+        throw err;
+    }
+}
+
 // HERE IS YOUR CODE
 
-module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics}
+module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics, getHeartCheck, getResultNumberTest, getHeartRateCheck}
