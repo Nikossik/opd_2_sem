@@ -43,7 +43,10 @@
                         <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
                     <% } %>
                     <% if (adminUser) { %>
-                      <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                        <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                    <% } %>
+                    <% if (adminUser) { %>
+                        <li><a href="/add_heart_rate">ПУЛЬС</a></li>
                     <% } %>
                     <% if (loggedIn) { %>
                         <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>

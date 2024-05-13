@@ -5,7 +5,7 @@ const flash = require('connect-flash')
 const path = require('path')
 const crypto = require('crypto')
 const LocalStrategy = require('passport-local').Strategy;
-const {Profession, sequelize, User, Poll, ReactionTest} = require('./models/index');
+const {Profession, sequelize, User, Poll, ReactionTest, HeartRate} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
 const {
     filterTest,
@@ -973,6 +973,37 @@ server.get('/professions_:id', async (req, res) => {
     }
 });
 
+
+server.get('/add_heart_rate', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+        return
+    }
+
+    res.render('AddHeartRate');
+});
+
+server.post('/add_heart_rate', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+        return
+    }
+
+    const {respondentID, testType, heartRateBefore, heartRateDuring, heartRateAfter} = req.body;
+    try {
+        await HeartRate.create({
+            respondentID,
+            testType,
+            heartRateBefore,
+            heartRateDuring,
+            heartRateAfter
+        });
+        res.redirect('/add_heart_rate');
+    } catch (error) {
+        res.render('AddHeartRate', {error: error.message});
+    }
+    
+});
 
 async function aggregateExpertRatings(professionName) {
     try {

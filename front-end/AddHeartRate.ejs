@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./AddHeartStyle.css">
+    <title>Добавление данных о пульсе</title>
+    <style>
+        body {
+            background-image: url('images/background_gradient.png');
+            background-size: cover; 
+            background-position: center; 
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-wrap">
+        <input type="checkbox" class="toggler">
+        <div class="main-menu-icon"><div></div></div>
+        <div class="menu">
+            <div>
+                <div>
+                    <ul>
+                        <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
+    
+                        <% if (!loggedIn) { %>
+                            <li><a href="/login">ВОЙТИ</a></li>
+                        <% } %>
+                    
+                        <% if (loggedIn) { %>
+                            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
+                        <% } %>
+                    
+                        <% if (adminUser) { %>
+                            <li><a href="/poll_1_part_1">ОПРОС</a></li>
+                        <% } %>
+                        
+                        <% if (adminUser || respondentUser) { %>
+                            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/add_heart_rate">ПУЛЬС</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/logout">ВЫЙТИ</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="container">
+        <h1>Добавление данных о пульсе</h1>
+
+        <form action="/add_heart_rate" method="POST">
+
+            <div>
+                <label for="respondentID">ID респондента:</label>
+                <input type="text" id="respondentID" name="respondentID" class="input">
+            </div>
+
+            <div>
+                <label for="testType">Название пройденного теста:</label>
+                <select class="select-style" id="testType" name="testType">
+                    <option value="ColorReactionTest">Color Reaction Test</option>
+                    <option value="LightReactionTest">Light Reaction Test</option>
+                    <option value="MultipleReactionTest">Multiple Reaction Test</option>
+                    <option value="SoundReactionTest">Sound Reaction Test</option>
+                    <option value="SoundMathTest">Sound Math Test</option>
+                    <option value="VisualMathTest">Visual Math Test</option>
+                    <option value="EasyActionTest">Easy Action Test</option>
+                    <option value="HardActionTest">Hard Action Test</option>
+                    <option value="AnalogTrackingTest">Analog Tracking Test</option>
+                    <option value="StalkingTest">Stalking Test</option>
+                    <option value="AbstractTest">Abstract Test</option>
+                    <option value="AbstractThinkingTest">Abstract Thinking Test</option>
+                    <option value="AttentionAssessmentTest">Attention Assessment Test</option>
+                    <option value="ComprasionMindTest">Comprasion Mind Test</option>
+                    <option value="MyunsterbergTest">Myunsterberg Test</option>
+                    <option value="RandomAccessMemoryTest">Random Access Memory Test</option>
+                    <option value="Short-termMemoryTest">Short-term Memory Test</option>
+                </select>
+                <!-- <input type="text" id="testType" name="testType"> -->
+            </div>
+
+            <div>
+                <label for="heartRateBefore">Частота сердечных сокращений до прохождения теста:</label>
+                <input type="text" id="heartRateBefore" name="heartRateBefore" class="input">
+            </div>
+
+            <div>
+                <label for="heartRateDuring">Частота сердечных сокращений во время прохождения теста:</label>
+                <input type="text" id="heartRateDuring" name="heartRateDuring" class="input">
+            </div>
+
+            <div>
+                <label for="heartRateAfter">Частота сердечных сокращений после прохождения теста:</label>
+                <input type="text" id="heartRateAfter" name="heartRateAfter" class="input">
+            </div>
+
+            <div id="error-message">
+                <% if (typeof error !== 'undefined') { %>
+                    <p class="error-message"><%= error %></p>
+                <% } %>
+            </div>
+
+            <button class="first-button" type="submit">Отправить</button>  
+        </form>
+    </section>
+
+</body>
+</html>
