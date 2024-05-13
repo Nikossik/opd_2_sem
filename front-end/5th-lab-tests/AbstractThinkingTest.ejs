@@ -1,21 +1,61 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Тест на абстрактное мышление</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="AbstractThinkingTest.css">
+    <style>
+        body {
+            background-image: url('images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .answer-image {
+            width: 197px;  /* Установка ширины всех изображений-ответов */
+            height: 193px; /* Установка высоты всех изображений-ответов */
+        }
+    </style>
+    <title>Abstract Thinking Test</title>
 </head>
 <body>
-<div id="app">
-    <h1>Тест на абстрактное мышление</h1>
-    <div id="questionContainer">
-    </div>
-    <div id="result" style="display:none;">
-        <p>Ваш результат: <span id="score"></span> из 6</p>
-    </div>
+<div class="container">
+    <header>
+        <h1>Тест на абстрактное мышление</h1>
+    </header>
+    <main>
+        <div id="testContent">
+            <!-- Тестовое содержимое сюда -->
+        </div>
+        <div id="questionContainer"></div>
+        <div id="result" style="display:none;">
+            <p>Ваш результат: <span id="score"></span> из 6</p>
+        </div>
+        <div class="buttons">
+            <button id="startTestButton">Начать тест</button>
+            <button id="submitAnswerButton" style="display:none;">Отправить ответ</button>
+            <button id="restartTestButton" style="display:none;">Начать заново</button>
+        </div>
+        <div id="timer" style="display:none;">
+            Оставшееся время: <span id="time">00:00</span>
+        </div>
+    </main>
+    <footer>
+        <p>Удачи в тесте!</p>
+    </footer>
 </div>
 
 <script>
+    document.getElementById('startTestButton').addEventListener('click', function() {
+        document.getElementById('testContent').style.display = 'block';
+        document.getElementById('startTestButton').style.display = 'none';
+        document.getElementById('submitAnswerButton').style.display = 'inline';
+        document.getElementById('restartTestButton').style.display = 'inline';
+        document.getElementById('timer').style.display = 'block';
+        startTimer();
+        loadQuestion(0);  // Загрузка первого вопроса при старте теста
+    });
+
+    let testPassed = false;
     let currentQuestion = 0;
     let score = 0;
     const questions = [
@@ -55,10 +95,10 @@
     function loadQuestion(index) {
         const question = questions[index];
         const container = document.getElementById('questionContainer');
-        container.innerHTML = `<img src="${question.image}" alt="Вопрос ${index + 1}"><br>`;
+        container.innerHTML = `<img src="${question.image}" alt="Вопрос ${index + 1}" class="question-image"><br>`;
 
         question.answers.forEach((answer, idx) => {
-            container.innerHTML += `<img src="${answer}" class="answer" onclick="checkAnswer(${idx})" alt="Ответ ${idx + 1}">`;
+            container.innerHTML += `<img src="${answer}" class="answer-image" onclick="checkAnswer(${idx})" alt="Ответ ${idx + 1}">`;
         });
     }
 
@@ -74,17 +114,94 @@
         if (currentQuestion < questions.length) {
             loadQuestion(currentQuestion);
         } else {
+            testPassed = true;
             showResults();
         }
     }
 
     function showResults() {
+
+        document.getElementById('timer').style.display = 'none';
         document.getElementById('questionContainer').style.display = 'none';
         document.getElementById('result').style.display = 'block';
         document.getElementById('score').textContent = score;
+
+        const submitButtonEnclosing = document.getElementById("submitAnswerButton");
+        submitButtonEnclosing.innerHTML = '';  // Очистка содержимого, если это необходимо
+
+        const submitButton = document.createElement("button");
+        submitButton.textContent = "Отправить результат";
+        submitButton.onclick = sendData
+        submitButtonEnclosing.appendChild(submitButton);
+
+        const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
+        restartButtonEnclosing.innerHTML = '';  // Очистка содержимого, если это необходимо
+
+        const restartButton = document.createElement("button");
+        restartButton.textContent = "Пройти заново";
+        restartButton.onclick = function() {
+            location.reload();  // Простой способ перезапустить тест
+        };
+        restartButtonEnclosing.appendChild(restartButton);
     }
 
-    loadQuestion(0);
+    async function sendData() {
+        if (testPassed) {
+            const data = {
+                testType: "analog_tracking_test",
+                score: score
+            }
+
+            let url = ''
+            const urlObject = new URL(window.location.href)
+
+            if (urlObject.searchParams.has('data')) {
+                url += '/abstract_thinking_test?data=' + urlObject.searchParams.get('data')
+            } else {
+                url += '/abstract_thinking_test'
+            }
+
+            await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            })
+                .then(res => {
+                    console.log(res)
+                    // Redirect to another URL
+                    window.location.href = res.url;
+                })
+                .catch(error => console.error(error));
+
+        }
+    }
+
+
+
+    function startTimer() {
+        let timeLeft = 1200; // 20 минут
+        const timerElement = document.getElementById('time');
+        const timer = setInterval(function() {
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                document.getElementById('timer').innerHTML = 'Время вышло!';
+                // Действие при окончании времени
+            } else {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.innerHTML = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                timeLeft--;
+            }
+        }, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('testContent').style.display = 'none';
+        document.getElementById('submitAnswerButton').style.display = 'none';
+        document.getElementById('restartTestButton').style.display = 'none';
+        document.getElementById('timer').style.display = 'none';
+    });
+
 </script>
 </body>
 </html>
