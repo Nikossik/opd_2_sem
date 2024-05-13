@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="AbstractThinkingTest.css">
+    <link rel="stylesheet" href="5th-lab-tests/AbstractThinkingTest.css">
+
     <style>
         body {
             background-image: url('images/background_gradient.png');
@@ -24,7 +25,6 @@
     </header>
     <main>
         <div id="testContent">
-            <!-- Тестовое содержимое сюда -->
         </div>
         <div id="questionContainer"></div>
         <div id="result" style="display:none;">
@@ -32,6 +32,7 @@
         </div>
         <div class="buttons">
             <button id="startTestButton">Начать тест</button>
+            <button id="nextQuestion" style="display:none;">Следующий вопрос</button>
             <button id="submitAnswerButton" style="display:none;">Отправить ответ</button>
             <button id="restartTestButton" style="display:none;">Начать заново</button>
         </div>
@@ -39,7 +40,7 @@
             Оставшееся время: <span id="time">00:00</span>
         </div>
     </main>
-    <footer>
+    <footer id="luckyFooter">
         <p>Удачи в тесте!</p>
     </footer>
 </div>
@@ -48,13 +49,16 @@
     document.getElementById('startTestButton').addEventListener('click', function() {
         document.getElementById('testContent').style.display = 'block';
         document.getElementById('startTestButton').style.display = 'none';
-        document.getElementById('submitAnswerButton').style.display = 'inline';
-        document.getElementById('restartTestButton').style.display = 'inline';
         document.getElementById('timer').style.display = 'block';
+        document.getElementById('luckyFooter').style.display = 'none';
+        document.getElementById('nextQuestion').style.display = 'inline';
+        document.getElementById('testContent').innerHTML = 'Выберите наиболее подходящий вариант';
         startTimer();
         loadQuestion(0);  // Загрузка первого вопроса при старте теста
     });
-
+    document.getElementById('nextQuestion').addEventListener('click', function() {
+        nextQuestion();
+    });
     let testPassed = false;
     let currentQuestion = 0;
     let score = 0;
@@ -115,16 +119,19 @@
             loadQuestion(currentQuestion);
         } else {
             testPassed = true;
+            document.getElementById('submitAnswerButton').style.display = 'inline';
+            document.getElementById('restartTestButton').style.display = 'inline';
             showResults();
         }
     }
 
     function showResults() {
-
+        document.getElementById('nextQuestion').style.display = 'none';
         document.getElementById('timer').style.display = 'none';
         document.getElementById('questionContainer').style.display = 'none';
         document.getElementById('result').style.display = 'block';
         document.getElementById('score').textContent = score;
+        document.getElementById('testContent').style.display = 'none';
 
         const submitButtonEnclosing = document.getElementById("submitAnswerButton");
         submitButtonEnclosing.innerHTML = '';  // Очистка содержимого, если это необходимо
@@ -134,7 +141,7 @@
         submitButton.onclick = sendData
         submitButtonEnclosing.appendChild(submitButton);
 
-        const restartButtonEnclosing = document.getElementById("restart-button-enclosing");
+        const restartButtonEnclosing = document.getElementById("restartTestButton");
         restartButtonEnclosing.innerHTML = '';  // Очистка содержимого, если это необходимо
 
         const restartButton = document.createElement("button");
