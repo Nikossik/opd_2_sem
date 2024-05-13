@@ -8,27 +8,54 @@
             background-image: url('images/background_gradient.png');
             font-family: Arial, sans-serif;
             padding: 20px;
+            text-align: center; /* Выравнивание текста по центру */
+            color: white; /* Цвет текста */
         }
+
         img {
             width: 300px;
             height: auto;
             margin: 10px;
         }
+
         .hidden {
             display: none;
+        }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Высота по высоте экрана */
         }
     </style>
 </head>
 <body>
-<h1>Тест на абстракцию</h1>
-<div id="task-container">
-    <img id="task-image" src="" alt="Задание теста">
-    <p id="task-instruction">Введите количество треугольников на картинке:</p>
-    <input type="number" id="user-answer">
-    <button onclick="submitAnswer()">Отправить ответ</button>
+<div class="center-content">
+    <h1>Тест на абстракцию</h1>
+    <div id="task-container" class="hidden">
+        <img id="task-image" src="" alt="Задание теста">
+        <p id="task-instruction">Введите количество треугольников на картинке:</p>
+        <input type="number" id="user-answer">
+        <button onclick="submitAnswer()">Отправить ответ</button>
+    </div>
+    <button id="submit-button" onclick="submitAnswer()" style="display: none;">Отправить ответ</button>
+    <div id="start-button-enclosing">
+        <button id="start-button" onclick="startTest(0)">Начать тест</button>
+    </div>
+    <div id="timer"></div>
+    <div id="results" class="hidden">
+        <p>Тест завершён! Верных ответов: <span id="correct-answers-count"></span> из <span
+                    id="total-tasks-count"></span>.</p>
+        <button id="final-submit-button" onclick="sendFinalResults()" style="display: none;">Отправить результат
+        </button>
+        <button id="restart-button" onclick="restartTest()" style="display: none;">Начать заново
+        </button>
+    </div>
+
 </div>
-<div id="timer"></div>
-<div id="results" class="hidden"></div>
+
 
 <script>
     const tasks = [
@@ -42,6 +69,16 @@
     let timeoutHandle;
     let intervalHandle;
     let correctAnswers = 0;  // For storing the count of correct answers
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('start-button').style.display = 'block';
+    });
+
+    function startTest(index) {
+        document.getElementById('task-container').classList.remove('hidden');
+        document.getElementById('start-button-enclosing').classList.add('hidden')
+        startTask(index);
+    }
 
     function startTask(index) {
         const task = tasks[index];
@@ -69,9 +106,15 @@
     function updateInstruction(task) {
         let figureType = "";
         switch (task.type) {
-            case "triangle": figureType = "треугольников"; break;
-            case "rectangle": figureType = "прямоугольников"; break;
-            case "number": figureType = "цифр"; break;
+            case "triangle":
+                figureType = "треугольников";
+                break;
+            case "rectangle":
+                figureType = "прямоугольников";
+                break;
+            case "number":
+                figureType = "цифр";
+                break;
         }
         document.getElementById('task-instruction').textContent = `Введите количество ${figureType} на картинке:`;
     }
@@ -95,11 +138,44 @@
             document.getElementById('task-container').classList.add('hidden');
             document.getElementById('timer').textContent = '';
             document.getElementById('results').classList.remove('hidden');
-            document.getElementById('results').textContent = `Тест завершён! Верных ответов: ${correctAnswers} из ${tasks.length}`;
+            document.getElementById('correct-answers-count').textContent = correctAnswers;
+            document.getElementById('total-tasks-count').textContent = tasks.length;
+            document.getElementById('final-submit-button').style.display = 'block'; // Показать кнопку "Отправить результат"
+            document.getElementById('restart-button').style.display = 'block';
         }
     }
 
-    startTask(0);  // Запуск первого задания при загрузке страницы.
+    function restartTest() {
+        currentTaskIndex = 0;
+        correctAnswers = 0;
+        document.getElementById('restart-button').style.display = 'none'; // Скрыть кнопку "Начать заново"
+        document.getElementById('results').classList.add('hidden')
+        startTest(0);
+    }
+
+    function sendFinalResults() {
+        const data = {
+            score: correctAnswers,
+            total: tasks.length
+        };
+        console.log('Sending final results:', data);
+
+        fetch('/submit-results', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Результаты успешно отправлены!');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Ошибка при отправке результатов.');
+            });
+    }
 </script>
 </body>
 </html>
