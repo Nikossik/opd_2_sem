@@ -388,32 +388,45 @@ server.get('/compare_test', (req, res) => {
     }
 })
 
-server.get('/memory_test', (req, res) => {
+// Рендеринг статической страницы без передачи изображений
+server.get('/memory_test_page', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login');
     } else {
-        const images = [
-            "img/11.gif",
-            "img/19.gif",
-            "img/28.gif",
-            "img/36.gif"
-        ];
-        const allImages = [
-            "img/11.gif",
-            "img/19.gif",
-            "img/28.gif",
-            "img/36.gif",
-            "img/0.gif",
-            "img/1.gif",
-            "img/2.gif",
-            "img/3.gif",
-            "img/4.gif",
-            "img/5.gif",
-            "img/6.gif"
-        ];
-
-        res.render('5th-lab-tests/Short-termMemoryTest', {images: images, allImages: allImages});
+        res.render('5th-lab-tests/Short-termMemoryTest', { images: [], allImages: [] });
     }
+});
+
+server.get('/get_images', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({error: 'Not authenticated'});
+    }
+
+    const difficulty = req.query.difficulty || 'easy';
+    let images, allImages;
+
+    if (difficulty === 'all') {
+        // Возвращает все изображения для любого уровня сложности
+        allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+        return res.json({ images: [], allImages });
+    }
+
+    switch(difficulty) {
+        case 'easy':
+            images = ["img/0.gif", "img/4.gif", "img/5.gif", "img/11.gif"];
+            allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+            break;
+        case 'medium':
+            images = ["img/2.gif", "img/3.gif", "img/6.gif", "img/19.gif", "img/28.gif"];
+            allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+            break;
+        case 'hard':
+            images = ["img/0.gif", "img/4.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif"];
+            allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+            break;
+    }
+
+    res.json({ images, allImages });
 });
 
 server.get('/math_sound', (req, res) => {
@@ -1102,19 +1115,19 @@ async function calculateMetric(testResults) {
         'light': 0, // Нет данных для этого теста
         'visual_math_test': 280, // Математика визуальная
         'pulse_test': 70, // Например, средний пульс (указать реальное среднее значение, если известно)
-        'hard_action': 0, // Укажите среднее значение для теста hard_action
-        'easy_action': 0, // Укажите среднее значение для теста easy_action
-        'analog_tracking_test': 0, // Укажите среднее значение для теста analog_tracking_test
-        '3_colors': 0, // Укажите среднее значение для теста 3_colors
-        'math_sound_test': 0, // Укажите среднее значение для теста math_sound_test
+        'hard_action': 240, // Укажите среднее значение для теста hard_action
+        'easy_action': 220, // Укажите среднее значение для теста easy_action
+        'analog_tracking_test': 45, // Укажите среднее значение для теста analog_tracking_test
+        '3_colors': 245, // Укажите среднее значение для теста 3_colors
+        'math_sound_test': 270, // Укажите среднее значение для теста math_sound_test
         'math_vis': 280, // Например, математическая визуальная оценка (указать реальное среднее значение, если известно)
         'random_access_memory': 4, // Оперативная память
-        'short_term_memory': 11, // Кратковременная память
+        'short_term_memory': 7, // Кратковременная память
         'myunsterberg_test': 7, // Концентрация
         'comparison_mind': 17, // Тест на сравнение
         'attention_assessment_test': 7, // Тест на концентрацию
         'abstract_thinking_test': 4, // Тест на индукцию
-        'abstract_test': 28, // Тест на абстракцию
+        'abstract_test': 3, // Тест на абстракцию; 28, если не уровни считать
     };
 
     const weights = {

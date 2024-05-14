@@ -1,42 +1,50 @@
 body, html {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background: #f4f4f4;
+    color: white; /* Белый текст */
+    height: 100%; /* Для полного покрытия фоном */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .container {
+    width: 90%;
     max-width: 600px;
-    margin: 20px auto;
-    background: #fff;
+    background: rgba(89, 42, 246, 0.46); /* Слегка прозрачный фон */
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px; /* Скругленные углы */
     text-align: center;
+    transition: transform 0.3s ease-in-out;
 }
 
 img {
     max-width: 100%;
     height: auto;
+    margin-top: 20px; /* Отступ для изображения */
 }
 
-#inputArea {
-    margin-top: 20px;
+#inputArea, #timer, #results, #final-submit-button, #restart-button {
+    margin-top: 20px; /* Однородные отступы сверху */
+    width: 100%; /* Полная ширина контейнера */
+    display: none; /* Скрытие элементов по умолчанию */
 }
 
-input[type="number"] {
+input[type="number"], button {
+    width: calc(100% - 40px); /* Полная ширина с учетом padding */
     padding: 10px;
     margin-top: 10px;
-    width: calc(100% - 24px);
+    border: none;
+    border-radius: 5px;
 }
 
 button {
-    padding: 10px 20px;
-    background-color: #007BFF;
+    background-color: rgb(72 0 255 / 38%);
     color: white;
-    border: none;
-    margin-top: 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 button:hover {
