@@ -1,7 +1,9 @@
 body, html {
+    background-image: url('/images/background_gradient.png');
     font-family: Arial, sans-serif;
-    text-align: center;
     padding: 20px;
+    text-align: center;
+    color: white;
 }
 
 .container {
@@ -10,6 +12,20 @@ body, html {
 }
 
 button {
-    padding: 10px 20px;
-    margin-top: 10px;
+    display: block;
+    margin: 20px auto;
+    padding: 15px 30px; /* Увеличиваем внутренние отступы */
+    font-size: 18px; /* Увеличиваем размер шрифта */
+    width: auto 50%; /* Устанавливаем ширину кнопки */
+    height: auto 50px; /* Устанавливаем высоту кнопки */
+    border: 2px solid #007BFF; /* Стиль границы */
+    border-radius: 10px; /* Скругленные углы */
+    background-color: white; /* Цвет фона */
+    color: black; /* Цвет текста */
+    cursor: pointer; /* Курсор в виде указателя */
+    transition: background-color 0.3s; /* Плавное изменение фона при наведении */
+}
+
+button:hover {
+    background-color: #59636d; /* Цвет фона при наведении */
 }

@@ -3,87 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <title>Тест на кратковременную память</title>
-    <link rel="stylesheet" href="Short-termMemoryTest.css">
+    <link rel="stylesheet" href="5th-lab-tests/Short-termMemoryTest.css">
 </head>
 <body>
 <div class="container">
     <h1>Проверка кратковременной памяти</h1>
     <div id="difficultySelection">
-        <button onclick="startTest('easy', 150)">Легкий уровень - 2.5 мин</button>
-        <button onclick="startTest('medium', 120)">Средний уровень - 2 мин</button>
-        <button onclick="startTest('hard', 60)">Сложный уровень - 1 мин</button>
+        <button onclick="startTest('easy')">Легкий уровень - 2.5 мин</button>
+        <button onclick="startTest('medium')">Средний уровень - 2 мин</button>
+        <button onclick="startTest('hard')">Сложный уровень - 1 мин</button>
     </div>
     <div id="memoryImages" style="display: none;">
         <p>Запомните эти фигуры:</p>
-        <div id="timerDisplay"></div>
-        <% images.forEach(function(image, index) { %>
-            <img src="<%= image %>" data-id="<%= index %>" class="memory-image" onclick="selectImage(this)">
-        <% }); %>
-        <button onclick="showTestPage()">Далее</button>
+        <div id="imagesToRemember"></div>
+        <button id="nextButton" style="display:none;" onclick="showTestPage()">Далее</button>
     </div>
     <div id="testImages" style="display: none;">
         <p>Щелкайте по картинкам, которые вы запомнили.</p>
-        <% allImages.forEach(function(image, index) { %>
-            <img src="<%= image %>" data-id="<%= index %>" class="memory-image" onclick="selectImage(this)">
-        <% }); %>
-        <button onclick="evaluateResults()">Проверить результат</button>
+        <div id="allImages"></div>
+        <button onclick="evaluateResults('Тест завершен!')">Проверить результат</button>
     </div>
-    <div id="results" class="hidden"></div>
+    <div id="results" style="display: none; padding: 10px; background-color: #f8f8f8; border: 1px solid #ccc; margin-top: 20px;"></div>
+    <div id="timerDisplay" style="font-size: 24px; color: black; margin-top: 10px;"></div>
+    <div id="resultButtons" style="display: none; margin-top: 10px;">
+        <button onclick="sendResults()">Отправить результат</button>
+        <button onclick="restartTest()">Пройти заново</button>
+    </div>
 </div>
 
 <script>
     var correctImages = []; // Массив с правильными изображениями
     var selectedImages = []; // Массив с выбранными пользователем изображениями
 
-    function startTest(difficulty, time) {
-        document.getElementById('difficultySelection').style.display = 'none';
-        document.getElementById('memoryImages').style.display = 'block';
-        correctIDs = Array.from(document.querySelectorAll('#memoryImages img')).map(img => img.dataset.id);
-        startTimer(time);
+    function startTest(difficulty) {
+        const timeLimits = {
+            easy: 150, // 2.5 минуты в секундах
+            medium: 120, // 2 минуты
+            hard: 60 // 1 минута
+        };
+        let timeRemaining = timeLimits[difficulty] || 150; // Установка времени в зависимости от сложности
+
+        fetch(`/get_images?difficulty=${difficulty}`)
+        .then(response => response.json())
+        .then(data => {
+            const imagesContainer = document.getElementById('imagesToRemember');
+            imagesContainer.innerHTML = '';
+            data.images.forEach((imgSrc) => {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'memory-image';
+                imagesContainer.appendChild(img);
+            });
+            correctImages = data.images;
+            document.getElementById('difficultySelection').style.display = 'none';
+            document.getElementById('memoryImages').style.display = 'block';
+            document.getElementById('nextButton').style.display = 'block';
+            document.getElementById('timerDisplay').style.display = 'block';
+        })
+        .catch(error => console.error('Ошибка при загрузке изображений:', error));
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
+        window.timerInterval = setInterval(() => {
+            timeRemaining--;
+            timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                evaluateResults("Время вышло!"); // Переход к результатам
+            }
+        }, 1000);
     }
 
     function showTestPage() {
         document.getElementById('memoryImages').style.display = 'none';
-        document.getElementById('testImages').style.display = 'block';
-        selectedImages = []; // Очищаем массив выбранных изображений при начале теста
+        fetch('/get_images?difficulty=all')
+        .then(response => response.json())
+        .then(data => {
+            const imagesContainer = document.getElementById('allImages');
+            imagesContainer.innerHTML = '';
+            data.allImages.forEach((imgSrc) => {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'memory-image selectable';
+                img.onclick = function() { selectImage(this); };
+                imagesContainer.appendChild(img);
+            });
+            document.getElementById('testImages').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке изображений для теста:', error);
+            alert('Ошибка при загрузке изображений: ' + error.message);
+        });
+        selectedImages = [];
     }
 
     function selectImage(imgElement) {
-        imgElement.classList.toggle('selected-image');
-        if (!imgElement.classList.contains('selected-image')) {
-            selectedImages = selectedImages.filter(id => id !== imgElement.dataset.id);
-        } else {
-            selectedImages.push(imgElement.dataset.id);
+        const imgId = imgElement.src; // Используем src изображения как уникальный идентификатор
+        const baseName = getBaseName(imgId);
+        const isCorrect = correctImages.some(correct => getBaseName(correct) === baseName);
+
+        if (!isCorrect) {
+            evaluateResults("Вы выбрали неправильное изображение. Тест завершен.");
+            return; // Завершаем функцию, если изображение неправильное
         }
+
+        imgElement.classList.toggle('selected');
+
+        // Проверяем, содержится ли imgId в массиве selectedImages
+        const index = selectedImages.indexOf(imgId);
+        if (index === -1) {
+            selectedImages.push(imgId);
+        } else {
+            selectedImages.splice(index, 1);
+        }
+        console.log("Выбранные изображения: ", selectedImages); // Для отладки
     }
 
-    function evaluateResults() {
-        let correctCount = selectedImages.filter(id => correctIDs.includes(id)).length;
-        let incorrectCount = selectedImages.length - correctCount;
-        alert(`Вы правильно запомнили: ${correctCount} изображений.\nНеправильных выборов: ${incorrectCount}.`);
+    function getBaseName(url) {
+        return url.substring(url.lastIndexOf('/') + 1);
+    }
+
+    function sendResults() {
+        const correctCount = selectedImages.filter(selected => {
+            const selectedBaseName = getBaseName(selected);
+            return correctImages.some(correct => getBaseName(correct) === selectedBaseName);
+        }).length;
+
+        const data = {
+            score: correctCount,
+            total: correctImages.length
+        };
+        console.log('Sending final results:', data);
+
+        fetch('/submit-results', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Результаты успешно отправлены!');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Ошибка при отправке результатов.');
+            });
+    }
+
+    function restartTest() {
+        document.getElementById('difficultySelection').style.display = 'block';
+        document.getElementById('memoryImages').style.display = 'none';
         document.getElementById('testImages').style.display = 'none';
-        document.getElementById('results').classList.remove('hidden');
-        document.getElementById('results').textContent = `Тест завершён! Верных ответов: ${correctCount}, неправильных: ${incorrectCount}`;
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('resultButtons').style.display = 'none';
+        document.getElementById('timerDisplay').style.display = 'none';
+        // Очистите все переменные или состояния, если это необходимо
+        correctImages = [];
+        selectedImages = [];
     }
 
-    function startTimer(duration) {
-        var timer = duration, minutes, seconds;
-        var timerDisplay = document.getElementById('timerDisplay');
-        var interval = setInterval(function () {
-            minutes = parseInt(timer / 60, 10);
-            seconds = parseInt(timer % 60, 10);
+    function evaluateResults(message) {
+        console.log("Вызов функции evaluateResults");
+        console.log("Выбранные изображения: ", selectedImages);
+        console.log("Правильные изображения: ", correctImages);
 
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
+        clearInterval(window.timerInterval); // Очистка текущего интервала таймера
+        timerDisplay.textContent = message;
 
-            timerDisplay.textContent = minutes + ":" + seconds;
+        const correctCount = selectedImages.filter(selected => {
+            const selectedBaseName = getBaseName(selected);
+            return correctImages.some(correct => getBaseName(correct) === selectedBaseName);
+        }).length;
 
-            if (--timer < 0) {
-                clearInterval(interval);
-                showTestPage();
-            }
-        }, 1000);
+        const resultText = `Вы правильно запомнили: ${correctCount} изображений из ${correctImages.length}.`;
+        const resultsElement = document.getElementById('results');
+        resultsElement.textContent = resultText;
+        resultsElement.style.display = 'block'; // Устанавливаем элемент как видимый
+
+        // Удаление класса анимации после ее выполнения
+        setTimeout(() => {
+            resultsElement.classList.remove('result-fade-in');
+        }, 3000); // Анимация длится 3 секунды
+
+        console.log(resultText); // Для отладки
+
+        // Показать кнопки для отправки результатов и перезапуска теста
+        document.getElementById('resultButtons').style.display = 'block';
     }
+    
 </script>
 </body>
 </html>

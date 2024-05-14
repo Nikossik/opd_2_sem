@@ -1,12 +1,39 @@
+body {
+    background-image: url('/images/background_gradient.png');
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    text-align: center;
+    color: black;
+}
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Высота по высоте экрана */
+}
 .container {
     text-align: center;
     margin-top: 50px;
 }
 
 button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
+    display: block;
+    margin: 20px auto;
+    padding: 15px 30px; /* Увеличиваем внутренние отступы */
+    font-size: 18px; /* Увеличиваем размер шрифта */
+    width: 50%; /* Устанавливаем ширину кнопки */
+    height: 50px; /* Устанавливаем высоту кнопки */
+    border: 2px solid #007BFF; /* Стиль границы */
+    border-radius: 10px; /* Скругленные углы */
+    background-color: white; /* Цвет фона */
+    color: black; /* Цвет текста */
+    cursor: pointer; /* Курсор в виде указателя */
+    transition: background-color 0.3s; /* Плавное изменение фона при наведении */
+}
+
+button:hover {
+    background-color: #59636d; /* Цвет фона при наведении */
 }
 
 #imageContainer img {
@@ -21,7 +48,22 @@ button {
     margin: 5px;
     transition: transform 0.3s ease;
 }
-.selected-image {
-    transform: scale(1.2);
+.selected {
     border: 2px solid red;
+}
+#results {
+    display: block; /* Убедитесь, что элемент видим */
+    padding: 20px; /* Добавляет внутренний отступ */
+    background-color: #ffff99; /* Яркий фон для выделения */
+    color: #333; /* Темный текст для контраста */
+    font-size: 20px; /* Увеличивает размер шрифта */
+    text-align: center; /* Центрирование текста */
+    border: 2px solid #ff0000; /* Добавляет красную рамку вокруг результатов */
+    margin-top: 20px; /* Отступ сверху */
+    width: 80%; /* Ширина блока результатов */
+    margin-left: auto; /* Автоматическое выравнивание по горизонтали */
+    margin-right: auto; /* Автоматическое выравнивание по горизонтали */
+}
+.result-fade-in {
+    opacity: 1 !important; /* Плавное появление */
 }

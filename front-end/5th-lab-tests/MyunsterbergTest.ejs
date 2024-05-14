@@ -9,6 +9,8 @@
             font-family: Arial, sans-serif;
             padding: 20px;
             background-image: url('images/background_gradient.png');
+            text-align: center;
+            color: white;
         }
 
         .sequence {
@@ -41,6 +43,7 @@
     <button onclick="startTest('hard')">Сложный уровень</button>
 </div>
 <button id="stop-button" class="hidden" onclick="stopTest()">Завершить досрочно</button>
+<div id="timerDisplay" style="font-size: 24px; margin-top: 20px;"></div>
 <div id="results"></div>
 
 <script>
@@ -76,6 +79,23 @@
         resultsElement.textContent = '';
         levelButtons.style.display = 'none'; // Hide level buttons
         stopButton.classList.remove('hidden'); // Show stop button
+        document.getElementById('timerDisplay').style.display = 'block';
+
+        let timeRemaining = getTestDuration(level) / 1000; // Convert to seconds
+        const timerDisplay = document.getElementById('timerDisplay');
+        timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
+
+        window.timerInterval = setInterval(() => {
+            timeRemaining--;
+            timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
+            if (timeRemaining <= 0) {
+                clearInterval(timeoutHandle);
+                timerDisplay.textContent = "Время вышло!";
+                evaluateResults(levelData);
+                stopButton.classList.add('hidden');
+                levelButtons.style.display = 'block';
+            }
+        }, 1000);
 
         // Create checkboxes for each word
         levelData.words.forEach(word => {
@@ -99,21 +119,64 @@
 
     function stopTest() {
         const levelButtons = document.getElementById('level-buttons');
-        clearTimeout(timeoutHandle); // Clear the timeout
+        const timerDisplay = document.getElementById('timerDisplay');
+        timerDisplay.clearInterval; // Очистка текущего интервала таймера
+        timerDisplay.textContent = "Тест завершен!";
         evaluateResults(data.easy); // Assuming 'easy' level for demonstration
         document.getElementById('stop-button').classList.add('hidden');
-        levelButtons.style.display = 'block'; // Show level buttons again
+        levelButtons.style.display = 'none';
     }
 
     function evaluateResults(levelData) {
+        clearInterval(window.timerInterval);
+        const levelButtons = document.getElementById('level-buttons');
+        const sequenceElement = document.getElementById('sequence');
         const wordsElement = document.getElementById('words');
         const resultsElement = document.getElementById('results');
+        const stopButton = document.getElementById('stop-button');
+        levelButtons.style.display = 'none';
+
+        sequenceElement.textContent = ''; // Clear the sequence
+        wordsElement.innerHTML = ''; // Clear the checkboxes
+        stopButton.classList.add('hidden'); // Hide the stop button
+
+        // Сбор выбранных пользователем ответов
         const checkedValues = Array.from(wordsElement.querySelectorAll('input[type=checkbox]:checked')).map(el => el.value);
+
+        // Подсчет правильных ответов
         const correctCount = checkedValues.filter(value => levelData.answers.includes(value)).length;
-        const incorrectCount = checkedValues.length - correctCount;
-        const missedCount = levelData.answers.length - correctCount;
+
+        // Подсчет неправильных ответов (выбрано, но не входит в список правильных ответов)
+        const incorrectCount = checkedValues.filter(value => !levelData.answers.includes(value)).length;
+
+        // Подсчет пропущенных правильных слов (не выбрано, но входит в список правильных ответов)
+        const missedCount = levelData.answers.filter(answer => !checkedValues.includes(answer)).length;
+
+        // Вывод результатов
         resultsElement.textContent = `Правильных ответов: ${correctCount}, Неправильных выбрано: ${incorrectCount}, Пропущенных правильных слов: ${missedCount}`;
-        wordsElement.innerHTML = ''; // Clear options after showing results
+
+        // Add restart button
+        const restartButton = document.createElement('button');
+        restartButton.textContent = "Пройти заново";
+        restartButton.onclick = restartTest;
+        resultsElement.appendChild(document.createElement('br'));
+        resultsElement.appendChild(restartButton);
+    }
+
+    function restartTest() {
+        const sequenceElement = document.getElementById('sequence');
+        const wordsElement = document.getElementById('words');
+        const resultsElement = document.getElementById('results');
+        const levelButtons = document.getElementById('level-buttons');
+        const stopButton = document.getElementById('stop-button');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        sequenceElement.textContent = '';
+        wordsElement.innerHTML = '';
+        resultsElement.textContent = '';
+        stopButton.classList.add('hidden');
+        timerDisplay.style.display = 'none';
+        levelButtons.style.display = 'block';
     }
 
     function getTestDuration(level) {
@@ -123,7 +186,7 @@
             case 'medium':
                 return 120000; // 2 minutes
             case 'hard':
-                return 60000; // 1 minute
+                return 10000; // 1 minute
         }
     }
 </script>
