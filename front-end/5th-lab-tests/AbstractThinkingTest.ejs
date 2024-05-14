@@ -11,8 +11,9 @@
             background-size: cover;
             background-position: center;
         }
+
         .answer-image {
-            width: 197px;  /* Установка ширины всех изображений-ответов */
+            width: 197px; /* Установка ширины всех изображений-ответов */
             height: 193px; /* Установка высоты всех изображений-ответов */
         }
     </style>
@@ -46,7 +47,7 @@
 </div>
 
 <script>
-    document.getElementById('startTestButton').addEventListener('click', function() {
+    document.getElementById('startTestButton').addEventListener('click', function () {
         document.getElementById('testContent').style.display = 'block';
         document.getElementById('startTestButton').style.display = 'none';
         document.getElementById('timer').style.display = 'block';
@@ -56,7 +57,7 @@
         startTimer();
         loadQuestion(0);  // Загрузка первого вопроса при старте теста
     });
-    document.getElementById('nextQuestion').addEventListener('click', function() {
+    document.getElementById('nextQuestion').addEventListener('click', function () {
         nextQuestion();
     });
     let testPassed = false;
@@ -146,49 +147,46 @@
 
         const restartButton = document.createElement("button");
         restartButton.textContent = "Пройти заново";
-        restartButton.onclick = function() {
+        restartButton.onclick = function () {
             location.reload();  // Простой способ перезапустить тест
         };
         restartButtonEnclosing.appendChild(restartButton);
     }
 
     async function sendData() {
-        if (testPassed) {
-            const data = {
-                testType: "analog_tracking_test",
-                score: score
-            }
-
-            let url = ''
-            const urlObject = new URL(window.location.href)
-
-            if (urlObject.searchParams.has('data')) {
-                url += '/abstract_thinking_test?data=' + urlObject.searchParams.get('data')
-            } else {
-                url += '/abstract_thinking_test'
-            }
-
-            await fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {'Content-Type': 'application/json'},
-            })
-                .then(res => {
-                    console.log(res)
-                    // Redirect to another URL
-                    window.location.href = res.url;
-                })
-                .catch(error => console.error(error));
-
+        const data = {
+            testType: "abstract_thinking_test",
+            accuracy: score / 6
         }
-    }
 
+        let url = ''
+        const urlObject = new URL(window.location.href)
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/accuracy_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/accuracy_test'
+        }
+
+        await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
+            })
+            .catch(error => console.error(error));
+
+    }
 
 
     function startTimer() {
         let timeLeft = 1200; // 20 минут
         const timerElement = document.getElementById('time');
-        const timer = setInterval(function() {
+        const timer = setInterval(function () {
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 document.getElementById('timer').innerHTML = 'Время вышло!';
@@ -202,7 +200,7 @@
         }, 1000);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('testContent').style.display = 'none';
         document.getElementById('submitAnswerButton').style.display = 'none';
         document.getElementById('restartTestButton').style.display = 'none';

@@ -26,7 +26,7 @@
     <div id="results" style="display: none; padding: 10px; background-color: #f8f8f8; border: 1px solid #ccc; margin-top: 20px;"></div>
     <div id="timerDisplay" style="font-size: 24px; color: black; margin-top: 10px;"></div>
     <div id="resultButtons" style="display: none; margin-top: 10px;">
-        <button onclick="sendResults()">Отправить результат</button>
+        <button onclick="sendData()">Отправить результат</button>
         <button onclick="restartTest()">Пройти заново</button>
     </div>
 </div>
@@ -123,33 +123,33 @@
         return url.substring(url.lastIndexOf('/') + 1);
     }
 
-    function sendResults() {
-        const correctCount = selectedImages.filter(selected => {
-            const selectedBaseName = getBaseName(selected);
-            return correctImages.some(correct => getBaseName(correct) === selectedBaseName);
-        }).length;
-
+    async function sendData() {
         const data = {
-            score: correctCount,
-            total: correctImages.length
-        };
-        console.log('Sending final results:', data);
+            testType: "short_term_memory_test",
+            accuracy: correctAnswers / tasks.length
+        }
 
-        fetch('/submit-results', {
+        let url = ''
+        const urlObject = new URL(window.location.href)
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/accuracy_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/accuracy_test'
+        }
+
+        await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        }).then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                alert('Результаты успешно отправлены!');
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
             })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('Ошибка при отправке результатов.');
-            });
+            .catch(error => console.error(error));
+
     }
 
     function restartTest() {
