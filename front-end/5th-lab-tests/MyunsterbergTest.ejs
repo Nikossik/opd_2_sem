@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Тест на концентрацию</title>
     <style>
-
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
@@ -13,22 +12,18 @@
             text-align: center;
             color: white;
         }
-
         .sequence {
             margin: 20px 0;
             font-size: 16px;
             word-wrap: break-word;
         }
-
         .words input[type="checkbox"] {
             margin-right: 5px;
         }
-
         button {
             padding: 10px 20px;
             margin-top: 20px;
         }
-
         .hidden {
             display: none;
         }
@@ -36,20 +31,26 @@
 </head>
 <body>
 <h1>Тест на концентрацию</h1>
-<div id="sequence" class="sequence"></div>
-<div id="words" class="words"></div>
-<div id="level-buttons">
-    <button onclick="startTest('easy')">Легкий уровень</button>
-    <button onclick="startTest('medium')">Средний уровень</button>
-    <button onclick="startTest('hard')">Сложный уровень</button>
+<div id="sequence" class="sequence hidden"></div>
+<div id="words" class="words hidden"></div>
+<div id="timerDisplay" style="font-size: 24px; margin-top: 20px;" class="hidden"></div>
+<div id="results" class="hidden"></div>
+<div id="control-buttons">
+    <button id="start-button" onclick="startTest()">Начать тест</button>
+    <button id="next-button" class="hidden" onclick="showNextLevel()">Далее</button>
+    <button id="restart-button" class="hidden" onclick="restartTest()">Пройти заново</button>
+    <button id="send-results-button" class="hidden" onclick="sendResults()">Отправить результат</button>
 </div>
-<button id="stop-button" class="hidden" onclick="stopTest()">Завершить досрочно</button>
-<button id="restart-button" class="hidden" onclick="restartTest()">Пройти заново</button>
-<div id="timerDisplay" style="font-size: 24px; margin-top: 20px;"></div>
-<div id="results"></div>
 
 <script>
-    let timeoutHandle;
+    const levels = ['easy', 'medium', 'hard']; // Уровни сложности
+    let currentLevel = 0;
+    let correctImages = [];
+    let selectedImages = [];
+    let results = [];
+    let timeRemaining;
+    let timerInterval; // Таймер интервала
+
     const data = {
         easy: {
             sequence: "Ривырмпиыомпшыибогадельнятиваопрдлабризтмыдмиоытермоситовлимлюырагуашьижыртшкжщталезвиеиылрмивомиюлутшмрзакисьтлмдипкирккабантволюяиомялмиолы",
@@ -68,38 +69,28 @@
         }
     };
 
-    function startTest(level) {
+    function startTest() {
+        currentLevel = 0;
+        results = [];
+        document.getElementById('start-button').classList.add('hidden');
+        document.getElementById('sequence').classList.remove('hidden');
+        document.getElementById('words').classList.remove('hidden');
+        document.getElementById('timerDisplay').classList.remove('hidden');
+        nextLevel();
+    }
+
+    function nextLevel() {
+        if (currentLevel >= levels.length) {
+            showFinalResults();
+            return;
+        }
+
+        const level = levels[currentLevel];
         const levelData = data[level];
         const sequenceElement = document.getElementById('sequence');
         const wordsElement = document.getElementById('words');
-        const resultsElement = document.getElementById('results');
-        const levelButtons = document.getElementById('level-buttons');
-        const stopButton = document.getElementById('stop-button');
-
-        sequenceElement.textContent = levelData.sequence;
-        wordsElement.innerHTML = ''; // Clear previous entries
-        resultsElement.textContent = '';
-        levelButtons.style.display = 'none'; // Hide level buttons
-        stopButton.classList.remove('hidden'); // Show stop button
-        document.getElementById('timerDisplay').style.display = 'block';
-
-        let timeRemaining = getTestDuration(level) / 1000; // Convert to seconds
         const timerDisplay = document.getElementById('timerDisplay');
-        timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
 
-        window.timerInterval = setInterval(() => {
-            timeRemaining--;
-            timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
-            if (timeRemaining <= 0) {
-                clearInterval(timeoutHandle);
-                timerDisplay.textContent = "Время вышло!";
-                evaluateResults(levelData);
-                stopButton.classList.add('hidden');
-                levelButtons.style.display = 'block';
-            }
-        }, 1000);
-
-        // Display the sequence and checkboxes
         sequenceElement.textContent = levelData.sequence;
         wordsElement.innerHTML = '';
         levelData.words.forEach(word => {
@@ -111,82 +102,147 @@
             label.appendChild(document.createTextNode(word));
             wordsElement.appendChild(label);
             wordsElement.appendChild(document.createElement('br'));
-            console.log('Checkbox created:', checkbox); // вывод созданных checkbox в консоль
         });
 
-        // Set a timer to evaluate the answers after the specified time
-        timeoutHandle = setTimeout(() => {
-            evaluateResults(levelData);
-            stopButton.classList.add('hidden');
-            levelButtons.style.display = 'block'; // Show level buttons again
-        }, getTestDuration(level));
+        document.getElementById('next-button').classList.remove('hidden');
+        document.getElementById('restart-button').classList.add('hidden');
+        document.getElementById('send-results-button').classList.add('hidden');
+        document.getElementById('timerDisplay').style.display = 'block';
+
+        timeRemaining = getTimeLimit(level);
+        startTimer();
     }
 
-    function stopTest() {
-        const levelButtons = document.getElementById('level-buttons');
+    function getTimeLimit(level) {
+        const timeLimits = {
+            easy: 150, // 2.5 минуты в секундах
+            medium: 120, // 2 минуты
+            hard: 60 // 1 минута
+        };
+        return timeLimits[level];
+    }
+
+    function startTimer() {
         const timerDisplay = document.getElementById('timerDisplay');
-        timerDisplay.clearInterval; // Очистка текущего интервала таймера
-        timerDisplay.textContent = "Тест завершен!";
-        evaluateResults(data.easy); // Assuming 'easy' level for demonstration
-        document.getElementById('stop-button').classList.add('hidden');
-        levelButtons.style.display = 'none';
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                evaluateResults();
+                currentLevel++;
+                nextLevel();
+            }
+        }, 1000);
     }
 
-    function evaluateResults(levelData) {
-        clearInterval(window.timerInterval);
-        const levelButtons = document.getElementById('level-buttons');
-        const sequenceElement = document.getElementById('sequence');
-        const wordsElement = document.getElementById('words');
-        const resultsElement = document.getElementById('results');
-        const stopButton = document.getElementById('stop-button');
-        const restartButton = document.getElementById('restart-button');
-        levelButtons.style.display = 'none';
-        stopButton.classList.add('hidden');
-        restartButton.classList.remove('hidden');
+    function showNextLevel() {
+        clearInterval(timerInterval);
+        evaluateResults();
+        currentLevel++;
+        nextLevel();
+    }
 
-        // Проверка состояния элементов перед сбором значений
-        console.log('Words Element InnerHTML:', wordsElement.innerHTML);
-
-        // Сбор выбранных пользователем ответов
-        const checkedValues = Array.from(wordsElement.querySelectorAll('input[type=checkbox]:checked')).map(el => el.value);
-        console.log('Checked Values:', checkedValues);
-
-        // Подсчет правильных ответов
+    function evaluateResults() {
+        const level = levels[currentLevel];
+        const levelData = data[level];
+        const checkedValues = Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(el => el.value);
         const correctCount = checkedValues.filter(value => levelData.answers.includes(value)).length;
-        console.log('Correct Count:', correctCount);
         const incorrectCount = checkedValues.filter(value => !levelData.answers.includes(value)).length;
-        console.log('Incorrect Count:', incorrectCount);
         const missedCount = levelData.answers.filter(answer => !checkedValues.includes(answer)).length;
-        console.log('Missed Count:', missedCount);
-        resultsElement.textContent = `Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}, Пропущенных слов: ${missedCount}`;
 
-        sequenceElement.textContent = ''; // Clear the sequence
-        wordsElement.innerHTML = ''; // Clear the checkboxes
+        results.push({
+            level: level,
+            correctCount: correctCount,
+            incorrectCount: incorrectCount,
+            missedCount: missedCount
+        });
+    }
+
+    function showFinalResults() {
+        clearInterval(timerInterval);
+        const timerDisplay = document.getElementById('timerDisplay');
+        timerDisplay.style.display = 'none';
+        timerDisplay.textContent = ''; // Сброс таймера
+
+        document.getElementById('sequence').classList.add('hidden');
+        document.getElementById('words').classList.add('hidden');
+        document.getElementById('next-button').classList.add('hidden');
+
+        const resultsElement = document.getElementById('results');
+        const totalCorrect = results.reduce((sum, result) => sum + result.correctCount, 0);
+        const totalIncorrect = results.reduce((sum, result) => sum + result.incorrectCount, 0);
+        const totalMissed = results.reduce((sum, result) => sum + result.missedCount, 0);
+
+        resultsElement.innerHTML = `
+            <p>Итоговые результаты:</p>
+            ${results.map(result => `
+                <p>${result.level}: 
+                    Правильных ответов: ${result.correctCount}, 
+                    Неправильных ответов: ${result.incorrectCount}, 
+                    Пропущенных слов: ${result.missedCount}
+                </p>
+            `).join('')}
+            <p>Всего правильных ответов: ${totalCorrect}</p>
+            <p>Всего неправильных ответов: ${totalIncorrect}</p>
+            <p>Всего пропущенных слов: ${totalMissed}</p>
+        `;
+
+        resultsElement.classList.remove('hidden');
+        document.getElementById('restart-button').classList.remove('hidden');
+        document.getElementById('send-results-button').classList.remove('hidden');
+    }
+
+    async function sendResults() {
+        const finalResults = {
+            levels: results,
+            totalCorrect: results.reduce((sum, levelResult) => sum + levelResult.correctCount, 0),
+            totalImages: results.reduce((sum, levelResult) => sum + levelResult.totalCount, 0)
+        };
+
+        const data = {
+            testType: "myunsterberg_test",
+            accuracy: finalResults.totalCorrect / finalResults.totalImages
+        };
+
+        let url = '';
+        const urlObject = new URL(window.location.href);
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/myunsterberg_test?data=' + urlObject.searchParams.get('data');
+        } else {
+            url += '/myunsterberg_test';
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            });
+            const result = await response.json();
+            console.log('Success:', result);
+            window.location.href = response.url; // Перенаправление на другой URL
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     function restartTest() {
-        const levelButtons = document.getElementById('level-buttons');
-        const resultsElement = document.getElementById('results');
-        const restartButton = document.getElementById('restart-button');
-        const timerDisplay = document.getElementById('timerDisplay');
-        
-        timerDisplay.clearInterval;
+        currentLevel = 0;
+        results = [];
+        document.getElementById('sequence').textContent = '';
+        document.getElementById('words').innerHTML = '';
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('start-button').classList.remove('hidden');
+        document.getElementById('next-button').classList.add('hidden');
+        document.getElementById('restart-button').classList.add('hidden');
+        document.getElementById('send-results-button').classList.add('hidden');
+        document.getElementById('sequence').classList.add('hidden');
+        document.getElementById('words').classList.add('hidden');
         document.getElementById('timerDisplay').style.display = 'none';
-        levelButtons.style.display = 'block'; // Показать кнопки выбора уровня
-        resultsElement.textContent = ''; // Очистить результаты
-        restartButton.classList.add('hidden'); // Скрыть кнопку рестарта
-    }
-
-
-    function getTestDuration(level) {
-        switch (level) {
-            case 'easy':
-                return 150000; // 2.5 minutes
-            case 'medium':
-                return 120000; // 2 minutes
-            case 'hard':
-                return 60000; // 1 minute
-        }
+        document.getElementById('results').classList.add('hidden');
+        clearInterval(timerInterval); // Остановка таймера
     }
 </script>
 </body>
