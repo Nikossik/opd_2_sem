@@ -1,6 +1,5 @@
-body, html {
-    height: 100%;
-    margin: 0;
+body {
+    background-image: url('public/images/background_gradient.png');
     font-family: Arial, sans-serif;
     background: linear-gradient(to right, #ff7e5f, #feb47b);
     color: white;

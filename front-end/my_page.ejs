@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="my_page.css">
+    <title>Профиль: <%= username %></title>
+</head>
+<body class="body-background">
+    <section class="container">
+    <div class="menu-wrap">
+        <input type="checkbox" class="toggler">
+        <div class="main-menu-icon"><div></div></div>
+        <div class="menu">
+            <div>
+                <div>
+                    <ul>
+                        <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
+    
+                        <% if (!loggedIn) { %>
+                            <li><a href="/login">ВОЙТИ</a></li>
+                        <% } %>
+                    
+                        <% if (loggedIn) { %>
+                            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
+                        <% } %>
+                    
+                        <% if (adminUser) { %>
+                            <li><a href="/poll_1_part_1">ОПРОС</a></li>
+                        <% } %>
+                        
+                        <% if (adminUser) { %>
+                            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/logout">ВЫЙТИ</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- <div class="qualities-container"> -->
+            <h1>Мой профиль</h1>
+
+
+            <div class="qualities-header"><h2>Имя: <%= username %></h2></div>
+            <div class="qualities-header"><h2>ID: <%= id %></h2></div>
+
+            <% if (respondentUser) { %>
+                <div class="qualities-header"><h2>Респондент: ✔️</h2></div>
+            <% } else { %>
+                <div class="qualities-header"><h2>Респондент: ❌</h2></div>
+            <% } %>
+
+            <% if (adminUser) { %>
+                <div class="qualities-header"><h2>Админ: ✔️</h2></div>
+            <% } else { %>
+                <div class="qualities-header"><h2>Админ: ❌</h2></div>
+            <% } %>
+        <!-- </div>  -->
+    </section>
+</body>
+</html>
