@@ -78,7 +78,31 @@
                 <% }); %>
             </ul>
         </div>
-
+        <div class="tests-container">
+            <% if (testResults.length > 0) { %>
+                <h2>Test Results</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Тип Теста</th>
+                        <th>Результат</th>
+                        <th>В норме ли пульс</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% testResults.forEach(function(result) { %>
+                        <tr>
+                            <td><%= result.type %></td>
+                            <td><%= result.result %></td>
+                            <td><%= result.heartRateCheck %></td>
+                        </tr>
+                    <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p>No test results available.</p>
+            <% } %>
+        </div>
     </section>
 </body>
 </html>

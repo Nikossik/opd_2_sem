@@ -1,5 +1,5 @@
 const { getHashes } = require('crypto')
-const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession, HeartRate} = require('../models')
+const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession, HeartRate, StatisticAll} = require('../models')
 
 async function filterTest(type, username, testId, testType){
     let userId = null
@@ -210,4 +210,15 @@ async function getHeartRateCheck(user, type) {
 
 // HERE IS YOUR CODE
 
-module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics, getHeartCheck, getResultNumberTest, getHeartRateCheck}
+async function getUserTestResults(userId) {
+    try {
+        return await StatisticAll.findAll({
+            where: {user: userId}
+        });
+    } catch (error) {
+        console.error('Error retrieving user test results:', error);
+        throw error;
+    }
+}
+
+module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics, getHeartCheck, getResultNumberTest, getHeartRateCheck, getUserTestResults}

@@ -15,7 +15,8 @@ const {
     getProfessionCharacteristics,
     getHeartCheck,
     getResultNumberTest,
-    getHeartRateCheck
+    getHeartRateCheck,
+    getUserTestResults
 } = require('./js-scripts/databaseManipulations')
 const {login} = require("passport/lib/http/request");
 const server = express();
@@ -1004,6 +1005,7 @@ server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
             const id = req.params.id;
+            const userID = req.user.id;
             const profession = await Profession.findOne({where: {id: id}});
             if (!profession) {
                 console.error('Профессия с ID', id, 'не найдена');
@@ -1012,11 +1014,13 @@ server.get('/professions_:id', async (req, res) => {
             }
             const characteristics = await getProfessionCharacteristics(id);
             const qualities = await aggregateExpertRatings(profession.profession);
-
+            const testResults = await getUserTestResults(userID);
+            console.log(testResults)
             res.render('ProfessionPage', {
                 profession: profession,
                 characteristics: characteristics,
-                qualities: qualities
+                qualities: qualities,
+                testResults: testResults
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
