@@ -15,8 +15,7 @@ const {
     getProfessionCharacteristics,
     getHeartCheck,
     getResultNumberTest,
-    getHeartRateCheck,
-    getUserTestResults
+    getHeartRateCheck
 } = require('./js-scripts/databaseManipulations')
 const {login} = require("passport/lib/http/request");
 const server = express();
@@ -189,6 +188,15 @@ const char_dict = {
     165: 'Особенности телосложения',
     166: 'Хорошее общее физическое развитие',
     167: 'Физическая подготовленность к воздействию неблагоприятных факторов профессиональной деятельности'
+};
+
+const testToQualityMap = {
+    'compare_test': [2, 25, 27], // Самостоятельность, Способность к планированию своей деятельности, Способность брать на себя ответственность за принимаемые решения и действия
+    'abstract_test': [7, 8, 49, 52], // Организованность, Самодисциплина, Креативность, Образность
+    'abstract_thinking_test': [7, 48, 53], // Организованность, Логичность, Абстрактность
+    'attention_assessment_test': [118, 119, 120], // Концентрированность внимания, Устойчивость внимания во времени, Переключаемость внимания
+    'ram_test': [77, 79], // Зрительная оперативная память на лица, Зрительная оперативная память на условные обозначения
+    'memory_test': [73, 79] // Зрительная долговременная память на условные обозначения, Зрительная оперативная память на условные обозначения
 };
 
 server.use(express.json());
@@ -1001,27 +1009,98 @@ server.post('/add_profession', async (req, res) => {
     }
 });
 
+async function getUserTestResults(userId) {
+    try {
+        const testResults = await StatisticAll.findAll({
+            where: { user: userId }
+        });
+
+        const requiredTests = Object.keys(testToQualityMap);
+
+        return testResults.filter(test => requiredTests.includes(test.type));
+    } catch (error) {
+        console.error('Error retrieving user test results:', error);
+        throw error;
+    }
+}
+
+async function calculateMetric(testResults) {
+    const testToQualityMap = {
+        'compare_test': 2,
+        'abstract_test': [7, 8],
+        'abstract_thinking_test': 9,
+        'ram_test': 10,
+        'memory_test': 10
+    };
+    const averageValues = {
+        'compare_test': 17,
+        'abstract_test': 28,
+        'abstract_thinking_test': 4,
+        'ram_test': 11,
+        'memory_test': 11
+    };
+
+    const weights = {
+        2: 8,
+        6: 7,
+        7: 6,
+        8: 5,
+        9: 4,
+        10: 3
+    };
+
+    let totalScore = 0;
+
+    for (const [testType, quality] of Object.entries(testToQualityMap)) {
+        const result = testResults.find(test => test.type === testType);
+        if (result) {
+            const userValue = parseInt(result.result, 10);
+            const averageValue = averageValues[testType];
+            const weight = Array.isArray(quality) ? Math.max(...quality.map(q => weights[q])) : weights[quality];
+            if (userValue >= averageValue) {
+                totalScore += weight;
+            } else if (userValue >= averageValue * 0.9) {
+                totalScore += weight / 2;
+            }
+        }
+    }
+
+    if (totalScore >= 27) {
+        return 1;
+    } else if (totalScore >= 22) {
+        return 2;
+    } else {
+        return 3;
+    }
+}
+
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
             const id = req.params.id;
             const userID = req.user.id;
-            const profession = await Profession.findOne({where: {id: id}});
+            const profession = await Profession.findOne({ where: { id: id } });
             if (!profession) {
                 console.error('Профессия с ID', id, 'не найдена');
                 res.status(404).send('Профессия не найдена');
                 return;
             }
+
             const characteristics = await getProfessionCharacteristics(id);
             const qualities = await aggregateExpertRatings(profession.profession);
             const testResults = await getUserTestResults(userID);
-            console.log(testResults)
+            const metric = await calculateMetric(testResults);
+
             res.render('ProfessionPage', {
                 profession: profession,
                 characteristics: characteristics,
                 qualities: qualities,
                 testResults: testResults,
-                metric: calculateMetric(testResults)
+                metric: metric,
+                loggedIn: req.isAuthenticated(),
+                adminUser: req.user.isAdmin,
+                char_dict: char_dict,
+                testToQualityMap: testToQualityMap
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
@@ -1119,7 +1198,3 @@ sequelize.sync().then(() => {
         console.log('Server running on http://localhost:3000');
     });
 });
-
-async function calculateMetric(testResults) {
-
-}

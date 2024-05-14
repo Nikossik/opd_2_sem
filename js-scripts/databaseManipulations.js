@@ -210,15 +210,4 @@ async function getHeartRateCheck(user, type) {
 
 // HERE IS YOUR CODE
 
-async function getUserTestResults(userId) {
-    try {
-        return await StatisticAll.findAll({
-            where: {user: userId}
-        });
-    } catch (error) {
-        console.error('Error retrieving user test results:', error);
-        throw error;
-    }
-}
-
-module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics, getHeartCheck, getResultNumberTest, getHeartRateCheck, getUserTestResults}
+module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics, getHeartCheck, getResultNumberTest, getHeartRateCheck}

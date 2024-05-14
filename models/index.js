@@ -9,7 +9,7 @@ const AccuracyTestModel = require('./accuracyTest')
 const HeartRateModel = require('./heartRate');
 const StatisticAllModel = require('./statisticAll')
 
-const sequelize = new Sequelize('opd_2_sem', 'postgres', 'postgres', {
+const sequelize = new Sequelize('opd_2_sem', 'postgres', 'admin', {
     dialect: 'postgres',
     port: 5432,
     host: 'localhost',
