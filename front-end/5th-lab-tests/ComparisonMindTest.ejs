@@ -23,7 +23,7 @@
     <div id="results" style="display: none;"></div>
     <div id="test-controls">
         <button id="startButton" onclick="startTest(0)">Начать тест</button>
-        <button id="final-submit-button" onclick="sendFinalResults()" style="display: none;">Отправить результат</button>
+        <button id="final-submit-button" onclick="sendData()" style="display: none;">Отправить результат</button>
         <button id="restart-button" onclick="restartTest()" style="display: none">Начать заново</button>
     </div>
 </div>
@@ -79,22 +79,33 @@
     }
 
 
-    function sendFinalResults() {
-        const data = {results};
-        fetch('/submit-results', {
+    async function sendData() {
+        const data = {
+            testType: "compare_test",
+            accuracy: correctAnswers / 6
+        }
+
+        let url = ''
+        const urlObject = new URL(window.location.href)
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/accuracy_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/accuracy_test'
+        }
+
+        await fetch(url, {
             method: 'POST',
+            body: JSON.stringify(data),
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                alert('Результаты успешно отправлены!');
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
             })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('Ошибка при отправке результатов.');
-            });
+            .catch(error => console.error(error));
+
     }
 
     function submitDifference() {
