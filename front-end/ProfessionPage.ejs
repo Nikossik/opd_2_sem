@@ -6,7 +6,6 @@
     <title><%= profession.name %></title>
 </head>
 <body class="body-background">
-
 <section class="container">
     <div class="menu-wrap">
         <input type="checkbox" class="toggler">
@@ -102,14 +101,7 @@
                 </tbody>
             </table>
         <% } else { %>
-            <p>Тесты не пройдены</p>
-        <% } %>
-        <% if (metric === 1) { %>
-            <h2>Профессия рекомендуется</h2>
-        <% } else if (metric === 2) { %>
-            <h2>Рекомендуется развить некоторые ПВК</h2>
-        <% } else { %>
-            <h2>Профессия не рекомендуется</h2>
+            <p>Результаты тестов отсутствуют.</p>
         <% } %>
     </div>
 </section>

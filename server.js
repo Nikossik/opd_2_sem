@@ -191,12 +191,15 @@ const char_dict = {
 };
 
 const testToQualityMap = {
-    'compare_test': [2, 25, 27], // Самостоятельность, Способность к планированию своей деятельности, Способность брать на себя ответственность за принимаемые решения и действия
-    'abstract_test': [7, 8, 49, 52], // Организованность, Самодисциплина, Креативность, Образность
-    'abstract_thinking_test': [7, 48, 53], // Организованность, Логичность, Абстрактность
-    'attention_assessment_test': [118, 119, 120], // Концентрированность внимания, Устойчивость внимания во времени, Переключаемость внимания
-    'ram_test': [77, 79], // Зрительная оперативная память на лица, Зрительная оперативная память на условные обозначения
-    'memory_test': [73, 79] // Зрительная долговременная память на условные обозначения, Зрительная оперативная память на условные обозначения
+    'compare_test': [1, 3, 5, 6, 7, 8], // Количество пройденных тестов на сайте
+    'abstract_thinking_test': [2, 3, 7, 9], // Индукция
+    'attention_assessment_test': [6, 7], // Концентрация
+    'abstract_test': [2, 4, 7, 8, 9], // Абстракция
+    'ram_test': [8, 10], // Оперативная память
+    'memory_test': [10], // Кратковременная память
+    'sound_test': [6, 9], // Реакция на звук
+    'visual_math_test': [1], // Математика визуальная
+    'pulse_test': [4, 9, 10] // Пульс
 };
 
 server.use(express.json());
@@ -1009,35 +1012,85 @@ server.post('/add_profession', async (req, res) => {
     }
 });
 
-async function getUserTestResults(userId) {
+async function getUserTestResults(userId, relevantPvk) {
     try {
+        // Преобразование строковых ПВК в числовые идентификаторы
+        const relevantPvkIds = relevantPvk.map(pvkName => {
+            for (let id in char_dict) {
+                if (char_dict[id] === pvkName) {
+                    return parseInt(id);
+                }
+            }
+            return null;
+        }).filter(id => id !== null);
+
+        console.log('relevantPvkIds:', relevantPvkIds);
+
         const testResults = await StatisticAll.findAll({
             where: { user: userId }
         });
 
-        const requiredTests = Object.keys(testToQualityMap);
+        console.log('All testResults:', testResults);
 
-        return testResults.filter(test => requiredTests.includes(test.type));
+        const relevantTests = Object.keys(testToQualityMap).filter(testType =>
+            testToQualityMap[testType].some(pvk => relevantPvkIds.includes(pvk))
+        );
+
+        console.log('relevantTests:', relevantTests);
+
+        const filteredTestResults = testResults.filter(test => relevantTests.includes(test.type));
+
+        console.log('filteredTestResults:', filteredTestResults);
+
+        return filteredTestResults;
     } catch (error) {
         console.error('Error retrieving user test results:', error);
         throw error;
     }
 }
 
+
+
 async function calculateMetric(testResults) {
     const testToQualityMap = {
-        'compare_test': 2,
-        'abstract_test': [7, 8],
-        'abstract_thinking_test': 9,
-        'ram_test': 10,
-        'memory_test': 10
+        'sound': [106, 69], // Острота слуха, Способность к распознаванию небольших отклонений параметров технологических процессов по акустическим признакам
+        'light': [], // Пока пусто, нужно добавить соответствующие ПВК, если они есть
+        'visual_math_test': [101, 68], // Острота зрения, Способность к распознаванию небольших отклонений параметров технологических процессов по визуальным признакам
+        'pulse_test': [4, 9, 10, 11], // Нервно-эмоциональная устойчивость, Самообладание, Ответственность
+        'hard_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
+        'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
+        'analog_tracking_test': [118], // Концентрированность внимания
+        '3_colors': [101], // Острота зрения
+        'math_sound_test': [106], // Острота слуха
+        'math_vis': [101], // Острота зрения
+        'random_access_memory': [73, 8, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
+        'short_term_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
+        'myunsterberg_test': [98, 121], // Умственная работоспособность, Способность к распределению внимания между несколькими объектами или видами деятельности
+        'comparison_mind': [12, 3, 7, 25, 44, 22], // Трудолюбие, Организованность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
+        'attention_assessment_test': [6, 7], // Концентрированность внимания, Логичность мышления
+        'abstract_thinking_test': [45, 48, 42, 52], // Аналитичность мышления, Логичность мышления, Способность наглядно представлять себе новое явление, Образность мышления
+        'abstract_test': [49, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
     };
+
+
     const averageValues = {
-        'compare_test': 17,
-        'abstract_test': 28,
-        'abstract_thinking_test': 4,
-        'ram_test': 11,
-        'memory_test': 11
+        'sound': 270, // Реакция на звук
+        'light': 0, // Нет данных для этого теста
+        'visual_math_test': 280, // Математика визуальная
+        'pulse_test': 70, // Например, средний пульс (указать реальное среднее значение, если известно)
+        'hard_action': 0, // Укажите среднее значение для теста hard_action
+        'easy_action': 0, // Укажите среднее значение для теста easy_action
+        'analog_tracking_test': 0, // Укажите среднее значение для теста analog_tracking_test
+        '3_colors': 0, // Укажите среднее значение для теста 3_colors
+        'math_sound_test': 0, // Укажите среднее значение для теста math_sound_test
+        'math_vis': 280, // Например, математическая визуальная оценка (указать реальное среднее значение, если известно)
+        'random_access_memory': 4, // Оперативная память
+        'short_term_memory': 11, // Кратковременная память
+        'myunsterberg_test': 7, // Концентрация
+        'comparison_mind': 17, // Тест на сравнение
+        'attention_assessment_test': 7, // Тест на концентрацию
+        'abstract_thinking_test': 4, // Тест на индукцию
+        'abstract_test': 28, // Тест на абстракцию
     };
 
     const weights = {
@@ -1088,8 +1141,12 @@ server.get('/professions_:id', async (req, res) => {
 
             const characteristics = await getProfessionCharacteristics(id);
             const qualities = await aggregateExpertRatings(profession.profession);
-            const testResults = await getUserTestResults(userID);
+
+            const relevantPvk = qualities.map(quality => quality.characteristic);
+            const testResults = await getUserTestResults(userID, relevantPvk);
             const metric = await calculateMetric(testResults);
+
+            console.log('qualities:', qualities);
 
             res.render('ProfessionPage', {
                 profession: profession,
@@ -1099,8 +1156,9 @@ server.get('/professions_:id', async (req, res) => {
                 metric: metric,
                 loggedIn: req.isAuthenticated(),
                 adminUser: req.user.isAdmin,
-                char_dict: char_dict,
-                testToQualityMap: testToQualityMap
+                testToQualityMap: testToQualityMap,
+                char_dict: char_dict, // Передаем char_dict для использования в шаблоне
+                relevantPvk: relevantPvk
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
@@ -1110,6 +1168,8 @@ server.get('/professions_:id', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
 
 
 server.get('/add_heart_rate', (req, res) => {
