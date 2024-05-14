@@ -1,5 +1,5 @@
 const { getHashes } = require('crypto')
-const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession, HeartRate, StatisticAll} = require('../models')
+const {Poll, ReactionTest, ComplexReactionTest, User, AccuracyTest, Profession, HeartRate, StatisticAll, AbstractTest} = require('../models')
 
 async function filterTest(type, username, testId, testType){
     let userId = null
@@ -179,6 +179,13 @@ async function getResultNumberTest(user, testType, type) {
             result = await ReactionTest.min('reactionTime', {
                 where: {
                     user: user,
+                    type: type
+                }
+            });
+        } else if (testType === 'abstract_test') {
+            result = await AbstractTest.max('result', {
+                where: {
+                    uesr: uesr,
                     type: type
                 }
             });

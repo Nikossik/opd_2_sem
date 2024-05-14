@@ -5,7 +5,7 @@ const flash = require('connect-flash')
 const path = require('path')
 const crypto = require('crypto')
 const LocalStrategy = require('passport-local').Strategy;
-const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll} = require('./models/index');
+const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
 const {
     filterTest,
@@ -931,10 +931,13 @@ server.get('/characteristics', async (req, res) => {
 
     for (const user of users) {
         console.log(user);
-        const reactionTests = ['sound'];
+        const reactionTests = ['sound', 'light'];
         for (const testType of reactionTests) {
-            const result = await getResultNumberTest(user, 'reaction', testType);
-            console.log(result);
+            let result = await getResultNumberTest(user, 'reaction', testType);
+
+            if (result == null) {
+                result = 0;
+            }
             
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
@@ -948,9 +951,12 @@ server.get('/characteristics', async (req, res) => {
 
         const accuracyTests = ['hard_action', 'easy_action', 'analog_tracking_test'];
         for (const testType of accuracyTests) {
-            const result = await getResultNumberTest(user, 'accuracy', testType);
-            console.log(result);
-            
+            let result = await getResultNumberTest(user, 'accuracy', testType);
+
+            if (result == null) {
+                result = 0;
+            }
+
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
             await StatisticAll.create({
@@ -963,7 +969,11 @@ server.get('/characteristics', async (req, res) => {
 
         const complex_reaction = ['3_colors', 'math_sound_test', 'math_vis'];
         for (const testType of complex_reaction) {
-            const result = await getResultNumberTest(user, 'complex_reaction', testType);
+            let result = await getResultNumberTest(user, 'complex_reaction', testType);
+
+            if (result == null) {
+                result = 0;
+            }
             
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
@@ -974,6 +984,20 @@ server.get('/characteristics', async (req, res) => {
                 heartRateCheck: heartRateCheck ? true : false
             });
         }
+
+        /* const abstracttests = ['random_access_memory', 'short_term_memory', 'myunsterberg_test', 'comparison_mind', 'attention_assessment_test', 'abstract_thinking_test', 'abstract_test'];
+        for (const testType of abstracttests) {
+            const result = await getResultNumberTest(user, 'abstract_test', testType);
+            
+            const heartRateCheck = await getHeartRateCheck(user, testType);
+
+            await StatisticAll.create({
+                user: user,
+                type: testType,
+                result: result,
+                heartRateCheck: heartRateCheck ? true : false
+            });
+        } */
     }
 
 
