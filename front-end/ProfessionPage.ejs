@@ -6,7 +6,7 @@
     <title><%= profession.name %></title>
 </head>
 <body class="body-background">
-    <section class="container">
+<section class="container">
     <div class="menu-wrap">
         <input type="checkbox" class="toggler">
         <div class="main-menu-icon"><div></div></div>
@@ -15,19 +15,15 @@
                 <div>
                     <ul>
                         <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
-    
                         <% if (!loggedIn) { %>
                             <li><a href="/login">ВОЙТИ</a></li>
                         <% } %>
-                    
                         <% if (loggedIn) { %>
                             <li><a href="/characteristics">ПРОФЕССИИ</a></li>
                         <% } %>
-                    
                         <% if (adminUser) { %>
                             <li><a href="/poll_1_part_1">ОПРОС</a></li>
                         <% } %>
-                        
                         <% if (adminUser) { %>
                             <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
                         <% } %>
@@ -48,37 +44,66 @@
             </div>
         </div>
     </div>
-
+    <div class="qualities-container">
         <h1><%= profession.profession %></h1>
         <p><%= profession.description %></p>
-
         <% if (characteristics.length > 0) { %>
             <h2>Базовые характеристики</h2>
             <ul>
                 <% characteristics.forEach(function(characteristic) { %>
-                    <li><strong>Конкуренция:</strong> <%= characteristic.competition %></li>
-                    <li><strong>Зарплата:</strong> <%= characteristic.salary %></li>
-                    <li><strong>Сложность обучения:</strong> <%= characteristic.study %></li>
-                    <li><strong>Описание профессии:</strong> <%= characteristic.description %></li>
-                    <li><strong>Основные задачи:</strong> <%= characteristic.task %></li>
+                    <li class="lili"><strong>Конкуренция:</strong> <%= characteristic.competition %></li>
+                    <li class="lili"><strong>Зарплата:</strong> <%= characteristic.salary %></li>
+                    <li class="lili"><strong>Сложность обучения:</strong> <%= characteristic.study %></li>
+                    <li class="lili"><strong>Описание профессии:</strong> <%= characteristic.description %></li>
+                    <li class="lili"><strong>Основные задачи:</strong> <%= characteristic.task %></li>
                 <% }); %>
             </ul>
         <% } else { %>
             <p>Характеристики для этой профессии отсутствуют.</p>
         <% } %>
-
-        <div class="qualities-container">
-            <div class="qualities-header">Качества</div>
-            <ul>
-                <% qualities.forEach(function(quality) { %>
-                    <li class="quality-item">
-                        <span class="quality-text"><%= quality.characteristic %></span>
-                        <span class="quality-importance"><%= quality.totalImportance %></span>
-                    </li>
+        <div class="qualities-header">Качества</div>
+        <ul>
+            <% qualities.forEach(function(quality) { %>
+                <li class="quality-item lili">
+                    <span class="quality-text"><%= quality.characteristic %></span>
+                    <span class="quality-importance"><%= quality.totalImportance %></span>
+                </li>
+            <% }); %>
+        </ul>
+        <% if (testResults.length > 0) { %>
+            <br>
+            <br>
+            <h2>Результаты тестов</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Тип Теста</th>
+                    <th>Результат</th>
+                    <th>Соответствующие качества</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% testResults.forEach(function(result) { %>
+                    <tr>
+                        <td><%= result.type %></td>
+                        <% if (result.result) { %>
+                            <td><%= result.result %></td>
+                        <% } else { %>
+                            <td>Не пройден</td>
+                        <% } %>
+                        <td>
+                            <% testToQualityMap[result.type].forEach(function(qualityId) { %>
+                                <span><%= char_dict[qualityId] %></span><br>
+                            <% }); %>
+                        </td>
+                    </tr>
                 <% }); %>
-            </ul>
-        </div>
-
-    </section>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>Результаты тестов отсутствуют.</p>
+        <% } %>
+    </div>
+</section>
 </body>
 </html>

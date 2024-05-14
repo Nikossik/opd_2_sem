@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./AddHeartStyle.css">
+    <title>Добавление данных о пульсе</title>
+    <style>
+        body {
+            background-image: url('images/background_gradient.png');
+            background-size: cover; 
+            background-position: center; 
+        }
+    </style>
+</head>
+<body>
+    <section class="container">
+        
+
+    
+        <h1>Добавление данных о пульсе</h1>
+
+        <form action="/add_heart_rate" method="POST">
+
+            <div>
+                <label for="respondentID">ID респондента:</label>
+                <input type="text" id="respondentID" name="respondentID" class="input">
+            </div>
+
+            <div>
+                <label for="testType">Название пройденного теста:</label>
+                <select class="select-style" id="testType" name="testType">
+                    <option value="3_colors">Color Reaction Test</option>
+                    <option value="light">Light Reaction Test</option>
+                    <option value="3_colors">Multiple Reaction Test</option>
+                    <option value="sound">Sound Reaction Test</option>
+                    <option value="math_sound_test">Sound Math Test</option>
+                    <option value="math_vis">Visual Math Test</option>
+                    <option value="easy_action">Easy Action Test</option>
+                    <option value="hard_action">Hard Action Test</option>
+                    <option value="analog_tracking_test">Analog Tracking Test</option>
+                    <option value="analog_tracking_test">Stalking Test</option>
+                    <!-- <option value="AbstractTest">Abstract Test</option>
+                    <option value="AbstractThinkingTest">Abstract Thinking Test</option>
+                    <option value="AttentionAssessmentTest">Attention Assessment Test</option>
+                    <option value="ComprasionMindTest">Comprasion Mind Test</option>
+                    <option value="MyunsterbergTest">Myunsterberg Test</option>
+                    <option value="RandomAccessMemoryTest">Random Access Memory Test</option>
+                    <option value="Short-termMemoryTest">Short-term Memory Test</option> -->
+                </select>
+            </div>
+
+            <div>
+                <label for="heartRateBefore">Частота сердечных сокращений до прохождения теста:</label>
+                <input type="text" id="heartRateBefore" name="heartRateBefore" class="input">
+            </div>
+
+            <div>
+                <label for="heartRateDuring">Частота сердечных сокращений во время прохождения теста:</label>
+                <input type="text" id="heartRateDuring" name="heartRateDuring" class="input">
+            </div>
+
+            <div>
+                <label for="heartRateAfter">Частота сердечных сокращений после прохождения теста:</label>
+                <input type="text" id="heartRateAfter" name="heartRateAfter" class="input">
+            </div>
+
+            <div id="error-message">
+                <% if (typeof error !== 'undefined') { %>
+                    <p class="error-message"><%= error %></p>
+                <% } %>
+            </div>
+
+            <button class="first-button" type="submit">Отправить</button>  
+        </form>
+    </section>
+
+</body>
+</html>
