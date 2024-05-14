@@ -1020,7 +1020,8 @@ server.get('/professions_:id', async (req, res) => {
                 profession: profession,
                 characteristics: characteristics,
                 qualities: qualities,
-                testResults: testResults
+                testResults: testResults,
+                metric: calculateMetric(testResults)
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
@@ -1065,6 +1066,18 @@ server.post('/add_heart_rate', async (req, res) => {
     }
 });
 
+server.get('/my_page', (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+        return
+    }
+
+    adminUser = req.user.isAdmin;
+    respondentUser = req.user.respondent;
+
+    res.render('my_page', {username: req.user.login, id: req.user.id, loggedIn: req.isAuthenticated(), adminUser: adminUser, respondentUser: respondentUser});
+});
+
 async function aggregateExpertRatings(professionName) {
     try {
         const polls = await Poll.findAll({
@@ -1106,3 +1119,7 @@ sequelize.sync().then(() => {
         console.log('Server running on http://localhost:3000');
     });
 });
+
+async function calculateMetric(testResults) {
+
+}

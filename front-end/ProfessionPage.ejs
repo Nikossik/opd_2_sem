@@ -48,40 +48,41 @@
             </div>
         </div>
     </div>
-
-        <h1><%= profession.profession %></h1>
-        <p><%= profession.description %></p>
-
-        <% if (characteristics.length > 0) { %>
-            <h2>Базовые характеристики</h2>
-            <ul>
-                <% characteristics.forEach(function(characteristic) { %>
-                    <li><strong>Конкуренция:</strong> <%= characteristic.competition %></li>
-                    <li><strong>Зарплата:</strong> <%= characteristic.salary %></li>
-                    <li><strong>Сложность обучения:</strong> <%= characteristic.study %></li>
-                    <li><strong>Описание профессии:</strong> <%= characteristic.description %></li>
-                    <li><strong>Основные задачи:</strong> <%= characteristic.task %></li>
-                <% }); %>
-            </ul>
-        <% } else { %>
-            <p>Характеристики для этой профессии отсутствуют.</p>
-        <% } %>
-
         <div class="qualities-container">
+            <h1><%= profession.profession %></h1>
+            <p><%= profession.description %></p>
+    
+            <% if (characteristics.length > 0) { %>
+                <h2>Базовые характеристики</h2>
+                <ul>
+                    <% characteristics.forEach(function(characteristic) { %>
+                        <li class="lili"><strong>Конкуренция:</strong> <%= characteristic.competition %></li>
+                        <li class="lili"><strong>Зарплата:</strong> <%= characteristic.salary %></li>
+                        <li class="lili"><strong>Сложность обучения:</strong> <%= characteristic.study %></li>
+                        <li class="lili"><strong>Описание профессии:</strong> <%= characteristic.description %></li>
+                        <li class="lili"><strong>Основные задачи:</strong> <%= characteristic.task %></li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <p>Характеристики для этой профессии отсутствуют.</p>
+            <% } %>
+
             <div class="qualities-header">Качества</div>
             <ul>
                 <% qualities.forEach(function(quality) { %>
-                    <li class="quality-item">
+                    <li class="quality-item lili">
                         <span class="quality-text"><%= quality.characteristic %></span>
                         <span class="quality-importance"><%= quality.totalImportance %></span>
                     </li>
                 <% }); %>
             </ul>
-        </div>
-        <div class="tests-container">
+        <!-- </div> -->
+        <!-- <div class="tests-container"> -->
             <% if (testResults.length > 0) { %>
-                <h2>Test Results</h2>
-                <table>
+                <br>
+                <br>
+                <h2>Результаты тестов</h2>
+                <table class="table">
                     <thead>
                     <tr>
                         <th>Тип Теста</th>
@@ -93,15 +94,29 @@
                     <% testResults.forEach(function(result) { %>
                         <tr>
                             <td><%= result.type %></td>
-                            <td><%= result.result %></td>
+                            <% if (result.result) { %>
+                                <td><%= result.result %></td>
+                            <% } else { %>
+                                <td>Не пройден</td>
+                            <% } %>
                             <td><%= result.heartRateCheck %></td>
                         </tr>
                     <% }); %>
                     </tbody>
                 </table>
             <% } else { %>
-                <p>No test results available.</p>
+                <p>Тесты не пойдены</p>
             <% } %>
+        <!-- </div>
+        <div class="tests-container"> -->
+            <% if (metric == 1) { %>
+                <h2>...</h2>
+            <% } else if (metric == 2) { %>
+                <h2>...</h2>
+            <% } else { %>
+                <h2>...</h2>
+            <% } %>
+
         </div>
     </section>
 </body>

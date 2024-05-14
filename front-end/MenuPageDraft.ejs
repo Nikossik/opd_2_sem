@@ -31,7 +31,9 @@
                     <% if (loggedIn) { %>
                         <li><a href="/characteristics">ПРОФЕССИИ</a></li>
                     <% } %>
-                
+                    <% if (loggedIn) { %>
+                        <li><a href="/my_page">МОЙ ПРОФИЛЬ</a></li>
+                    <% } %>
                     <% if (adminUser) { %>
                         <li><a href="/poll_1_part_1">ОПРОС</a></li>
                     <% } %>
@@ -50,6 +52,9 @@
                     <% } %>
                     <% if (loggedIn) { %>
                         <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+                    <% } %>
+                    <% if (adminUser || respondentUser) { %>
+                        <li><a href="/tests_list">СПИСОК ТЕСТОВ</a></li>
                     <% } %>
                     <% if (loggedIn) { %>
                         <li><a href="/logout">ВЫЙТИ</a></li>
