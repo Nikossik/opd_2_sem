@@ -1078,19 +1078,19 @@ async function calculateMetric(testResults) {
         'light': 0, // Нет данных для этого теста
         'visual_math_test': 280, // Математика визуальная
         'pulse_test': 70, // Например, средний пульс (указать реальное среднее значение, если известно)
-        'hard_action': 0, // Укажите среднее значение для теста hard_action
-        'easy_action': 0, // Укажите среднее значение для теста easy_action
-        'analog_tracking_test': 0, // Укажите среднее значение для теста analog_tracking_test
-        '3_colors': 0, // Укажите среднее значение для теста 3_colors
-        'math_sound_test': 0, // Укажите среднее значение для теста math_sound_test
+        'hard_action': 240, // Укажите среднее значение для теста hard_action
+        'easy_action': 220, // Укажите среднее значение для теста easy_action
+        'analog_tracking_test': 45, // Укажите среднее значение для теста analog_tracking_test
+        '3_colors': 245, // Укажите среднее значение для теста 3_colors
+        'math_sound_test': 270, // Укажите среднее значение для теста math_sound_test
         'math_vis': 280, // Например, математическая визуальная оценка (указать реальное среднее значение, если известно)
         'random_access_memory': 4, // Оперативная память
-        'short_term_memory': 11, // Кратковременная память
+        'short_term_memory': 7, // Кратковременная память
         'myunsterberg_test': 7, // Концентрация
         'comparison_mind': 17, // Тест на сравнение
         'attention_assessment_test': 7, // Тест на концентрацию
         'abstract_thinking_test': 4, // Тест на индукцию
-        'abstract_test': 28, // Тест на абстракцию
+        'abstract_test': 3, // Тест на абстракцию; 28, если не уровни считать
     };
 
     const weights = {
