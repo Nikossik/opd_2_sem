@@ -388,32 +388,45 @@ server.get('/compare_test', (req, res) => {
     }
 })
 
-server.get('/memory_test', (req, res) => {
+// Рендеринг статической страницы без передачи изображений
+server.get('/memory_test_page', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login');
     } else {
-        const images = [
-            "img/11.gif",
-            "img/19.gif",
-            "img/28.gif",
-            "img/36.gif"
-        ];
-        const allImages = [
-            "img/11.gif",
-            "img/19.gif",
-            "img/28.gif",
-            "img/36.gif",
-            "img/0.gif",
-            "img/1.gif",
-            "img/2.gif",
-            "img/3.gif",
-            "img/4.gif",
-            "img/5.gif",
-            "img/6.gif"
-        ];
-
-        res.render('5th-lab-tests/Short-termMemoryTest', {images: images, allImages: allImages});
+        res.render('5th-lab-tests/Short-termMemoryTest', { images: [], allImages: [] });
     }
+});
+
+server.get('/get_images', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({error: 'Not authenticated'});
+    }
+
+    const difficulty = req.query.difficulty || 'easy';
+    let images, allImages;
+
+    if (difficulty === 'all') {
+        // Возвращает все изображения для любого уровня сложности
+        allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+        return res.json({ images: [], allImages });
+    }
+
+    switch(difficulty) {
+        case 'easy':
+            images = ["img/0.gif", "img/4.gif", "img/5.gif", "img/11.gif"];
+            allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+            break;
+        case 'medium':
+            images = ["img/2.gif", "img/3.gif", "img/6.gif", "img/19.gif", "img/28.gif"];
+            allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+            break;
+        case 'hard':
+            images = ["img/0.gif", "img/4.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif"];
+            allImages = ["img/0.gif", "img/1.gif", "img/2.gif", "img/3.gif", "img/4.gif", "img/5.gif", "img/6.gif", "img/11.gif", "img/19.gif", "img/28.gif", "img/36.gif"];
+            break;
+    }
+
+    res.json({ images, allImages });
 });
 
 server.get('/math_sound', (req, res) => {
