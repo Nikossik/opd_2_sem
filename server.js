@@ -629,7 +629,7 @@ server.get('/poll_1_part_1', async (req, res) => {
     if (!checkAdmin) {
         res.redirect('/')
     } else {
-        res.render('1stTest1stPart', {professions});
+        res.render('1stTest1stPart', {'professions': professions, 'adminUser': checkAdmin});
     }
 })
 
