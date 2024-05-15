@@ -397,7 +397,7 @@ server.get('/compare_test', (req, res) => {
 })
 
 // Рендеринг статической страницы без передачи изображений
-server.get('/memory_test_page', (req, res) => {
+server.get('/memory_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login');
     } else {

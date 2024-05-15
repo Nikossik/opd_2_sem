@@ -9,9 +9,7 @@
 <div class="container">
     <h1>Проверка кратковременной памяти</h1>
     <div id="difficultySelection">
-        <button onclick="startTest('easy')">Легкий уровень - 2.5 мин</button>
-        <button onclick="startTest('medium')">Средний уровень - 2 мин</button>
-        <button onclick="startTest('hard')">Сложный уровень - 1 мин</button>
+        <button onclick="startTest()">Начать тест</button>
     </div>
     <div id="memoryImages" style="display: none;">
         <p>Запомните эти фигуры:</p>
@@ -21,7 +19,7 @@
     <div id="testImages" style="display: none;">
         <p>Щелкайте по картинкам, которые вы запомнили.</p>
         <div id="allImages"></div>
-        <button onclick="evaluateResults('Тест завершен!')">Проверить результат</button>
+        <button id="nextLevelButton" onclick="evaluateAndNextLevel()">Далее</button>
     </div>
     <div id="results" style="display: none; padding: 10px; background-color: #f8f8f8; border: 1px solid #ccc; margin-top: 20px;"></div>
     <div id="timerDisplay" style="font-size: 24px; color: black; margin-top: 10px;"></div>
@@ -34,14 +32,25 @@
 <script>
     var correctImages = []; // Массив с правильными изображениями
     var selectedImages = []; // Массив с выбранными пользователем изображениями
+    var currentLevel = 0; // Текущий уровень теста
+    const levels = ['easy', 'medium', 'hard']; // Последовательность уровней сложности
+    var results = []; // Результаты всех уровней
+    var timeRemaining; // Переменная для хранения оставшегося времени
 
-    function startTest(difficulty) {
-        const timeLimits = {
-            easy: 150, // 2.5 минуты в секундах
-            medium: 120, // 2 минуты
-            hard: 60 // 1 минута
-        };
-        let timeRemaining = timeLimits[difficulty] || 150; // Установка времени в зависимости от сложности
+    function startTest() {
+        currentLevel = 0; // Начинаем с легкого уровня
+        results = []; // Очистить результаты
+        nextLevel(); // Переходим к следующему уровню
+    }
+
+    function nextLevel() {
+        if (currentLevel >= levels.length) {
+            showFinalResults();
+            return;
+        }
+
+        const difficulty = levels[currentLevel];
+        timeRemaining = getTimeLimit(difficulty); // Получаем время для текущего уровня
 
         fetch(`/get_images?difficulty=${difficulty}`)
         .then(response => response.json())
@@ -62,6 +71,19 @@
         })
         .catch(error => console.error('Ошибка при загрузке изображений:', error));
 
+        startTimer();
+    }
+
+    function getTimeLimit(difficulty) {
+        const timeLimits = {
+            easy: 150, // 2.5 минуты в секундах
+            medium: 120, // 2 минуты
+            hard: 60 // 1 минута
+        };
+        return timeLimits[difficulty] || 150; // Установка времени в зависимости от сложности
+    }
+
+    function startTimer() {
         const timerDisplay = document.getElementById('timerDisplay');
         timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
         window.timerInterval = setInterval(() => {
@@ -69,7 +91,7 @@
             timerDisplay.textContent = `Оставшееся время: ${timeRemaining} сек.`;
             if (timeRemaining <= 0) {
                 clearInterval(timerInterval);
-                evaluateResults("Время вышло!"); // Переход к результатам
+                evaluateAndNextLevel("Время вышло! Переход к следующему заданию.");
             }
         }, 1000);
     }
@@ -89,6 +111,7 @@
                 imagesContainer.appendChild(img);
             });
             document.getElementById('testImages').style.display = 'block';
+            document.getElementById('nextLevelButton').style.display = 'block';
         })
         .catch(error => {
             console.error('Ошибка при загрузке изображений для теста:', error);
@@ -103,7 +126,7 @@
         const isCorrect = correctImages.some(correct => getBaseName(correct) === baseName);
 
         if (!isCorrect) {
-            evaluateResults("Вы выбрали неправильное изображение. Тест завершен.");
+            evaluateAndNextLevel("Вы выбрали неправильное изображение. Переход к следующему заданию.");
             return; // Завершаем функцию, если изображение неправильное
         }
 
@@ -123,38 +146,40 @@
         return url.substring(url.lastIndexOf('/') + 1);
     }
 
-    async function sendData() {
-        const correctCount = selectedImages.filter(selected => {
-            const selectedBaseName = getBaseName(selected);
-            return correctImages.some(correct => getBaseName(correct) === selectedBaseName);
-        }).length;
+    async function sendResults() {
+        const finalResults = {
+            levels: results,
+            totalCorrect: results.reduce((sum, levelResult) => sum + levelResult.correctCount, 0),
+            totalImages: results.reduce((sum, levelResult) => sum + levelResult.totalCount, 0)
+        };
+        console.log('Final results:', finalResults);
 
         const data = {
-            testType: "short_term_memory_test",
-            result: correctCount
-        }
+            testType: "memory_test",
+            accuracy: finalResults.totalCorrect / finalResults.totalImages
+        };
 
-        let url = ''
-        const urlObject = new URL(window.location.href)
+        let url = '';
+        const urlObject = new URL(window.location.href);
 
         if (urlObject.searchParams.has('data')) {
-            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+            url += '/memory_test?data=' + urlObject.searchParams.get('data');
         } else {
-            url += '/abstract_test'
+            url += '/memory_test';
         }
 
-        await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {'Content-Type': 'application/json'},
-        })
-            .then(res => {
-                console.log(res)
-                // Redirect to another URL
-                window.location.href = res.url;
-            })
-            .catch(error => console.error(error));
-
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            });
+            const result = await response.json();
+            console.log('Success:', result);
+            window.location.href = response.url; // Перенаправление на другой URL
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     function restartTest() {
@@ -164,43 +189,63 @@
         document.getElementById('results').style.display = 'none';
         document.getElementById('resultButtons').style.display = 'none';
         document.getElementById('timerDisplay').style.display = 'none';
+        document.getElementById('nextLevelButton').style.display = 'none';
         // Очистите все переменные или состояния, если это необходимо
         correctImages = [];
         selectedImages = [];
+        currentLevel = 0; // Сброс уровня
+        results = []; // Очистить результаты
     }
 
-    function evaluateResults(message) {
+    function evaluateAndNextLevel(message = "Переход к следующему заданию.") {
+        clearInterval(window.timerInterval); // Остановить таймер
+        evaluateResults(); // Сохранить результат текущего задания
+        currentLevel++; // Увеличить уровень
+        document.getElementById('testImages').style.display = 'none'; // Скрыть все картинки
+        document.getElementById('allImages').innerHTML = ''; // Очистить контейнер с картинками
+        nextLevel(); // Переход к следующему уровню
+    }
+
+    function evaluateResults() {
         console.log("Вызов функции evaluateResults");
         console.log("Выбранные изображения: ", selectedImages);
         console.log("Правильные изображения: ", correctImages);
-
-        clearInterval(window.timerInterval); // Очистка текущего интервала таймера
-        timerDisplay.textContent = message;
 
         const correctCount = selectedImages.filter(selected => {
             const selectedBaseName = getBaseName(selected);
             return correctImages.some(correct => getBaseName(correct) === selectedBaseName);
         }).length;
 
-        const resultText = `Вы правильно запомнили: ${correctCount} изображений из ${correctImages.length}.`;
+        results.push({
+            level: levels[currentLevel],
+            correctCount: correctCount,
+            totalCount: correctImages.length
+        });
+
+        console.log(`Результаты уровня ${levels[currentLevel]}: ${correctCount} из ${correctImages.length}`); // Для отладки
+    }
+
+    function showFinalResults() {
+        clearInterval(window.timerInterval); // Очистка текущего интервала таймера
+        document.getElementById('timerDisplay').style.display = 'none'; // Скрыть таймер
+
+        const finalResults = results.map((result, index) => {
+            return `Задание ${index + 1} (${result.level}): ${result.correctCount} из ${result.totalCount}`;
+        }).join(' ');
+        const totalCorrect = results.reduce((sum, levelResult) => sum + levelResult.correctCount, 0);
+        const totalImages = results.reduce((sum, levelResult) => sum + levelResult.totalCount, 0);
+
+        const resultText = `Итоговые результаты: ${finalResults} Всего правильно: ${totalCorrect} из ${totalImages}`;
         const resultsElement = document.getElementById('results');
         resultsElement.textContent = resultText;
         resultsElement.style.display = 'block'; // Устанавливаем элемент как видимый
-
-        document.getElementById('testImages').style.display = 'none';
-
-
-        // Удаление класса анимации после ее выполнения
-        setTimeout(() => {
-            resultsElement.classList.remove('result-fade-in');
-        }, 3000); // Анимация длится 3 секунды
 
         console.log(resultText); // Для отладки
 
         // Показать кнопки для отправки результатов и перезапуска теста
         document.getElementById('resultButtons').style.display = 'block';
+        document.getElementById('nextLevelButton').style.display = 'none';
     }
-    
 </script>
 </body>
 </html>
