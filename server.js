@@ -465,7 +465,7 @@ server.get('/tests_list', (req, res) => {
         res.redirect('/login')
         return
     }
-    res.render('TestListPage')
+    res.render('TestListPage', {'loggedIn': req.isAuthenticated(), 'adminUser': req.user.isAdmin})
 })
 
 server.post('/get_tests_from_db', async (req, res) => {
