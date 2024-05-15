@@ -204,8 +204,7 @@ const testToQualityMap = {
     'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
     'short_term_memory_test': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
     'myunsterberg_test': [98, 121], // Умственная работоспособность, Способность к распределению внимания между несколькими объектами или видами деятельности
-    'comparison_mind': [12, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
-    'attention_assessment_test': [118, 48], // Концентрированность внимания, Логичность мышления
+    'compare_test': [12, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
     'abstract_thinking_test': [45, 48, 42, 52], // Аналитичность мышления, Логичность мышления, Способность наглядно представлять себе новое явление, Образность мышления
     'abstract_test': [49, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
 };
@@ -1095,7 +1094,6 @@ server.post('/add_profession', async (req, res) => {
 
 async function getUserTestResults(userId, relevantPvk) {
     try {
-        // Преобразование строковых ПВК в числовые идентификаторы
         const relevantPvkIds = relevantPvk.map(pvkName => {
             for (let id in char_dict) {
                 if (char_dict[id] === pvkName) {
@@ -1111,15 +1109,9 @@ async function getUserTestResults(userId, relevantPvk) {
             where: { user: userId }
         });
 
-        console.log('All testResults:', testResults);
-
-        // Найдем все тесты, которые соответствуют нужным ПВК
-        const relevantTests = [];
-        for (const [testType, pvkIds] of Object.entries(testToQualityMap)) {
-            if (pvkIds.some(pvkId => relevantPvkIds.includes(pvkId))) {
-                relevantTests.push(testType);
-            }
-        }
+        const relevantTests = Object.keys(testToQualityMap).filter(testType =>
+            testToQualityMap[testType].some(pvk => relevantPvkIds.includes(pvk))
+        );
 
         console.log('relevantTests:', relevantTests);
 
@@ -1127,7 +1119,7 @@ async function getUserTestResults(userId, relevantPvk) {
 
         console.log('filteredTestResults:', filteredTestResults);
 
-        return filteredTestResults;
+        return { filteredTestResults, totalTestsCount: testResults.length };
     } catch (error) {
         console.error('Error retrieving user test results:', error);
         throw error;
@@ -1135,7 +1127,12 @@ async function getUserTestResults(userId, relevantPvk) {
 }
 
 
-async function calculateMetric(testResults, totalTestsCount) {
+
+function getCharDictKeyByValue(value) {
+    return Object.keys(char_dict).find(key => char_dict[key] === value);
+}
+
+async function calculateMetric(testResults, totalTestsCount, qualities) {
     const averageValues = {
         'sound': 270,
         'light': 0,
@@ -1156,31 +1153,30 @@ async function calculateMetric(testResults, totalTestsCount) {
         'abstract_test': 3,
     };
 
-    const weights = {
-        2: 8,
-        6: 7,
-        7: 6,
-        8: 5,
-        9: 4,
-        10: 3,
-        12: 2, // Трудолюбие
-        11: 2, // Ответственность
-        3: 2, // Организованность
-    };
+    // Присваиваем веса на основе порядка важности ПВК
+    const weights = {};
+    qualities.forEach((quality, index) => {
+        const key = getCharDictKeyByValue(quality.characteristic);
+        weights[key] = 10 - index; // Приоритет от 10 до 1
+    });
 
     let totalScore = 0;
 
-    // Учитываем общее количество пройденных тестов
-    const testCountScore = totalTestsCount >= 9 ? 2 : totalTestsCount >= 8 ? 1 : 0;
-    totalScore += testCountScore;
+    // Максимальный возможный вес
+    const maxTotalScore = Array.from({ length: totalTestsCount }, (_, i) => 10 - i)
+        .reduce((acc, val) => acc + val, 0);
 
-    for (const [testType, quality] of Object.entries(testToQualityMap)) {
+    for (const [testType, qualityIds] of Object.entries(testToQualityMap)) {
         const result = testResults.find(test => test.type === testType);
         if (result) {
             const userValue = parseFloat(result.result);
             const averageValue = averageValues[testType];
-            const weight = Array.isArray(quality) ? Math.max(...quality.map(q => weights[q])) : weights[quality];
-            if (userValue >= averageValue) {
+            const qualityWeights = qualityIds.map(q => weights[q] || 0);
+            const weight = Math.max(...qualityWeights);
+
+            console.log(`Calculating score for test type ${testType}: userValue = ${userValue}, averageValue = ${averageValue}, weight = ${weight}`);
+
+            if (userValue >= averageValue * 1.1) {
                 totalScore += weight;
             } else if (userValue >= averageValue * 0.9) {
                 totalScore += weight / 2;
@@ -1188,14 +1184,21 @@ async function calculateMetric(testResults, totalTestsCount) {
         }
     }
 
-    if (totalScore >= 27) {
-        return 1;
-    } else if (totalScore >= 22) {
-        return 2;
+    console.log('totalScore:', totalScore);
+    console.log('maxTotalScore:', maxTotalScore);
+
+    const scorePercentage = (totalScore / maxTotalScore) * 100;
+
+    if (scorePercentage >= 75) {
+        return 1; // Профессия рекомендуется
+    } else if (scorePercentage >= 55) {
+        return 2; // Рекомендуется развить некоторые ПВК
     } else {
-        return 3;
+        return 3; // Профессия не рекомендуется
     }
 }
+
+
 
 
 server.get('/professions_:id', async (req, res) => {
@@ -1214,30 +1217,23 @@ server.get('/professions_:id', async (req, res) => {
             const qualities = await aggregateExpertRatings(profession.profession);
 
             const relevantPvk = qualities.map(quality => quality.characteristic);
-            console.log('relevantPvk:', relevantPvk);
+            const { filteredTestResults, totalTestsCount } = await getUserTestResults(userID, relevantPvk);
+            const metric = await calculateMetric(filteredTestResults, totalTestsCount, qualities);
 
-            const testResults = await getUserTestResults(userID, relevantPvk);
-            const totalTestsCount = await StatisticAll.count({
-                where: { user: userID }
-            });
-            const metric = await calculateMetric(testResults, totalTestsCount);
-            console.log('metric:', metric);
-            console.log('testResults:', testResults);
-            console.log('totalTestsCount:', totalTestsCount);
             console.log('qualities:', qualities);
 
             res.render('ProfessionPage', {
                 profession: profession,
                 characteristics: characteristics,
                 qualities: qualities,
-                testResults: testResults,
+                testResults: filteredTestResults,
+                totalTestsCount: totalTestsCount,
                 metric: metric,
                 loggedIn: req.isAuthenticated(),
                 adminUser: req.user.isAdmin,
                 testToQualityMap: testToQualityMap,
                 char_dict: char_dict,
-                relevantPvk: relevantPvk,
-                totalTestsCount: totalTestsCount
+                relevantPvk: relevantPvk
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
