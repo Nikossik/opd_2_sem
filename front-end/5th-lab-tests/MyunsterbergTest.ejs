@@ -50,6 +50,7 @@
     let results = [];
     let timeRemaining;
     let timerInterval; // Таймер интервала
+
     const data = {
         easy: {
             sequence: "Ривырмпиыомпшыибогадельнятиваопрдлабризтмыдмиоытермоситовлимлюырагуашьижыртшкжщталезвиеиылрмивомиюлутшмрзакисьтлмдипкирккабантволюяиомялмиолы",
@@ -146,9 +147,10 @@
         const level = levels[currentLevel];
         const levelData = data[level];
         const checkedValues = Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(el => el.value);
-        document.getElementById('final-submit-button').style.display = 'block';
+        const correctCount = checkedValues.filter(value => levelData.answers.includes(value)).length;
+        const incorrectCount = checkedValues.filter(value => !levelData.answers.includes(value)).length;
+        const missedCount = levelData.answers.filter(answer => !checkedValues.includes(answer)).length;
 
-        // Подсчет правильных ответов
         results.push({
             level: level,
             correctCount: correctCount,
