@@ -29,12 +29,14 @@
           <% if (loggedIn) { %>
             <li><a href="/characteristics">ПРОФЕССИИ</a></li>
           <% } %>
-
+          <% if (loggedIn) { %>
+            <li><a href="/my_page">МОЙ ПРОФИЛЬ</a></li>
+          <% } %>
           <% if (adminUser) { %>
             <li><a href="/poll_1_part_1">ОПРОС</a></li>
           <% } %>
 
-          <% if (adminUser) { %>
+          <% if (adminUser || respondentUser) { %>
             <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
           <% } %>
           <% if (adminUser) { %>
@@ -43,8 +45,14 @@
           <% if (adminUser) { %>
             <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
           <% } %>
+          <% if (adminUser) { %>
+            <li><a href="/add_heart_rate">ПУЛЬС</a></li>
+          <% } %>
           <% if (loggedIn) { %>
             <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+          <% } %>
+          <% if (adminUser || respondentUser) { %>
+            <li><a href="/tests_list">СПИСОК ТЕСТОВ</a></li>
           <% } %>
           <% if (loggedIn) { %>
             <li><a href="/logout">ВЫЙТИ</a></li>
