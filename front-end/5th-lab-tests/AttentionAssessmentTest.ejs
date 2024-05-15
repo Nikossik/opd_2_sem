@@ -213,19 +213,22 @@
                 reactionTimings.slice(6).reduce((a, b) => a + b, 0) / 3
             ];
 
+            if (isNaN(averageReactionTimes)) {
+                averageReactionTimes = 0;
+            }
+
             const data = {
-                testType: "3_colors",
-                reactionTimings: averageReactionTimes,
-                accuracy: correctTestCounter / totalQuestions
+                testType: "attention_assessment_test",
+                result: averageReactionTimes
             };
 
             let url = '';
             const urlObject = new URL(window.location.href);
 
             if (urlObject.searchParams.has('data')) {
-                url += '/complex_reaction_test?data=' + encodeURIComponent(urlObject.searchParams.get('data'));
+                url += '/abstract_test?data=' + encodeURIComponent(urlObject.searchParams.get('data'));
             } else {
-                url += '/complex_reaction_test';
+                url += '/abstract_test';
             }
 
             await fetch(url, {

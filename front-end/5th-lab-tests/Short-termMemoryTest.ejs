@@ -30,6 +30,7 @@
 </div>
 
 <script>
+    let correctAllCount = 0;
     var correctImages = []; // Массив с правильными изображениями
     var selectedImages = []; // Массив с выбранными пользователем изображениями
     var currentLevel = 0; // Текущий уровень теста
@@ -182,6 +183,35 @@
         }
     }
 
+    async function sendData() {
+            const data = {
+                testType: "short_term_memory_test",
+                result: correctAllCount
+            }
+
+            let url = ''
+            const urlObject = new URL(window.location.href)
+
+            if (urlObject.searchParams.has('data')) {
+                url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+            } else {
+                url += '/abstract_test'
+            }
+
+            await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            })
+                .then(res => {
+                    console.log(res)
+                    // Redirect to another URL
+                    window.location.href = res.url;
+                })
+                .catch(error => console.error(error));
+
+        }
+
     function restartTest() {
         document.getElementById('difficultySelection').style.display = 'block';
         document.getElementById('memoryImages').style.display = 'none';
@@ -239,6 +269,8 @@
         const resultsElement = document.getElementById('results');
         resultsElement.textContent = resultText;
         resultsElement.style.display = 'block'; // Устанавливаем элемент как видимый
+
+        correctAllCount = totalCorrect;
 
         console.log(resultText); // Для отладки
 

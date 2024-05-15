@@ -39,10 +39,11 @@
     <button id="start-button" onclick="startTest()">Начать тест</button>
     <button id="next-button" class="hidden" onclick="showNextLevel()">Далее</button>
     <button id="restart-button" class="hidden" onclick="restartTest()">Пройти заново</button>
-    <button id="send-results-button" class="hidden" onclick="sendResults()">Отправить результат</button>
+    <button id="send-results-button" class="hidden" onclick="sendData()">Отправить результат</button>
 </div>
 
 <script>
+    let correctAllCount = 0;
     const levels = ['easy', 'medium', 'hard']; // Уровни сложности
     let currentLevel = 0;
     let correctImages = [];
@@ -191,9 +192,11 @@
         resultsElement.classList.remove('hidden');
         document.getElementById('restart-button').classList.remove('hidden');
         document.getElementById('send-results-button').classList.remove('hidden');
+
+        let correctAllCount = totalCorrect;
     }
 
-    async function sendResults() {
+    /* async function sendResults() {
         const finalResults = {
             levels: results,
             totalCorrect: results.reduce((sum, levelResult) => sum + levelResult.correctCount, 0),
@@ -226,7 +229,7 @@
         } catch (error) {
             console.error('Error:', error);
         }
-    }
+    } */
 
     function restartTest() {
         currentLevel = 0;
@@ -243,6 +246,31 @@
         document.getElementById('timerDisplay').style.display = 'none';
         document.getElementById('results').classList.add('hidden');
         clearInterval(timerInterval); // Остановка таймера
+    }
+
+    async function sendData() {
+        const data = {
+            testType: "myunsterberg_test",
+            result: correctAllCount
+        }
+        let url = ''
+        const urlObject = new URL(window.location.href)
+        if (urlObject.searchParams.has('data')) {
+            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/abstract_test'
+        }
+        await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
+            })
+            .catch(error => console.error(error));
     }
 </script>
 </body>
