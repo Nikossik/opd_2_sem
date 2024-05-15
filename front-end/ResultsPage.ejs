@@ -125,19 +125,18 @@
             select.innerHTML += "<option value=\"stalking_test\">Тест на слежение</option>"
 
             document.getElementById("choose-test").appendChild(select)
-        }
-        else if (type === "abstractionTest"){
+        } else if (type === "abstractionTest"){
             const select = document.createElement("select")
             select.id = "select-test"
 
             select.innerHTML += "<option value=\"\">-</option>"
-            select.innerHTML += "<option value=\"abstract_test\">Тест на простое движение</option>"
-            select.innerHTML += "<option value=\"abstract_thinking_test\">Тест на сложное движение</option>"
-            select.innerHTML += "<option value=\"attention_assessment_test\">Тест на аналоговое слежение</option>"
-            select.innerHTML += "<option value=\"myunsterberg_test\">Тест на слежение</option>"
-            select.innerHTML += "<option value=\"comparison_mind\">Тест на слежение</option>"
-            select.innerHTML += "<option value=\"short_term_memory\">Тест на слежение</option>"
-            select.innerHTML += "<option value=\"random_access_memory\">Тест на слежение</option>"
+            select.innerHTML += "<option value=\"abstract_test\">Тест на абстракцию</option>"
+            select.innerHTML += "<option value=\"abstract_thinking_test\">Тест на абстрактное мышление</option>"
+            select.innerHTML += "<option value=\"attention_assessment_test\">Тест на внимательность</option>"
+            select.innerHTML += "<option value=\"myunsterberg_test\">Тест Мустенберга</option>"
+            select.innerHTML += "<option value=\"comparison_mind\">Тест на сравнение</option>"
+            select.innerHTML += "<option value=\"short_term_memory\">Тест на короткую память</option>"
+            select.innerHTML += "<option value=\"random_access_memory\">Тест на долгосрочную память</option>"
 
             document.getElementById("choose-test").appendChild(select)
         }
