@@ -233,6 +233,29 @@ select {
     opacity: .95;
 }
 
+.addHeartRateDuring {
+    border-radius: 10px;
+    display: inline-block; 
+    border: none;
+    background-color: rgb(123, 83, 234);
+    color: white;
+    padding: 1rem 2rem; 
+    transition: opacity .6s ease-in-out;
+    text-decoration: none;
+    font-size: 1rem;
+    letter-spacing: 0.2rem;
+    font-weight: 500;
+    vertical-align: middle;  
+    cursor: pointer;
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 15px;
+}
+
+.addHeartRateDuring:hover {
+    opacity: .95;
+}
+
 form {
     border-radius: 6px;
     display: flex;

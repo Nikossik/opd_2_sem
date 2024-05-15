@@ -40,13 +40,13 @@
                     <option value="hard_action">Hard Action Test</option>
                     <option value="analog_tracking_test">Analog Tracking Test</option>
                     <option value="analog_tracking_test">Stalking Test</option>
-                    <!-- <option value="AbstractTest">Abstract Test</option>
+                    <option value="AbstractTest">Abstract Test</option>
                     <option value="AbstractThinkingTest">Abstract Thinking Test</option>
                     <option value="AttentionAssessmentTest">Attention Assessment Test</option>
                     <option value="ComprasionMindTest">Comprasion Mind Test</option>
                     <option value="MyunsterbergTest">Myunsterberg Test</option>
                     <option value="RandomAccessMemoryTest">Random Access Memory Test</option>
-                    <option value="Short-termMemoryTest">Short-term Memory Test</option> -->
+                    <option value="Short-termMemoryTest">Short-term Memory Test</option>
                 </select>
             </div>
 
@@ -55,10 +55,14 @@
                 <input type="text" id="heartRateBefore" name="heartRateBefore" class="input">
             </div>
 
-            <div>
-                <label for="heartRateDuring">Частота сердечных сокращений во время прохождения теста:</label>
-                <input type="text" id="heartRateDuring" name="heartRateDuring" class="input">
+            <div id="heartRateDuringContainer">
+                <label>Частота сердечных сокращений во время прохождения теста:</label>
+                <div class="heartRateDuringInputs">
+                    <input type="text" name="heartRateDuring[]" class="input heartRateDuring">
+                    <button class="addHeartRateDuring" type="button" id="addHeartRateDuring">Добавление строки!</button>
+                </div>
             </div>
+
 
             <div>
                 <label for="heartRateAfter">Частота сердечных сокращений после прохождения теста:</label>
@@ -71,9 +75,33 @@
                 <% } %>
             </div>
 
-            <button class="first-button" type="submit">Отправить</button>  
+            <button class="first-button" type="submit">Отправить</button> 
+            
+            <input type="hidden" id="heartRateDuringValues" name="heartRateDuring" value="">
         </form>
     </section>
 
+    <script>
+        document.getElementById("addHeartRateDuring").addEventListener("click", function() {
+            var container = document.getElementById("heartRateDuringContainer");
+            var input = document.createElement("input");
+            input.type = "text";
+            input.name = "heartRateDuring[]";
+            input.className = "input heartRateDuring";
+            container.appendChild(input);
+            container.appendChild(document.createElement("br"));
+            container.appendChild(this);
+        });
+
+        document.querySelector("form").addEventListener("submit", function(event) {
+            var inputs = document.querySelectorAll(".heartRateDuring");
+            var values = [];
+            inputs.forEach(function(input) {
+                values.push(input.value);
+            });
+            document.getElementById("heartRateDuringValues").value = values.slice(0, -1 * values.length);
+        });
+
+    </script>
 </body>
 </html>

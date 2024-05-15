@@ -171,12 +171,30 @@ async function getProfessionCharacteristics(professionId) {
     }
 }
 
-async function getHeartCheck(HeartRateBefore, HeartRateAfter) {
-    if (HeartRateBefore <= HeartRateAfter) {
+async function getHeartCheck(heartRateBefore, heartRateDuringValues, heartRateAfter) {
+    /* if (heartRateBefore >= heartRateAfter) {
         return true;
     } else {
         return false;
+    } */
+    const lowerLimit = 60;
+    const upperLimit = 100;
+
+    if (heartRateBefore < lowerLimit || heartRateBefore > upperLimit) {
+        return false;
     }
+
+    for (let heartRateDuring of heartRateDuringValues) {
+        if (heartRateDuring < lowerLimit || heartRateDuring > upperLimit) {
+            return false;
+        }
+    }
+
+    if (heartRateAfter < lowerLimit || heartRateAfter > upperLimit) {
+        return false;
+    }
+
+    return true;
 }
 
 async function getResultNumberTest(user, testType, type) {

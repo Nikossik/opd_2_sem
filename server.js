@@ -1248,11 +1248,6 @@ server.get('/professions_:id', async (req, res) => {
     }
 });
 
-
-
-
-
-
 server.get('/add_heart_rate', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
@@ -1264,27 +1259,31 @@ server.get('/add_heart_rate', (req, res) => {
 
 server.post('/add_heart_rate', async (req, res) => {
     if (!req.isAuthenticated()) {
-        res.redirect('/login')
-        return
+        res.redirect('/login');
+        return;
     }
 
-    const {respondentID, testType, heartRateBefore, heartRateDuring, heartRateAfter} = req.body;
-    const check = await getHeartCheck(heartRateBefore, heartRateAfter);
+    const { respondentID, testType, heartRateBefore, heartRateAfter } = req.body;
+    const heartRateDuringValues = req.body.heartRateDuring;
+
+    const check = await getHeartCheck(heartRateBefore, heartRateDuringValues, heartRateAfter);
+
     try {
         await HeartRate.create({
             respondentID,
             testType,
             heartRateBefore,
-            heartRateDuring,
+            heartRateDuring: heartRateDuringValues,
             heartRateAfter,
             check
         });
 
         res.redirect('/add_heart_rate');
     } catch (error) {
-        res.render('AddHeartRate', {error: error.message});
+        res.render('AddHeartRate', { error: error.message });
     }
 });
+
 
 server.get('/my_page', (req, res) => {
     if (!req.isAuthenticated()) {
