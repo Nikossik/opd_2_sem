@@ -69,6 +69,7 @@
     <option value="reactionTest">Оценка простых сенсомоторных реакций человека</option>
     <option value="complexReactionTest">Оценка сложных сенсомоторных реакций человека</option>
     <option value="accuracyTest">Оценка точности</option>
+    <option value="abstractionTest">Тесты абстаркции</option>
 </select>
 
 <div id="input-for-id"></div>
@@ -122,6 +123,21 @@
             select.innerHTML += "<option value=\"hard_action\">Тест на сложное движение</option>"
             select.innerHTML += "<option value=\"analog_tracking_test\">Тест на аналоговое слежение</option>"
             select.innerHTML += "<option value=\"stalking_test\">Тест на слежение</option>"
+
+            document.getElementById("choose-test").appendChild(select)
+        }
+        else if (type === "abstractionTest"){
+            const select = document.createElement("select")
+            select.id = "select-test"
+
+            select.innerHTML += "<option value=\"\">-</option>"
+            select.innerHTML += "<option value=\"abstract_test\">Тест на простое движение</option>"
+            select.innerHTML += "<option value=\"abstract_thinking_test\">Тест на сложное движение</option>"
+            select.innerHTML += "<option value=\"attention_assessment_test\">Тест на аналоговое слежение</option>"
+            select.innerHTML += "<option value=\"myunsterberg_test\">Тест на слежение</option>"
+            select.innerHTML += "<option value=\"comparison_mind\">Тест на слежение</option>"
+            select.innerHTML += "<option value=\"short_term_memory\">Тест на слежение</option>"
+            select.innerHTML += "<option value=\"random_access_memory\">Тест на слежение</option>"
 
             document.getElementById("choose-test").appendChild(select)
         }
@@ -283,6 +299,20 @@
                     tableRow += "<td>" + data[i].user +"</td>"
                     tableRow += "<td>" + data[i].type +"</td>"
                     tableRow += "<td>" + data[i].accuracy +"</td>"
+                    tableRow += "</td>"
+
+                    tbody.innerHTML += tableRow
+                    tableRow = ""
+                }
+            } else if (type === "abstractionTest"){
+                thead.innerHTML += "<th>ID</th><th>User</th><th>Type</th><th>Result</th>"
+
+                for(let i=0;i<data.length;i++){
+                    tableRow += "<tr>"
+                    tableRow += "<td>" + data[i].id +"</td>"
+                    tableRow += "<td>" + data[i].user +"</td>"
+                    tableRow += "<td>" + data[i].type +"</td>"
+                    tableRow += "<td>" + data[i].result +"</td>"
                     tableRow += "</td>"
 
                     tbody.innerHTML += tableRow
