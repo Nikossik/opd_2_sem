@@ -97,6 +97,28 @@ async function filterTest(type, username, testId, testType){
         } else {
             return await AccuracyTest.findAll()
         }
+    } else if(type === "abstractionTest") {
+        if (testId){
+            return await AbstractTest.findByPk(testId)
+        }
+
+        let filters = {}
+
+        if (userId){
+            filters["user"] = userId
+        }
+
+        if(testType){
+            filters["type"] = testType
+        }
+
+        if (filters){
+            return await AbstractTest.findAll({
+                where : filters
+            })
+        } else {
+            return await AbstractTest.findAll()
+        }
     }
 }
 
