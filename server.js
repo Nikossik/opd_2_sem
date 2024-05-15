@@ -848,6 +848,39 @@ server.post('/accuracy_test', async (req, res) => {
     }
 })
 
+server.post('/abstract_test', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+        return
+    }
+
+    const user = req.user.id
+    const type = req.body.testType
+    const result = req.body.result
+
+    let data = null
+
+    if (req.query.data) {
+        data = JSON.parse(decodeURIComponent(req.query.data))
+    }
+
+    try {
+        const abstracttest = await AbstractTest.create({user, type, result})
+
+        if (data) {
+            if (data.i - 1 !== data.tests.length) {
+                res.redirect('/' + data.tests[data.i - 1] + '?data=' + encodeURIComponent(JSON.stringify(data)))
+            } else {
+                res.redirect('/polls_results')
+            }
+        } else {
+            return res.redirect('/polls_results')
+        }
+    } catch (e) {
+        console.log(e)
+    }
+})
+
 
 server.post('/create_invite', async (req, res) => {
     if (!req.isAuthenticated()) {

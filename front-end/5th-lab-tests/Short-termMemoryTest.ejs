@@ -124,18 +124,23 @@
     }
 
     async function sendData() {
+        const correctCount = selectedImages.filter(selected => {
+            const selectedBaseName = getBaseName(selected);
+            return correctImages.some(correct => getBaseName(correct) === selectedBaseName);
+        }).length;
+
         const data = {
             testType: "short_term_memory_test",
-            accuracy: correctAnswers / tasks.length
+            result: correctCount
         }
 
         let url = ''
         const urlObject = new URL(window.location.href)
 
         if (urlObject.searchParams.has('data')) {
-            url += '/accuracy_test?data=' + urlObject.searchParams.get('data')
+            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
         } else {
-            url += '/accuracy_test'
+            url += '/abstract_test'
         }
 
         await fetch(url, {
@@ -181,6 +186,9 @@
         const resultsElement = document.getElementById('results');
         resultsElement.textContent = resultText;
         resultsElement.style.display = 'block'; // Устанавливаем элемент как видимый
+
+        document.getElementById('testImages').style.display = 'none';
+
 
         // Удаление класса анимации после ее выполнения
         setTimeout(() => {

@@ -156,16 +156,16 @@
     async function sendData() {
         const data = {
             testType: "abstract_thinking_test",
-            accuracy: score / 6
+            result: score
         }
 
         let url = ''
         const urlObject = new URL(window.location.href)
 
         if (urlObject.searchParams.has('data')) {
-            url += '/accuracy_test?data=' + urlObject.searchParams.get('data')
+            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
         } else {
-            url += '/accuracy_test'
+            url += '/abstract_test'
         }
 
         await fetch(url, {
