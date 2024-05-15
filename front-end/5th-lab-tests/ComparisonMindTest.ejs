@@ -23,7 +23,7 @@
     <div id="results" style="display: none;"></div>
     <div id="test-controls">
         <button id="startButton" onclick="startTest(0)">Начать тест</button>
-        <button id="final-submit-button" onclick="sendFinalResults()" style="display: none;">Отправить результат</button>
+        <button id="final-submit-button" onclick="sendData()" style="display: none">Отправить результат</button>
         <button id="restart-button" onclick="restartTest()" style="display: none">Начать заново</button>
     </div>
 </div>
@@ -43,6 +43,7 @@
     const testDuration = [60, 120, 150]; // В секундах
     let results = []; // Сохраняем результаты пользователя
     let timer, inputTimer;
+    let sum = 0;
 
     function startTest(index) {
         currentTestIndex = index;
@@ -73,28 +74,69 @@
         let resultHTML = "<h2>Результаты теста:</h2>";
         results.forEach((result, index) => {
             resultHTML += `<p>Вопрос ${index + 1}: Найдено ${result.found} из ${result.total} отличий.</p>`;
+            sum += parseInt(result.found);
         });
         document.getElementById('results').innerHTML = resultHTML; // Отображаем результаты
         document.getElementById('results').style.display = 'block'; // Показываем блок результатов
     }
 
 
-    function sendFinalResults() {
-        const data = {results};
-        fetch('/submit-results', {
+    /* async function sendData() {
+        const data = {
+            testType: "compare_test",
+            result: correctAnswers
+        }
+
+        let url = ''
+        const urlObject = new URL(window.location.href)
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/abstract_test'
+        }
+
+        await fetch(url, {
             method: 'POST',
+            body: JSON.stringify(data),
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                alert('Результаты успешно отправлены!');
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
             })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('Ошибка при отправке результатов.');
-            });
+            .catch(error => console.error(error));
+
+    } */
+
+    async function sendData() {
+        const data = {
+            testType: "compare_test",
+            result: sum
+        }
+
+        let url = ''
+        const urlObject = new URL(window.location.href)
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/abstract_test'
+        }
+
+        await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
+            })
+            .catch(error => console.error(error));
+
     }
 
     function submitDifference() {

@@ -17,6 +17,7 @@
         <div id="question" style="display: none;">
             <!-- Вопросы будут отображаться здесь -->
         </div>
+        <button id="final-submit-button" onclick="sendData()" style="display: none">Отправить результат</button>
     </div>
 
     <script>
@@ -95,6 +96,7 @@
         }
 
         function endTest() {
+            document.getElementById('final-submit-button').style.display = 'block';
             let resultHtml = `
                 <div class="results">
                     <h2>Ваш результат: ${correctAnswersCount} из ${questions.length}</h2>
@@ -104,12 +106,42 @@
             `;
             document.getElementById('question').innerHTML = resultHtml;
         }
+
         function restartTest() {
             currentQuestionIndex = 0;
             correctAnswersCount = 0;
             document.getElementById('difficultySelection').style.display = 'block';
             document.getElementById('question').style.display = 'none';
             document.getElementById('imagePreview').style.display = 'block';
+        }
+
+        async function sendData() {
+            const data = {
+                testType: "random_access_memory",
+                result: correctAnswersCount
+            }
+
+            let url = ''
+            const urlObject = new URL(window.location.href)
+
+            if (urlObject.searchParams.has('data')) {
+                url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+            } else {
+                url += '/abstract_test'
+            }
+
+            await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            })
+                .then(res => {
+                    console.log(res)
+                    // Redirect to another URL
+                    window.location.href = res.url;
+                })
+                .catch(error => console.error(error));
+
         }
     </script>
 </body>

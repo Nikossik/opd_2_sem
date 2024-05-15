@@ -1,82 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Combined Tests</title>
-    <link rel="stylesheet" href="AttentionAssessmentTest.css">
+    <link rel="stylesheet" href="5th-lab-tests/ComparisonMindTest.css">
     <style>
         body {
-            background-image: url('public/images/background_gradient.png');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: space-around;
+            background-image: url('images/background_gradient.png');
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .main-container {
+            display: block;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .test-container {
-            width: 45%;
+            width: 100%;
             padding: 20px;
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        .buttons-container {
+            width: 100%;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin: 10px;
+            box-sizing: border-box;
         }
 
         .square {
             width: 50px;
-            height: 50px; /* Assuming size for visual purposes */
+            height: 50px;
             margin: 5px;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
-<div class="test-container">
-    <h1>Visual Math Test</h1>
-    <div id="incorrect_field"></div>
-    <div id="problem">Problem will appear here</div>
-    <div id="select_for_number_of_numbers">
-        <select id="numbers_for_test_time" required>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
+<div class="main-container">
+    <div class="test-container">
+        <h1>Тест на математику</h1>
+        <div id="problem">Здесь будет пример</div>
+        <button id="odd-button">Нечёт</button>
+        <button id="even-button">Чёт</button>
+        <br>
+        <progress id="progress" value="0" max="100"></progress>
     </div>
-    <div id="answer_buttons"></div>
-    <br>
-    <progress id="progress" value="0" max="100"></progress>
-</div>
-
-<div class="test-container">
-    <h1>Color Reaction Test</h1>
-    <progress id="reaction-progress" value="0" max="100"></progress>
-    <div id="send-button-enclosing"></div>
-    <div id="result-enclosing"></div> <!-- Added for displaying results -->
-    <!-- Removed button from here -->
-</div>
-
-<div style="text-align: center;">
-    <select id="difficulty-select">
-        <option value="light">Light</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-    </select>
-    <button id="start-test-button">Start Test</button>
+    <div class="test-container">
+        <h1>Тест на реакцию по цвету</h1>
+        <progress id="reaction-progress" value="0" max="100"></progress>
+        <div id="squares">
+            <div class="square" id="square1"></div>
+            <div class="square" id="square2"></div>
+            <div class="square" id="square3"></div>
+        </div>
+        <button id="restart-button">Начать заново</button>
+        <div id="result-enclosing"></div>
+    </div>
+    <div class="buttons-container" style="display: block;">
+        <select id="difficulty-select">
+            <option value="light">Лёгкий</option>
+            <option value="medium">Средний</option>
+            <option value="hard">Тяжёлый</option>
+        </select>
+        <button id="start-test-button">Начать тест</button>
+        <button id="send-answer-button" style="display: none" onclick="sendData()">Отправить ответ</button>
+    </div>
 </div>
 
 <script>
-    //const colors = ['red', 'blue', 'green'];
     let intervalId;
-    //let startTime;
     let reactionTime;
-    let correctAnswer; // square number
+    let correctAnswer;
     let currentSquare;
-    //let testCounter = 0;
     let correctTestCounter = 0;
-    //let totalReactionTime = 0;
-    //let testPassed = false;
+    let totalQuestions = 0;
     let reactionTimings = [], results = [];
-    let level = "light"; // Default difficulty level
-
+    let level = "light";
     const colors = ['red', 'blue', 'green'];
     const keys = {'Z': 0, 'X': 1, 'C': 2};
     let testInterval;
@@ -85,16 +96,17 @@
     let testCounter = 0;
     let totalReactionTime = 0;
     let testPassed = false;
-
+    let isAnswered = false;
     document.getElementById("start-test-button").addEventListener('click', function () {
-        let level = document.getElementById("difficulty-select").value;
+        level = document.getElementById("difficulty-select").value;
         startTests(level);
     });
 
     function startTests(level) {
         console.log(`Tests started at level: ${level}`);
+        document.getElementById("difficulty-select").style.display = "none";
         startVisualMathTest(level);
-        setTimeout(() => startColorReactionTest(level), 5000); // Start color test after 5 seconds
+        setTimeout(() => startColorReactionTest(level), 5000);
     }
 
     function startVisualMathTest(level) {
@@ -104,22 +116,32 @@
     }
 
     function generateMathProblem() {
+        isAnswered = false;
         let num1 = Math.floor(Math.random() * 10 + 1);
         let num2 = Math.floor(Math.random() * 10 + 1);
+        correctAnswer = num1 + num2;
         document.getElementById("problem").innerHTML = `${num1} + ${num2}`;
-        let correctAnswer = num1 + num2;
-        let userAnswer = prompt("What is " + num1 + " + " + num2 + "?");
-        if (parseInt(userAnswer) === correctAnswer) {
-            alert("Correct!");
+        totalQuestions++;
+    }
+
+    document.getElementById("odd-button").addEventListener('click', () => checkAnswer(correctAnswer % 2 !== 0));
+    document.getElementById("even-button").addEventListener('click', () => checkAnswer(correctAnswer % 2 === 0));
+
+    function checkAnswer(isCorrect) {
+        if (!isAnswered && isCorrect) {
+            alert("Правильно!");
+            correctTestCounter++;
         } else {
-            alert("Wrong! The correct answer was " + correctAnswer);
+            alert("Неправильно! Правильный ответ был " + correctAnswer);
         }
+        isAnswered = true;
     }
 
     function startColorReactionTest(level) {
+        alert("Нажимайте z, x или с в зависимости от загоревшегося квадратика")
         console.log('Color Reaction Test started at level:', level);
-        clearInterval(testInterval); // Stop the math test
-        hideButton(); // Prepare UI for reaction test
+        clearInterval(testInterval);
+        hideButton();
         let reactionTestCount = 0;
         let maxTestCount = 10;
         testInterval = setInterval(() => {
@@ -127,37 +149,38 @@
                 displayColorSquare();
             } else {
                 clearInterval(testInterval);
-                alert("Reaction test completed. Average reaction time: " + (totalReactionTime / maxTestCount).toFixed(2) + "ms");
+                alert("Тест на реакцию завершён. Среднее время реакции: " + (totalReactionTime / maxTestCount).toFixed(2) + "ms");
+                testPassed = true;
+                document.getElementById("send-answer-button").style.display = "block";
             }
         }, getTestSwitchTime(level));
     }
 
     function displayColorSquare() {
         let colorIndex = Math.floor(Math.random() * 3);
-        let square = document.getElementById("squares").children[colorIndex];
+        let square = document.getElementById(`square${colorIndex + 1}`);
         square.style.backgroundColor = colors[colorIndex];
-        startTime = new Date();
-        document.addEventListener('keydown', event => {
-            if (event.key.toUpperCase() === 'Z' || event.key.toUpperCase() === 'X' || event.key.toUpperCase() === 'C') {
-                if (keys[event.key.toUpperCase()] === colorIndex) {
-                    let reactionTime = new Date() - startTime;
-                    totalReactionTime += reactionTime;
-                    square.style.backgroundColor = 'white'; // Reset color
-                }
+        startTime = Date.now();
+        document.addEventListener('keydown', handleKeyPress);
+    }
+
+    function handleKeyPress(event) {
+        let key = event.key.toUpperCase();
+        if (key === 'Z' || key === 'X' || 'C') {
+            let squareIndex = keys[key];
+            let square = document.getElementById(`square${squareIndex + 1}`);
+            if (square.style.backgroundColor === colors[squareIndex]) {
+                let reactionTime = Date.now() - startTime;
+                totalReactionTime += reactionTime;
+                reactionTimings.push(reactionTime);
+                square.style.backgroundColor = 'white';
+                document.removeEventListener('keydown', handleKeyPress);
             }
-        });
+        }
     }
 
     function hideButton() {
         document.getElementById("start-test-button").style.display = "none";
-        const squaresDiv = document.createElement("div");
-        squaresDiv.id = "squares";
-        document.body.appendChild(squaresDiv);
-        for (let i = 0; i < 3; i++) {
-            const square = document.createElement("div");
-            square.className = "square";
-            squaresDiv.appendChild(square);
-        }
     }
 
     function getTestSwitchTime(level) {
@@ -174,11 +197,48 @@
     function getTestDuration(level) {
         switch (level) {
             case "light":
-                return 60000; // 1 minute
+                return 60000;
             case "medium":
-                return 120000; // 2 minutes
+                return 120000;
             case "hard":
-                return 180000; // 3 minutes
+                return 180000;
+        }
+    }
+
+    async function sendData() {
+        if (testPassed) {
+            const averageReactionTimes = [
+                reactionTimings.slice(0, 3).reduce((a, b) => a + b, 0) / 3,
+                reactionTimings.slice(3, 6).reduce((a, b) => a + b, 0) / 3,
+                reactionTimings.slice(6).reduce((a, b) => a + b, 0) / 3
+            ];
+
+            const data = {
+                testType: "3_colors",
+                reactionTimings: averageReactionTimes,
+                accuracy: correctTestCounter / totalQuestions
+            };
+
+            let url = '';
+            const urlObject = new URL(window.location.href);
+
+            if (urlObject.searchParams.has('data')) {
+                url += '/complex_reaction_test?data=' + encodeURIComponent(urlObject.searchParams.get('data'));
+            } else {
+                url += '/complex_reaction_test';
+            }
+
+            await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {'Content-Type': 'application/json'},
+            })
+                .then(res => {
+                    console.log(res);
+                    // Redirect to another URL
+                    window.location.href = res.url;
+                })
+                .catch(error => console.error(error));
         }
     }
 </script>

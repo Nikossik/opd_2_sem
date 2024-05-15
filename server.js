@@ -5,7 +5,7 @@ const flash = require('connect-flash')
 const path = require('path')
 const crypto = require('crypto')
 const LocalStrategy = require('passport-local').Strategy;
-const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll} = require('./models/index');
+const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
 const {
     filterTest,
@@ -191,15 +191,23 @@ const char_dict = {
 };
 
 const testToQualityMap = {
-    'compare_test': [1, 3, 5, 6, 7, 8], // Количество пройденных тестов на сайте
-    'abstract_thinking_test': [2, 3, 7, 9], // Индукция
-    'attention_assessment_test': [6, 7], // Концентрация
-    'abstract_test': [2, 4, 7, 8, 9], // Абстракция
-    'ram_test': [8, 10], // Оперативная память
-    'memory_test': [10], // Кратковременная память
-    'sound_test': [6, 9], // Реакция на звук
-    'visual_math_test': [1], // Математика визуальная
-    'pulse_test': [4, 9, 10] // Пульс
+    'sound': [106, 69], // Острота слуха, Способность к распознаванию небольших отклонений параметров технологических процессов по акустическим признакам
+    'light': [], // Пока пусто, нужно добавить соответствующие ПВК, если они есть
+    'visual_math_test': [101, 68], // Острота зрения, Способность к распознаванию небольших отклонений параметров технологических процессов по визуальным признакам
+    'pulse_test': [4, 9, 10, 11], // Нервно-эмоциональная устойчивость, Самообладание, Ответственность
+    'hard_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
+    'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
+    'analog_tracking_test': [118], // Концентрированность внимания
+    '3_colors': [101], // Острота зрения
+    'math_sound_test': [106], // Острота слуха
+    'math_vis': [101], // Острота зрения
+    'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
+    'short_term_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
+    'myunsterberg_test': [98, 121], // Умственная работоспособность, Способность к распределению внимания между несколькими объектами или видами деятельности
+    'comparison_mind': [12, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
+    'attention_assessment_test': [118, 48], // Концентрированность внимания, Логичность мышления
+    'abstract_thinking_test': [45, 48, 42, 52], // Аналитичность мышления, Логичность мышления, Способность наглядно представлять себе новое явление, Образность мышления
+    'abstract_test': [49, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
 };
 
 server.use(express.json());
@@ -840,6 +848,39 @@ server.post('/accuracy_test', async (req, res) => {
     }
 })
 
+server.post('/abstract_test', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login')
+        return
+    }
+
+    const user = req.user.id
+    const type = req.body.testType
+    const result = req.body.result
+
+    let data = null
+
+    if (req.query.data) {
+        data = JSON.parse(decodeURIComponent(req.query.data))
+    }
+
+    try {
+        const abstracttest = await AbstractTest.create({user, type, result})
+
+        if (data) {
+            if (data.i - 1 !== data.tests.length) {
+                res.redirect('/' + data.tests[data.i - 1] + '?data=' + encodeURIComponent(JSON.stringify(data)))
+            } else {
+                res.redirect('/polls_results')
+            }
+        } else {
+            return res.redirect('/polls_results')
+        }
+    } catch (e) {
+        console.log(e)
+    }
+})
+
 
 server.post('/create_invite', async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -944,14 +985,17 @@ server.get('/characteristics', async (req, res) => {
 
     for (const user of users) {
         console.log(user);
-        const reactionTests = ['sound'];
+        const reactionTests = ['sound', 'light'];
         for (const testType of reactionTests) {
-            const result = await getResultNumberTest(user, 'reaction', testType);
-            console.log(result);
+            let result = await getResultNumberTest(user, 'reaction', testType);
+
+            if (result == null) {
+                result = 0;
+            }
             
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
-            await HeartRate.create({
+            await StatisticAll.create({
                 user: user,
                 type: testType,
                 result: result,
@@ -961,9 +1005,12 @@ server.get('/characteristics', async (req, res) => {
 
         const accuracyTests = ['hard_action', 'easy_action', 'analog_tracking_test'];
         for (const testType of accuracyTests) {
-            const result = await getResultNumberTest(user, 'accuracy', testType);
-            console.log(result);
-            
+            let result = await getResultNumberTest(user, 'accuracy', testType);
+
+            if (result == null) {
+                result = 0;
+            }
+
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
             await StatisticAll.create({
@@ -976,7 +1023,11 @@ server.get('/characteristics', async (req, res) => {
 
         const complex_reaction = ['3_colors', 'math_sound_test', 'math_vis'];
         for (const testType of complex_reaction) {
-            const result = await getResultNumberTest(user, 'complex_reaction', testType);
+            let result = await getResultNumberTest(user, 'complex_reaction', testType);
+
+            if (result == null) {
+                result = 0;
+            }
             
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
@@ -987,6 +1038,20 @@ server.get('/characteristics', async (req, res) => {
                 heartRateCheck: heartRateCheck ? true : false
             });
         }
+
+        /* const abstracttests = ['random_access_memory', 'short_term_memory', 'myunsterberg_test', 'comparison_mind', 'attention_assessment_test', 'abstract_thinking_test', 'abstract_test'];
+        for (const testType of abstracttests) {
+            const result = await getResultNumberTest(user, 'abstract_test', testType);
+            
+            const heartRateCheck = await getHeartRateCheck(user, testType);
+
+            await StatisticAll.create({
+                user: user,
+                type: testType,
+                result: result,
+                heartRateCheck: heartRateCheck ? true : false
+            });
+        } */
     }
 
 
@@ -1025,6 +1090,7 @@ server.post('/add_profession', async (req, res) => {
     }
 });
 
+
 async function getUserTestResults(userId, relevantPvk) {
     try {
         // Преобразование строковых ПВК в числовые идентификаторы
@@ -1045,9 +1111,13 @@ async function getUserTestResults(userId, relevantPvk) {
 
         console.log('All testResults:', testResults);
 
-        const relevantTests = Object.keys(testToQualityMap).filter(testType =>
-            testToQualityMap[testType].some(pvk => relevantPvkIds.includes(pvk))
-        );
+        // Найдем все тесты, которые соответствуют нужным ПВК
+        const relevantTests = [];
+        for (const [testType, pvkIds] of Object.entries(testToQualityMap)) {
+            if (pvkIds.some(pvkId => relevantPvkIds.includes(pvkId))) {
+                relevantTests.push(testType);
+            }
+        }
 
         console.log('relevantTests:', relevantTests);
 
@@ -1063,47 +1133,45 @@ async function getUserTestResults(userId, relevantPvk) {
 }
 
 
-
-async function calculateMetric(testResults) {
+async function calculateMetric(testResults, totalTestsCount) {
     const testToQualityMap = {
         'sound': [106, 69], // Острота слуха, Способность к распознаванию небольших отклонений параметров технологических процессов по акустическим признакам
         'light': [], // Пока пусто, нужно добавить соответствующие ПВК, если они есть
         'visual_math_test': [101, 68], // Острота зрения, Способность к распознаванию небольших отклонений параметров технологических процессов по визуальным признакам
-        'pulse_test': [4, 9, 10, 11], // Нервно-эмоциональная устойчивость, Самообладание, Ответственность
+        'pulse_test': [4, 11, 10], // Нервно-эмоциональная устойчивость, Ответственность, Самообладание
         'hard_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
         'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
         'analog_tracking_test': [118], // Концентрированность внимания
         '3_colors': [101], // Острота зрения
         'math_sound_test': [106], // Острота слуха
         'math_vis': [101], // Острота зрения
-        'random_access_memory': [73, 8, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
+        'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
         'short_term_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
         'myunsterberg_test': [98, 121], // Умственная работоспособность, Способность к распределению внимания между несколькими объектами или видами деятельности
-        'comparison_mind': [12, 3, 7, 25, 44, 22], // Трудолюбие, Организованность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
-        'attention_assessment_test': [6, 7], // Концентрированность внимания, Логичность мышления
+        'comparison_mind': [12, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
+        'attention_assessment_test': [118, 48], // Концентрированность внимания, Логичность мышления
         'abstract_thinking_test': [45, 48, 42, 52], // Аналитичность мышления, Логичность мышления, Способность наглядно представлять себе новое явление, Образность мышления
         'abstract_test': [49, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
     };
 
-
     const averageValues = {
-        'sound': 270, // Реакция на звук
-        'light': 0, // Нет данных для этого теста
-        'visual_math_test': 280, // Математика визуальная
-        'pulse_test': 70, // Например, средний пульс (указать реальное среднее значение, если известно)
-        'hard_action': 240, // Укажите среднее значение для теста hard_action
-        'easy_action': 220, // Укажите среднее значение для теста easy_action
-        'analog_tracking_test': 45, // Укажите среднее значение для теста analog_tracking_test
-        '3_colors': 245, // Укажите среднее значение для теста 3_colors
-        'math_sound_test': 270, // Укажите среднее значение для теста math_sound_test
-        'math_vis': 280, // Например, математическая визуальная оценка (указать реальное среднее значение, если известно)
-        'random_access_memory': 4, // Оперативная память
-        'short_term_memory': 7, // Кратковременная память
-        'myunsterberg_test': 7, // Концентрация
-        'comparison_mind': 17, // Тест на сравнение
-        'attention_assessment_test': 7, // Тест на концентрацию
-        'abstract_thinking_test': 4, // Тест на индукцию
-        'abstract_test': 3, // Тест на абстракцию; 28, если не уровни считать
+        'sound': 270,
+        'light': 0,
+        'visual_math_test': 280,
+        'pulse_test': 70,
+        'hard_action': 240,
+        'easy_action': 220,
+        'analog_tracking_test': 45,
+        '3_colors': 245,
+        'math_sound_test': 270,
+        'math_vis': 280,
+        'random_access_memory': 4,
+        'short_term_memory': 7,
+        'myunsterberg_test': 7,
+        'comparison_mind': 17,
+        'attention_assessment_test': 7,
+        'abstract_thinking_test': 4,
+        'abstract_test': 3,
     };
 
     const weights = {
@@ -1112,15 +1180,22 @@ async function calculateMetric(testResults) {
         7: 6,
         8: 5,
         9: 4,
-        10: 3
+        10: 3,
+        12: 2, // Трудолюбие
+        11: 2, // Ответственность
+        3: 2, // Организованность
     };
 
     let totalScore = 0;
 
+    // Учитываем общее количество пройденных тестов
+    const testCountScore = totalTestsCount >= 9 ? 2 : totalTestsCount >= 8 ? 1 : 0;
+    totalScore += testCountScore;
+
     for (const [testType, quality] of Object.entries(testToQualityMap)) {
         const result = testResults.find(test => test.type === testType);
         if (result) {
-            const userValue = parseInt(result.result, 10);
+            const userValue = parseFloat(result.result);
             const averageValue = averageValues[testType];
             const weight = Array.isArray(quality) ? Math.max(...quality.map(q => weights[q])) : weights[quality];
             if (userValue >= averageValue) {
@@ -1140,6 +1215,7 @@ async function calculateMetric(testResults) {
     }
 }
 
+
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
@@ -1156,8 +1232,13 @@ server.get('/professions_:id', async (req, res) => {
             const qualities = await aggregateExpertRatings(profession.profession);
 
             const relevantPvk = qualities.map(quality => quality.characteristic);
+            console.log('relevantPvk:', relevantPvk);
+
             const testResults = await getUserTestResults(userID, relevantPvk);
-            const metric = await calculateMetric(testResults);
+            const totalTestsCount = await StatisticAll.count({
+                where: { user: userID }
+            });
+            const metric = await calculateMetric(testResults, totalTestsCount);
 
             console.log('qualities:', qualities);
 
@@ -1171,7 +1252,8 @@ server.get('/professions_:id', async (req, res) => {
                 adminUser: req.user.isAdmin,
                 testToQualityMap: testToQualityMap,
                 char_dict: char_dict, // Передаем char_dict для использования в шаблоне
-                relevantPvk: relevantPvk
+                relevantPvk: relevantPvk,
+                totalTestsCount: totalTestsCount
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
@@ -1181,6 +1263,8 @@ server.get('/professions_:id', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
 
 
 

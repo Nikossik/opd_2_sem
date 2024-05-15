@@ -5,7 +5,7 @@
     <title>Тест на абстракцию</title>
     <style>
         body {
-            background-image: url('public/images/background_gradient.png');
+            background-image: url('images/background_gradient.png');
             font-family: Arial, sans-serif;
             padding: 20px;
             text-align: center; /* Выравнивание текста по центру */
@@ -153,7 +153,7 @@
         startTest(0);
     }
 
-    function sendData() {
+    /* function sendData() {
         const data = {
             score: correctAnswers,
             total: tasks.length
@@ -175,9 +175,37 @@
                 console.error('Error:', error);
                 alert('Ошибка при отправке результатов.');
             });
+    } */
+    async function sendData() {
+        const data = {
+            testType: "abstract_test",
+            result: correctAnswers
+        }
+
+        let url = ''
+        const urlObject = new URL(window.location.href)
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/abstract_test?data=' + urlObject.searchParams.get('data')
+        } else {
+            url += '/abstract_test'
+        }
+
+        await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                console.log(res)
+                // Redirect to another URL
+                window.location.href = res.url;
+            })
+            .catch(error => console.error(error));
+
     }
 
-    async function sendData() {
+    /* async function sendData() {
         const data = {
             testType: "abstract_test",
             accuracy: correctAnswers / tasks.length
@@ -204,7 +232,7 @@
             })
             .catch(error => console.error(error));
 
-    }
+    } */
 </script>
 </body>
 </html>
