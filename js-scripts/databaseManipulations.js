@@ -207,7 +207,7 @@ async function getResultNumberTest(user, testType, type) {
         } else if (testType === 'abstract_test') {
             result = await AbstractTest.max('result', {
                 where: {
-                    uesr: uesr,
+                    user: user,
                     type: type
                 }
             });
