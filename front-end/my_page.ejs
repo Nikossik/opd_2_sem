@@ -51,10 +51,22 @@
         <!-- <div class="qualities-container"> -->
             <h1>Мой профиль</h1>
 
+            <% if (!respondentUser && !adminUser) { %>
+                    <button id="becomeRespondentButton">Стать респондентом</button>
+            <% } %>
 
             <div class="qualities-header"><h2>Имя: <%= username %></h2></div>
             <div class="qualities-header"><h2>ID: <%= id %></h2></div>
+            <% if (respondentUser) { %>
+               <div class="qualities-header">
+                               <% if (email) { %>
+                                   <h2>email: <%= email %></h2>
+                               <% } %>
+                           </div>
+                       <% } %>
 
+
+             <div class="qualities-header"><h2>Количество пройденных тестов: <%= countPT %></h2></div>
             <% if (respondentUser) { %>
                 <div class="qualities-header"><h2>Респондент: ✔️</h2></div>
             <% } else { %>
@@ -67,6 +79,37 @@
                 <div class="qualities-header"><h2>Админ: ❌</h2></div>
             <% } %>
         <!-- </div>  -->
+
+
+
     </section>
+    <script>
+            var becomeRespondentButton = document.getElementById('becomeRespondentButton')
+            becomeRespondentButton.addEventListener('click', setMail)
+
+            async function setMail(){
+
+         var email = prompt("Введите адрес электронной почты:");
+               //проверить по формату:
+               if(!email.match(/^\S+@\S+\.\S+$/)) {
+          alert("Неверный формат адреса!")
+          return true;
+
+
+
+        } else {
+
+                const data = {email:email}
+                console.log(document);
+                await fetch('/setmail', {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    headers : {'Content-Type' : 'application/json'}
+                })
+                    .then( alert ("Ok"))
+                    .catch(e => console.log(e))
+            }
+        }
+        </script>
 </body>
 </html>

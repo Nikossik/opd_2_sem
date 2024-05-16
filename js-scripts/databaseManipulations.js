@@ -257,4 +257,5 @@ async function getHeartRateCheck(user, type) {
 
 // HERE IS YOUR CODE
 
+
 module.exports = {filterTest, getUsers, getAdmins, getExpertPolls, getProfessionCharacteristics, getHeartCheck, getResultNumberTest, getHeartRateCheck}

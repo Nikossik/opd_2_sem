@@ -1279,6 +1279,16 @@ server.post('/add_heart_rate', async (req, res) => {
         res.render('AddHeartRate', { error: error.message });
     }
 });
+async function countPassedTests(userId) {
+    const count = await StatisticAll.count({
+        where: {
+            userId: id,
+            result: {
+                [Op.ne]: 0
+            }
+        }
+    });
+}
 
 
 server.get('/my_page', (req, res) => {
@@ -1289,8 +1299,20 @@ server.get('/my_page', (req, res) => {
 
     adminUser = req.user.isAdmin;
     respondentUser = req.user.respondent;
+    var countPT =  countPassedTests(req.user.id);
+    let userEmail = '';
+    if (respondentUser) {
+        userEmail = req.user.email;
+    }
 
-    res.render('my_page', {username: req.user.login, id: req.user.id, loggedIn: req.isAuthenticated(), adminUser: adminUser, respondentUser: respondentUser});
+    res.render('my_page', {
+        username: req.user.login,
+        id: req.user.id,
+        email:userEmail,
+        countPT:countPT,
+        loggedIn: req.isAuthenticated(),
+        adminUser: adminUser,
+        respondentUser: respondentUser});
 });
 
 async function aggregateExpertRatings(professionName) {
@@ -1328,6 +1350,8 @@ async function aggregateExpertRatings(professionName) {
 
 
 // HERE IS YOUR CODE
+
+
 
 sequelize.sync().then(() => {
     server.listen(3000, () => {
