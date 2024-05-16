@@ -4,6 +4,7 @@ const passport = require('passport');
 const flash = require('connect-flash')
 const path = require('path')
 const crypto = require('crypto')
+const { Op, Sequelize} = require('sequelize');
 const LocalStrategy = require('passport-local').Strategy;
 const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
@@ -199,7 +200,6 @@ const testToQualityMap = {
     'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
     'analog_tracking_test': [118], // Концентрированность внимания
     '3_colors': [101], // Острота зрения
-    'math_sound_test': [106], // Острота слуха
     'math_vis': [101], // Острота зрения
     'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
     'short_term_memory_test': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
@@ -1020,7 +1020,7 @@ server.get('/characteristics', async (req, res) => {
             });
         }
 
-        const complex_reaction = ['3_colors', 'math_sound_test', 'math_vis'];
+        const complex_reaction = ['3_colors', 'math_vis'];
         for (const testType of complex_reaction) {
             let result = await getResultNumberTest(user, 'complex_reaction', testType);
 
@@ -1127,31 +1127,43 @@ async function getUserTestResults(userId, relevantPvk) {
 }
 
 
+async function getAverageValues() {
+    const testTypes = [
+        'light', '3_colors', 'sound', 'math_vis', 'easy_action',
+        'hard_action', 'analog_tracking_test', 'random_access_memory', 'short_term_memory_test',
+        'myunsterberg_test', 'compare_test', 'attention_assessment_test', 'abstract_thinking_test',
+        'abstract_test'
+    ];
+
+    const averageValues = {};
+
+    for (const testType of testTypes) {
+        const results = await StatisticAll.findAll({
+            where: { type: testType },
+            attributes: [[Sequelize.fn('AVG', Sequelize.col('result')), 'avgResult']],
+            raw: true
+        });
+
+        if (results[0] && results[0].avgResult) {
+            averageValues[testType] = parseFloat(results[0].avgResult);
+        } else {
+            averageValues[testType] = 0; // Если нет данных для теста, устанавливаем среднее значение в 0
+        }
+    }
+
+    return averageValues;
+}
+
+
+
+
 
 function getCharDictKeyByValue(value) {
     return Object.keys(char_dict).find(key => char_dict[key] === value);
 }
 
 async function calculateMetric(testResults, totalTestsCount, qualities) {
-    const averageValues = {
-        'sound': 270,
-        'light': 0,
-        'visual_math_test': 280,
-        'pulse_test': 70,
-        'hard_action': 240,
-        'easy_action': 220,
-        'analog_tracking_test': 45,
-        '3_colors': 245,
-        'math_sound_test': 270,
-        'math_vis': 280,
-        'random_access_memory': 4,
-        'short_term_memory_test': 4,
-        'myunsterberg_test': 4,
-        'compare_test': 10,
-        'attention_assessment_test': 4,
-        'abstract_thinking_test': 4,
-        'abstract_test': 3,
-    };
+    const averageValues = await getAverageValues();
 
     // Присваиваем веса на основе порядка важности ПВК
     const weights = {};
@@ -1162,17 +1174,20 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
 
     let totalScore = 0;
 
-    // Максимальный возможный вес
-    const maxTotalScore = Array.from({ length: totalTestsCount }, (_, i) => 10 - i)
-        .reduce((acc, val) => acc + val, 0);
+    // Расчет максимального возможного веса
+    const testWeights = Array.from({ length: totalTestsCount }, (_, i) => 10 - i);
+    const maxTotalScore = testWeights.reduce((acc, val) => acc + val, 0);
 
-    for (const [testType, qualityIds] of Object.entries(testToQualityMap)) {
+    const relevantTests = Object.keys(testToQualityMap)
+        .filter(testType => testResults.some(result => result.type === testType));
+
+    relevantTests.forEach((testType, index) => {
         const result = testResults.find(test => test.type === testType);
         if (result) {
             const userValue = parseFloat(result.result);
             const averageValue = averageValues[testType];
-            const qualityWeights = qualityIds.map(q => weights[q] || 0);
-            const weight = Math.max(...qualityWeights);
+            const qualityWeights = testToQualityMap[testType].map(q => weights[q] || 0);
+            const weight = testWeights[index]; // Применение веса в зависимости от позиции теста
 
             console.log(`Calculating score for test type ${testType}: userValue = ${userValue}, averageValue = ${averageValue}, weight = ${weight}`);
 
@@ -1182,7 +1197,7 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
                 totalScore += weight / 2;
             }
         }
-    }
+    });
 
     console.log('totalScore:', totalScore);
     console.log('maxTotalScore:', maxTotalScore);
@@ -1197,8 +1212,6 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
         return 3; // Профессия не рекомендуется
     }
 }
-
-
 
 
 server.get('/professions_:id', async (req, res) => {
@@ -1243,6 +1256,7 @@ server.get('/professions_:id', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 server.get('/add_heart_rate', (req, res) => {
     if (!req.isAuthenticated()) {
@@ -1325,9 +1339,6 @@ async function aggregateExpertRatings(professionName) {
         throw err;
     }
 }
-
-
-// HERE IS YOUR CODE
 
 sequelize.sync().then(() => {
     server.listen(3000, () => {
