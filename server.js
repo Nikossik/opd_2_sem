@@ -1127,31 +1127,35 @@ async function getUserTestResults(userId, relevantPvk) {
 }
 
 
-async function getAverageValues() {
+async function getAverageAndVarianceValues() {
     const testTypes = [
         'light', '3_colors', 'sound', 'math_vis', 'easy_action',
         'hard_action', 'analog_tracking_test', 'random_access_memory', 'short_term_memory_test',
-        'myunsterberg_test', 'compare_test', 'attention_assessment_test', 'abstract_thinking_test',
-        'abstract_test'
+        'myunsterberg_test', 'compare_test', 'attention_assessment_test', 'abstract_thinking_test', 'abstract_test'
     ];
 
-    const averageValues = {};
+    const values = {};
 
     for (const testType of testTypes) {
         const results = await StatisticAll.findAll({
-            where: { type: testType },
-            attributes: [[Sequelize.fn('AVG', Sequelize.col('result')), 'avgResult']],
+            where: {
+                type: testType,
+                result: { [Op.ne]: 0 }
+            },
+            attributes: [
+                [Sequelize.fn('AVG', Sequelize.col('result')), 'average'],
+                [Sequelize.fn('VARIANCE', Sequelize.col('result')), 'variance']
+            ],
             raw: true
         });
 
-        if (results[0] && results[0].avgResult) {
-            averageValues[testType] = parseFloat(results[0].avgResult);
-        } else {
-            averageValues[testType] = 0; // Если нет данных для теста, устанавливаем среднее значение в 0
-        }
+        values[testType] = {
+            average: parseFloat(results[0].average),
+            variance: parseFloat(results[0].variance)
+        };
     }
 
-    return averageValues;
+    return values;
 }
 
 
@@ -1163,7 +1167,7 @@ function getCharDictKeyByValue(value) {
 }
 
 async function calculateMetric(testResults, totalTestsCount, qualities) {
-    const averageValues = await getAverageValues();
+    const values = await getAverageAndVarianceValues();
 
     // Присваиваем веса на основе порядка важности ПВК
     const weights = {};
@@ -1173,27 +1177,33 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
     });
 
     let totalScore = 0;
+    let validTestCount = 0;
 
-    // Расчет максимального возможного веса
+
+    const maxTotalScore = Array.from({ length: totalTestsCount }, (_, i) => 10 - i)
+        .reduce((acc, val) => acc + val, 0);
+
     const testWeights = Array.from({ length: totalTestsCount }, (_, i) => 10 - i);
-    const maxTotalScore = testWeights.reduce((acc, val) => acc + val, 0);
 
     const relevantTests = Object.keys(testToQualityMap)
         .filter(testType => testResults.some(result => result.type === testType));
 
     relevantTests.forEach((testType, index) => {
         const result = testResults.find(test => test.type === testType);
-        if (result) {
+        if (result && result.result !== 0) {
+            validTestCount++;
             const userValue = parseFloat(result.result);
-            const averageValue = averageValues[testType];
-            const qualityWeights = testToQualityMap[testType].map(q => weights[q] || 0);
-            const weight = testWeights[index]; // Применение веса в зависимости от позиции теста
+            const { average, variance } = values[testType];
+            const zScore = (userValue - average) / Math.sqrt(variance);
+            result.zScore = zScore;
 
-            console.log(`Calculating score for test type ${testType}: userValue = ${userValue}, averageValue = ${averageValue}, weight = ${weight}`);
+            const weight = testWeights[index];
 
-            if (userValue >= averageValue * 1.1) {
+            console.log(`Calculating score for test type ${testType}: userValue = ${userValue}, average = ${average}, variance = ${variance}, zScore = ${zScore}, weight = ${weight}`);
+
+            if (userValue >= average * 1.1) {
                 totalScore += weight;
-            } else if (userValue >= averageValue * 0.9) {
+            } else if (userValue >= average * 0.9) {
                 totalScore += weight / 2;
             }
         }
@@ -1202,17 +1212,27 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
     console.log('totalScore:', totalScore);
     console.log('maxTotalScore:', maxTotalScore);
 
+
+    if (validTestCount < totalTestsCount) {
+        return { metric: 4, validTestCount };
+    }
+
     const scorePercentage = (totalScore / maxTotalScore) * 100;
 
     if (scorePercentage >= 75) {
-        return 1; // Профессия рекомендуется
+        return { metric: 1, validTestCount };
     } else if (scorePercentage >= 55) {
-        return 2; // Рекомендуется развить некоторые ПВК
+        return { metric: 2, validTestCount };
     } else {
-        return 3; // Профессия не рекомендуется
+        return { metric: 3, validTestCount };
     }
 }
 
+getAverageAndVarianceValues().then(averageValues => {
+    console.log('Average Values:', averageValues);
+}).catch(error => {
+    console.error('Ошибка:', error);
+});
 
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
