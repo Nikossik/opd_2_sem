@@ -15,19 +15,19 @@
                 <div>
                     <ul>
                         <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
-    
+
                         <% if (!loggedIn) { %>
                             <li><a href="/login">ВОЙТИ</a></li>
                         <% } %>
-                    
+
                         <% if (loggedIn) { %>
                             <li><a href="/characteristics">ПРОФЕССИИ</a></li>
                         <% } %>
-                    
+
                         <% if (adminUser) { %>
                             <li><a href="/poll_1_part_1">ОПРОС</a></li>
                         <% } %>
-                        
+
                         <% if (adminUser) { %>
                             <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
                         <% } %>
@@ -78,6 +78,9 @@
             <% } else { %>
                 <div class="qualities-header"><h2>Админ: ❌</h2></div>
             <% } %>
+            <% if (respondentUser) { %>
+                        <button id="allTestsButton" onclick="location.href='/all_tests'">Все тесты</button>
+                    <% } %>
         <!-- </div>  -->
 
 

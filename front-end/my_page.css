@@ -319,15 +319,29 @@ h1{
 	background: #f3f3f3;
 }
 #becomeRespondentButton {
-    background-color: #4CAF50; /* Цвет фона */
-    border: none; /* Убираем границу */
-    color: white; /* Цвет текста */
-    padding: 15px 32px; /* Отступы внутри кнопки */
-    text-align: center; /* Выравнивание текста по центру */
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
     text-decoration: none;
-    display: inline-block; /* Делаем блочным элементом */
-    font-size: 16px; /* Размер текста */
-    margin: 4px 2px; /* Отступы вокруг кнопки */
-    cursor: pointer; /* Задаем вид курсора */
-    border-radius: 8px; /* Задаем скругление углов */
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
 }

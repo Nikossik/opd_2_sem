@@ -1386,6 +1386,23 @@ async function aggregateExpertRatings(professionName) {
 
 
 // HERE IS YOUR CODE
+server.get('/all_tests', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.respondent) {
+        res.redirect('/login');
+        return;
+    }
+
+    try {
+        const tests = await StatisticAll.findAll({
+            where: { user: req.user.id },
+            attributes: ['type', 'result']
+        });
+        res.render('all_tests', { tests });
+    } catch (error) {
+        res.status(500).send('Ошибка при получении данных тестов');
+    }
+});
+
 
 
 

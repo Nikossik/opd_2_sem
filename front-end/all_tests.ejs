@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="my_page.css">
+    <title>Все тесты</title>
+</head>
+<body class="body-background">
+    <section class="container">
+        <h1>Все тесты</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Тип теста</th>
+                    <th>Результат</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% tests.forEach(test => { %>
+                    <tr>
+                        <td><%= test.type %></td>
+                        <td><%= test.result %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <button onclick="location.href='/my_page'">Назад к профилю</button>
+    </section>
+</body>
+</html>
