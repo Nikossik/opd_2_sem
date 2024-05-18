@@ -991,7 +991,7 @@ server.get('/characteristics', async (req, res) => {
             if (result == null) {
                 result = 0;
             }
-            
+
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
             await StatisticAll.create({
@@ -1027,7 +1027,7 @@ server.get('/characteristics', async (req, res) => {
             if (result == null) {
                 result = 0;
             }
-            
+
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
             await StatisticAll.create({
@@ -1279,19 +1279,23 @@ server.post('/add_heart_rate', async (req, res) => {
         res.render('AddHeartRate', { error: error.message });
     }
 });
+const { Op } = require('sequelize')
+/*
 async function countPassedTests(userId) {
-    const count = await StatisticAll.count({
+        count = await StatisticAll.count({
         where: {
-            userId: id,
+            user: userId,
             result: {
                 [Op.ne]: 0
             }
         }
+
     });
+    console.log('countPassedTests:', count);
 }
+*/
 
-
-server.get('/my_page', (req, res) => {
+server.get('/my_page', async (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
         return
@@ -1299,7 +1303,15 @@ server.get('/my_page', (req, res) => {
 
     adminUser = req.user.isAdmin;
     respondentUser = req.user.respondent;
-    var countPT =  countPassedTests(req.user.id);
+    var countPT = await StatisticAll.count({
+        where: {
+            user: req.user.id,
+            result: {
+                [Op.ne]: 0
+            }
+        }
+
+    });
     let userEmail = '';
     if (respondentUser) {
         userEmail = req.user.email;
@@ -1308,11 +1320,35 @@ server.get('/my_page', (req, res) => {
     res.render('my_page', {
         username: req.user.login,
         id: req.user.id,
-        email:userEmail,
-        countPT:countPT,
+        email: userEmail,
+        countPT: countPT,
         loggedIn: req.isAuthenticated(),
         adminUser: adminUser,
-        respondentUser: respondentUser});
+        respondentUser: respondentUser
+    });
+});
+
+async function updateUserEmailAndRespondentStatus(userId, newEmail) {
+    await User.update(
+        { email: newEmail, respondent: true },
+        { where: { id: userId } })
+        .success(result =>
+            handleResult(result)
+        )
+        .error(err =>
+            handleError(err)
+        );
+}
+server.post('/setmail', async (req, res) => {
+    if (req.isAuthenticated()) {
+        try{
+            await updateUserEmailAndRespondentStatus(req.user.id, req.body.email)
+        }catch (error){
+            res.status(500).send('Ошибка при записи email'+error.toString());
+        }
+    }else {
+        res.redirect('/mypage');
+    }
 });
 
 async function aggregateExpertRatings(professionName) {
