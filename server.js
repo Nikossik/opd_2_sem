@@ -1403,8 +1403,27 @@ server.get('/all_tests', async (req, res) => {
     }
 });
 
+server.get('/all_users', async (req, res) => {
+    try {
+        const usersWithTestCounts = await Promise.all(users.map(async user => {
+            var countPT = await StatisticAll.count({
+                where: {
+                    user: req.user.id,
+                    result: {
+                        [Op.ne]: 0
+                    }
+                }
+
+            });
 
 
+        }));
+
+        res.render('all_users', { users: usersWithTestCounts });
+    } catch (error) {
+        res.status(500).send('Ошибка при получении данных пользователей');
+    }
+});
 
 sequelize.sync().then(() => {
     server.listen(3000, () => {
