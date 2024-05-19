@@ -1404,6 +1404,9 @@ server.get('/all_tests', async (req, res) => {
 });
 
 server.get('/all_users', async (req, res) => {
+    const users = await User.findAll({
+        attributes: ['id', 'login']
+    });
     try {
         const usersWithTestCounts = await Promise.all(users.map(async user => {
             var countPT = await StatisticAll.count({
@@ -1415,10 +1418,12 @@ server.get('/all_users', async (req, res) => {
                 }
 
             });
-
+            return {
+                login: user.login,
+                testCount: countPT
+            };
 
         }));
-
         res.render('all_users', { users: usersWithTestCounts });
     } catch (error) {
         res.status(500).send('Ошибка при получении данных пользователей');

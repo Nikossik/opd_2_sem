@@ -2,18 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="my_page.css">
+    <link rel="stylesheet" href="styles.css">
     <title>Все пользователи</title>
 </head>
-<body class="body-background">
-    <section class="container">
-        <h1>Все пользователи</h1>
-        <ul>
+<body>
+    <h1>Все пользователи</h1>
+    <ul>
+        <% if (users && users.length > 0) { %>
             <% users.forEach(user => { %>
                 <li><%= user.login %> - Количество пройденных тестов: <%= user.testCount %></li>
             <% }) %>
-        </ul>
-        <button onclick="location.href='/my_page'">Назад</button>
-    </section>
+        <% } else { %>
+            <li>Нет пользователей для отображения.</li>
+        <% } %>
+    </ul>
+    <button onclick="location.href='/my_page'">Назад</button>
 </body>
 </html>
