@@ -3,34 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="5th-lab-tests/combinedStyles.css">
+    <style>
+        body {
+            background-image: url('images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .test-container {
+            display: flex;
+            width: 80%;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .test-half {
+            width: 45%;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+        }
+        .square {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 10px;
+        }
+        #squares {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+    </style>
     <title>Combined Test Page</title>
 </head>
 <body>
-<div class="test-container">
-    <div class="test-half" id="sound-math-test">
-        <h1>Sound Math Test</h1>
-        <div id="problem"></div>
-        <div id="incorrect_field"></div>
-        <div id="select_for_number_of_numbers" style="display: none;">
-            <select id="numbers_for_test_time" required>
-                <option value="2" selected>2</option>
-            </select>
-        </div>
-        <div id="answer_buttons"></div>
-        <progress id="progress" value="0" max="100"></progress>
-        <div id="submit-button-enclosing"></div>
-    </div>
-    <div class="test-half" id="color-reaction-test">
-        <h1>Color Reaction Test</h1>
-        <progress id="progress-color" value="0" max="100"></progress>
-        <div id="submit-button-enclosing-color"></div>
-        <div id="restart-button-enclosing-color"></div>
-        <div id="result-enclosing-color"></div>
-        <p id="result-color"></p>
-    </div>
-</div>
+<h1>Combined Attention Test</h1>
 <div id="start-button-enclosing">
     <button id="start-button">Начать тест</button>
+</div>
+<div class="test-container">
+    <div class="test-half" id="sound-math-test">
+        <h2>Sound Math Test</h2>
+        <div id="problem"></div>
+        <div id="incorrect_field"></div>
+        <div id="answer_buttons"></div>
+        <progress id="progress-sound" value="0" max="100"></progress>
+    </div>
+    <div class="test-half" id="color-reaction-test">
+        <h2>Color Reaction Test</h2>
+        <progress id="progress-color" value="0" max="100"></progress>
+        <div id="squares"></div>
+        <div id="result"></div>
+    </div>
+</div>
+<div id="results-container" style="display: none;">
+    <h2>Test Results Summary</h2>
+    <p id="sound-math-results"></p>
+    <p id="color-reaction-results"></p>
+    <button id="send-data-button">Send Data</button>
+    <button id="restart-button">Restart Test</button>
 </div>
 <script src="5th-lab-tests/combinedLogic.js"></script>
 </body>
