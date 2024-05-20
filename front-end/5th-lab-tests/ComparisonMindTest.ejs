@@ -145,8 +145,11 @@
         const userDifference = parseInt(document.getElementById('userInput').value, 10);
         const correctDifference = images[currentTestIndex].correctDifferences;
 
+        // Проверка на превышение количества отличий
+        let score = (userDifference > correctDifference) ? 0 : userDifference;
+        
         // Сохраняем результаты
-        results.push({found: userDifference, total: correctDifference});
+        results.push({found: score, total: correctDifference});
 
         let message;
         if (userDifference === correctDifference) {
