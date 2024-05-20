@@ -12,18 +12,21 @@
             flex-direction: column;
             align-items: center;
         }
+
         .test-container {
             display: flex;
             width: 80%;
             justify-content: space-between;
             margin-top: 20px;
         }
+
         .test-half {
             width: 45%;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(200, 200, 200, 0.8); /* Изменили на более темный цвет */
             border-radius: 10px;
         }
+
         .square {
             width: 100px;
             height: 100px;
@@ -33,6 +36,7 @@
             font-size: 30px;
             margin: 10px;
         }
+
         #squares {
             display: flex;
             justify-content: center;
@@ -43,18 +47,22 @@
 </head>
 <body>
 <h1>Combined Attention Test</h1>
+<p>В этом тесте будут чередоваться два типа заданий: задание на математические задачи и задание на реакцию на цвет.
+    Следуйте инструкциям и отвечайте как можно быстрее.</p>
 <div id="start-button-enclosing">
     <button id="start-button" onclick="startTest()">Начать тест</button>
 </div>
 <div class="test-container">
     <div class="test-half" id="sound-math-test">
         <h2>Sound Math Test</h2>
+        <p>Задача будет произнесена вслух. Выберите правильный ответ: Четная или Нечетная.</p>
         <div id="incorrect_field"></div>
         <div id="answer_buttons"></div>
         <progress id="progress-sound" value="0" max="100"></progress>
     </div>
     <div class="test-half" id="color-reaction-test">
         <h2>Color Reaction Test</h2>
+        <p>Нажмите соответствующую клавишу (Z, X или C), когда квадрат загорится нужным цветом.</p>
         <progress id="progress-color" value="0" max="100"></progress>
         <div id="squares"></div>
     </div>
@@ -64,7 +72,9 @@
     <p id="sound-math-results"></p>
     <p id="color-reaction-results"></p>
     <button id="send-data-button">Send Data</button>
-    <button id="restart-button">Restart Test</button>
+    <button>
+        <a href="" id="restart-button">Restart Test</a> <!-- Ссылка на перезапуск страницы -->
+    </button>
 </div>
 <script src="5th-lab-tests/combinedLogic.js"></script>
 </body>

@@ -223,20 +223,7 @@ function endTests() {
 }
 
 document.getElementById('send-data-button').onclick = () => testResults.sendData();
-document.getElementById('restart-button').onclick = () => {
-    document.getElementById('results-container').style.display = 'none';
-    document.getElementById('start-button-enclosing').style.display = 'block';
-    testResults.soundMath = [];
-    testResults.colorReaction = [];
-    switchCounter = 0;
-    currentTest = 'sound-math';
-    testRunning = false;
-    document.getElementById('sound-math-test').style.display = 'block';
-    document.getElementById('color-reaction-test').style.display = 'block';
-    document.getElementById('incorrect_field').innerHTML = '';
-    document.getElementById('answer_buttons').innerHTML = '';
-    document.getElementById('squares').innerHTML = '';
-};
+document.getElementById('restart-button').setAttribute("href", window.location.href);
 
 // Обработчик события для кнопки начала теста
 document.getElementById('start-button').addEventListener('click', () => {
