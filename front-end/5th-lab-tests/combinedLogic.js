@@ -16,7 +16,7 @@ const testResults = {
             this.colorReaction.push(result);
         }
     },
-    sendData() {
+    /* sendData() {
         const data = {
             soundMath: this.soundMath,
             colorReaction: this.colorReaction
@@ -38,6 +38,37 @@ const testResults = {
                 console.error('Error:', error);
                 alert('Failed to save results.');
             });
+    } */
+    sendData() {
+        //здесь ты можешь посчитать свою переменную результата
+        //то, что я пытаался сосчитать ничего не получалось в бд вводилось NaN, тут я думаю, сами справитесь
+        let result;
+        const data = {
+            testType: "attention_assessment_test",
+            //вот здесь должна быть переменная резульатата, я вообще без понятия, что здесь должно быть
+            result: result
+        };
+
+        let url = '';
+        const urlObject = new URL(window.location.href);
+
+        if (urlObject.searchParams.has('data')) {
+            url += '/abstract_test?data=' + encodeURIComponent(urlObject.searchParams.get('data'));
+        } else {
+            url += '/abstract_test';
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                console.log(res);
+                // Redirect to another URL
+                window.location.href = res.url;
+            })
+            .catch(error => console.error(error));
     }
 };
 

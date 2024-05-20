@@ -172,12 +172,17 @@ async function getProfessionCharacteristics(professionId) {
 }
 
 async function getHeartCheck(heartRateBefore, heartRateDuringValues, heartRateAfter) {
+    if (heartRateBefore >= heartRateAfter - 8 && heartRateBefore <= heartRateAfter + 8) {
+        return true;
+    } else {
+        return false;
+    }
     /* if (heartRateBefore >= heartRateAfter) {
         return true;
     } else {
         return false;
     } */
-    const lowerLimit = 60;
+    /* const lowerLimit = 60;
     const upperLimit = 100;
 
     if (heartRateBefore < lowerLimit || heartRateBefore > upperLimit) {
@@ -194,7 +199,7 @@ async function getHeartCheck(heartRateBefore, heartRateDuringValues, heartRateAf
         return false;
     }
 
-    return true;
+    return true; */
 }
 
 async function getResultNumberTest(user, testType, type) {
