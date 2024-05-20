@@ -339,7 +339,7 @@ server.get('/attention_assessment_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
     } else {
-        res.render('5th-lab-tests/AttentionAssessmentTest')
+        res.render('5th-lab-tests/combinedView.ejs')
     }
 })
 server.get('/abstract_thinking_test', (req, res) => {

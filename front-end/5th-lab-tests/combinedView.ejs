@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="5th-lab-tests/combinedStyles.css">
+    <title>Combined Test Page</title>
+</head>
+<body>
+<div class="test-container">
+    <div class="test-half" id="sound-math-test">
+        <h1>Sound Math Test</h1>
+        <div id="problem"></div>
+        <div id="incorrect_field"></div>
+        <div id="select_for_number_of_numbers" style="display: none;">
+            <select id="numbers_for_test_time" required>
+                <option value="2" selected>2</option>
+            </select>
+        </div>
+        <div id="answer_buttons"></div>
+        <progress id="progress" value="0" max="100"></progress>
+        <div id="start-button-enclosing">
+            <button id="start-button">Начать тест</button>
+        </div>
+        <div id="submit-button-enclosing"></div>
+    </div>
+    <div class="test-half" id="color-reaction-test">
+        <h1>Color Reaction Test</h1>
+        <progress id="progress-color" value="0" max="100"></progress>
+        <div id="start-button-enclosing-color">
+            <button id="start-button-color" onclick="hideButton()">Начать тест</button>
+        </div>
+        <div id="submit-button-enclosing-color"></div>
+        <div id="restart-button-enclosing-color"></div>
+        <div id="result-enclosing-color"></div>
+        <p id="result-color"></p>
+    </div>
+</div>
+<script src="5th-lab-tests/combinedLogic.js"></script>
+</body>
+</html>
