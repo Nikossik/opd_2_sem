@@ -4,7 +4,7 @@ let switchCounter = 0; // Счётчик переключений
 const MAX_SWITCHES = 8;
 const NUM_OF_TESTS = 1; // Определяем количество тестов на звуковую математику (1 вопрос)
 const NUM_OF_COLOR_TESTS = 3; // Определяем количество тестов на цветовую реакцию (3 появления цвета)
-let testRunning = false;
+
 // Объект для хранения результатов тестирования
 const testResults = {
     soundMath: [],
@@ -44,6 +44,8 @@ const testResults = {
 // Функция для начала теста
 function startTest() {
     document.getElementById('start-button-enclosing').style.display = 'none';
+    document.getElementById('sound-math-test').style.display = 'block';
+    document.getElementById('color-reaction-test').style.display = 'block';
     runSoundMathTest();
 }
 
@@ -75,10 +77,9 @@ function runSoundMathTest() {
     });
 }
 
-let problemDiv, progressSoundElement, incorrectField, answerButtonsDiv;
+let progressSoundElement, incorrectField, answerButtonsDiv;
 
 function initializeSoundMathElements() {
-    problemDiv = document.getElementById("problem");
     progressSoundElement = document.getElementById("progress-sound");
     incorrectField = document.getElementById("incorrect_field");
     answerButtonsDiv = document.getElementById("answer_buttons");
@@ -93,7 +94,6 @@ function startSoundMathLogic(callback) {
 
     function runTest() {
         progressSoundElement.value = (testCounter / NUM_OF_TESTS) * 100;
-        problemDiv.innerHTML = "";
         incorrectField.innerHTML = "";
         answerButtonsDiv.innerHTML = "";
 
@@ -101,7 +101,6 @@ function startSoundMathLogic(callback) {
         problems.push({ numbers, isEven });
 
         let problem = numbers.join(" + ");
-        problemDiv.innerHTML = problem;
 
         const utterance = new SpeechSynthesisUtterance(problem);
         window.speechSynthesis.speak(utterance);
@@ -128,11 +127,6 @@ function startSoundMathLogic(callback) {
     }
 
     function checkAnswer(userAnswer, correctAnswer) {
-        if (userAnswer === correctAnswer) {
-            incorrectField.innerHTML = "Correct!";
-        } else {
-            incorrectField.innerHTML = "Incorrect!";
-        }
         testCounter++;
         if (testCounter < NUM_OF_TESTS) {
             setTimeout(runTest, 1000);
@@ -154,12 +148,11 @@ function runColorReactionTest() {
     });
 }
 
-let squaresDiv, progressColorElement, resultDiv;
+let squaresDiv, progressColorElement;
 
 function initializeColorReactionElements() {
     squaresDiv = document.getElementById("squares");
     progressColorElement = document.getElementById("progress-color");
-    resultDiv = document.getElementById("result");
 
     // Создание квадратов
     squaresDiv.innerHTML = "";
@@ -213,11 +206,6 @@ function startColorReactionLogic(callback) {
     }
 
     function checkColorAnswer(userKey, correctColor, square) {
-        if (userKey === correctColor) {
-            resultDiv.innerHTML = "Correct!";
-        } else {
-            resultDiv.innerHTML = "Incorrect!";
-        }
         square.style.backgroundColor = 'white';
         setTimeout(runTest, 1000);
     }
@@ -245,11 +233,9 @@ document.getElementById('restart-button').onclick = () => {
     testRunning = false;
     document.getElementById('sound-math-test').style.display = 'block';
     document.getElementById('color-reaction-test').style.display = 'block';
-    document.getElementById('problem').innerHTML = '';
     document.getElementById('incorrect_field').innerHTML = '';
     document.getElementById('answer_buttons').innerHTML = '';
     document.getElementById('squares').innerHTML = '';
-    document.getElementById('result').innerHTML = '';
 };
 
 // Обработчик события для кнопки начала теста
