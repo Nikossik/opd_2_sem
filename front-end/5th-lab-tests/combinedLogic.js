@@ -1,5 +1,5 @@
 // Состояние тестов
-let currentTest = 'sound-reaction'; // Начнем с теста Sound Reaction
+let currentTest = 'sound-math'; // Начнем с теста Sound Math
 let testRunning = false;
 let switchCounter = 0; // Счётчик переключений
 
@@ -8,18 +8,18 @@ const MAX_SWITCHES = 8;
 
 // Объект для хранения результатов тестирования
 const testResults = {
-    soundReaction: [],
+    soundMath: [],
     colorReaction: [],
     addResult(testType, result) {
-        if (testType === 'sound-reaction') {
-            this.soundReaction.push(result);
+        if (testType === 'sound-math') {
+            this.soundMath.push(result);
         } else if (testType === 'color-reaction') {
             this.colorReaction.push(result);
         }
     },
     sendData() {
         const data = {
-            soundReaction: this.soundReaction,
+            soundMath: this.soundMath,
             colorReaction: this.colorReaction
         };
         console.log('Sending data:', data);
@@ -46,12 +46,12 @@ const testResults = {
 function startTest() {
     if (switchCounter < MAX_SWITCHES) {
         document.getElementById('start-button-enclosing').style.display = 'none';
-        if (currentTest === 'sound-reaction') {
-            document.getElementById('sound-reaction-test').style.display = 'block';
+        if (currentTest === 'sound-math') {
+            document.getElementById('sound-math-test').style.display = 'block';
             document.getElementById('color-reaction-test').style.display = 'none';
-            runSoundReactionTest();
+            runSoundMathTest();
         } else {
-            document.getElementById('sound-reaction-test').style.display = 'none';
+            document.getElementById('sound-math-test').style.display = 'none';
             document.getElementById('color-reaction-test').style.display = 'block';
             runColorReactionTest();
         }
@@ -64,46 +64,138 @@ function startTest() {
 
 // Функция для переключения тестов
 function switchTest() {
-    currentTest = (currentTest === 'sound-reaction') ? 'color-reaction' : 'sound-reaction';
+    currentTest = (currentTest === 'sound-math') ? 'color-reaction' : 'sound-math';
     startTest();
 }
 
-// Логика Sound Reaction Test
-function runSoundReactionTest() {
-    console.log("Starting Sound Reaction Test");
-    startSoundReactionLogic(function(result) {
-        testResults.addResult('sound-reaction', result);
-        console.log("Sound Reaction Test completed with result:", result);
+// Логика Sound Math Test
+function runSoundMathTest() {
+    console.log("Starting Sound Math Test");
+    startSoundMathLogic(function(result) {
+        testResults.addResult('sound-math', result);
+        console.log("Sound Math Test completed with result:", result);
         switchTest();
     });
 }
 
-function startSoundReactionLogic(callback) {
-    let bodyElement = document.getElementsByTagName("body")[0];
-    let startTime, testStarted = false, testPassed = false;
-    let testResults = [];
-    const numTests = 3; // number of times to play the sound
-    let currentTestNum = 0;
+// Инициализация элементов Sound Math Test
+let problemDiv, progressElement, incorrectField, answerButtonsDiv, submitButtonEnclosing;
+let numberOfNumbers = 2; // Значение всегда 2
 
-    const audio = new Audio("images/sound.mp3");
+function initializeSoundMathElements() {
+    problemDiv = document.getElementById("problem");
+    progressElement = document.getElementById("progress");
+    incorrectField = document.getElementById("incorrect_field");
+    answerButtonsDiv = document.getElementById("answer_buttons");
+    submitButtonEnclosing = document.getElementById("submit-button-enclosing");
+}
 
-    async function sendData(){
-        if(testPassed){
-            const data = {
-                testType: "sound",
-                reactionTime: testResults.reduce((a, b) => a + b, 0) / testResults.length
-            };
+let problems = [], timings = [], results = [];
+const NUM_OF_TESTS = 9;
+let testCounter = 0, testPassed = false;
 
-            let url = '';
-            const urlObject = new URL(window.location.href);
+function startSoundMathLogic(callback) {
+    initializeSoundMathElements();
+    runTest();
 
-            if (urlObject.searchParams.has('data')){
-                url += '/reaction_test?data=' + urlObject.searchParams.get('data');
-            } else {
-                url += '/reaction_test';
+    function runTest() {
+        if (testCounter < NUM_OF_TESTS) {
+            progressElement.value = (testCounter / NUM_OF_TESTS) * 100;
+            problemDiv.innerHTML = "";
+            incorrectField.innerHTML = "";
+            answerButtonsDiv.innerHTML = "";
+            submitButtonEnclosing.innerHTML = "";
+
+            let { numbers, isEven } = generateProblem();
+            let problem = "";
+
+            problems.push(numbers)
+
+            for (let i = 0; i < numberOfNumbers; i++) {
+                if (i !== numberOfNumbers - 1) {
+                    problem += numbers[i] + "+"
+                } else {
+                    problem += numbers[i]
+                }
             }
 
-            console.log(JSON.stringify(data));
+            // voice acting
+            const utterance = new SpeechSynthesisUtterance(problem);
+            window.speechSynthesis.speak(utterance);
+
+            let evenButton = document.createElement("button")
+            evenButton.innerHTML = "Четная"
+            evenButton.value = "Четная"
+            evenButton.name = "answer_button"
+            evenButton.addEventListener("click", checkAnswer)
+            document.getElementById("answer_buttons").appendChild(evenButton)
+
+            let oddButton = document.createElement("button")
+            oddButton.innerHTML = "Нечетная"
+            oddButton.value = "Нечетная"
+            oddButton.name = "answer_button"
+            oddButton.addEventListener("click", checkAnswer)
+            document.getElementById("answer_buttons").appendChild(oddButton)
+
+            let startTime = new Date().getTime();
+
+            function checkAnswer(event) {
+                if ((event.srcElement.value === "Нечетная" && isEven === false) || (event.srcElement.value === "Четная" && isEven === true)) {
+                    let endTime = new Date().getTime()
+                    timings.push(endTime - startTime)
+                    document.getElementById("incorrect_field").innerHTML = "Всё верно!";
+                    document.getElementById("answer_buttons").innerHTML = "";
+                    testCounter++;
+                    runTest();
+                } else {
+                    document.getElementById("incorrect_field").innerHTML = "Неправильно, попробуйте еще раз!";
+                }
+            }
+
+        } else {
+            testCounter = 0;
+            results.push(timings);
+            timings = [];
+
+            document.getElementById("incorrect_field").innerHTML = ""; // здесь бы прописать результат, но я не понимаю, что именно он выводит
+
+            const submitButton = document.createElement("button")
+            submitButton.type = "submit"
+            submitButton.onclick = sendData
+            submitButton.textContent = "Отправить результат"
+            document.getElementById("submit-button-enclosing").appendChild(submitButton)
+
+            testPassed = true;
+
+            const startButton = document.createElement("button")
+            startButton.id = "start-button"
+            startButton.textContent = "Пройти заново"
+            startButton.onclick = runTest
+            document.getElementById("start-button-enclosing").appendChild(startButton)
+
+            progressElement.value = 0
+        }
+    }
+
+    async function sendData() {
+        if (testPassed) {
+            const reactionTimings = [results.at(-1).slice(0, 3).reduce((a, b) => a + b, 0) / 3,
+                results.at(-1).slice(3, 6).reduce((a, b) => a + b, 0) / 3,
+                results.at(-1).slice(6).reduce((a, b) => a + b, 0) / 3]
+
+            const data = {
+                testType: "math_sound_test",
+                reactionTimings: reactionTimings
+            }
+
+            let url = ''
+            const urlObject = new URL(window.location.href)
+
+            if (urlObject.searchParams.has('data')) {
+                url += '/complex_reaction_test?data=' + urlObject.searchParams.get('data')
+            } else {
+                url += '/complex_reaction_test'
+            }
 
             await fetch(url, {
                 method: 'POST',
@@ -111,7 +203,7 @@ function startSoundReactionLogic(callback) {
                 headers: { 'Content-Type': 'application/json' },
             })
                 .then(res => {
-                    console.log(res);
+                    console.log(res)
                     // Redirect to another URL
                     window.location.href = res.url;
                 })
@@ -119,91 +211,20 @@ function startSoundReactionLogic(callback) {
         }
     }
 
-    function handleKeyPress(event) {
-        if (event.keyCode === 32) { // проверяем, что нажата именно клавиша пробел
-            if (testStarted){
-                let endTime = new Date().getTime();
-                let reactionTime = endTime - startTime;
-                testResults.push(reactionTime);
-                document.getElementById("reaction-time-enclosing").innerHTML = "Ваше время реакции на звук: " + reactionTime + " мс";
-                testStarted = false;
+    function generateProblem() {
+        let numbers = []
 
-                const progressValue = (currentTestNum / numTests) * 100;
-                document.getElementById("progress").value = progressValue;
-
-                if (!testPassed && currentTestNum >= numTests) {
-                    document.getElementById("reaction-time-enclosing").innerHTML = "Результаты теста: " + testResults.join(" мс, ") + " мс.";
-
-                    const submitButton = document.createElement("button");
-                    submitButton.innerHTML = "ОТПРАВИТЬ РЕЗУЛЬТАТ";
-                    submitButton.onclick = sendData;
-                    document.getElementById("send-button-enclosing").appendChild(submitButton);
-
-                    const restartButton = document.createElement("button");
-                    restartButton.innerHTML = "Начать заново";
-                    restartButton.onclick = function () {
-                        testResults = [];
-                        testPassed = false;
-                        currentTestNum = 0;
-                        document.getElementById("reaction-time-enclosing").innerHTML = "";
-                        document.getElementById("send-button-enclosing").innerHTML = "";
-                        document.getElementById("progress").value = 0;
-                        startButton.style.display = "block";
-                        restartButton.style.display = "none";
-                    };
-                    document.getElementById("restart-button-enclosing").appendChild(restartButton);
-
-                    testPassed = true;
-                }
-            }
+        for (let i = 0; i < numberOfNumbers; i++) {
+            numbers.push(Math.round(Math.random() * 20))
         }
+
+        let isEven = numbers.reduce((a, b) => a + b, 0) % 2 === 0
+
+        return { numbers, isEven }
     }
-
-    document.addEventListener("keydown", handleKeyPress);
-
-    function startTest() {
-        const playSoundInterval = setInterval(() => {
-            if (currentTestNum >= numTests) {
-                clearInterval(playSoundInterval);
-                if (!testPassed) {
-                    document.getElementById("reaction-time-enclosing").innerHTML = "Результаты теста: " + testResults.join(" мс, ") + " мс.";
-
-                    const submitButton = document.createElement("button");
-                    submitButton.innerHTML = "ОТПРАВИТЬ РЕЗУЛЬТАТ";
-                    submitButton.onclick = sendData;
-                    document.getElementById("send-button-enclosing").appendChild(submitButton);
-                }
-                testPassed = true;
-            } else {
-                audio.play();
-                startTime = new Date().getTime();
-                testStarted = true;
-                bodyElement.focus();
-                currentTestNum++;
-            }
-        }, Math.floor(Math.random() * 3000) + 1000); // random interval between 1 and 4 seconds
-    }
-
-    const startButton = document.createElement("button");
-    startButton.innerHTML = "НАЧАТЬ ТЕСТ";
-    startButton.onclick = function () {
-        startButton.style.display = "none";
-        alert("Нажмите на клавишу пробел, когда услышите звук");
-        startTest();
-    };
-    bodyElement.appendChild(startButton);
 }
 
 // Логика Color Reaction Test
-function runColorReactionTest() {
-    console.log("Starting Color Reaction Test");
-    startColorReactionLogic(function(result) {
-        testResults.addResult('color-reaction', result);
-        console.log("Color Reaction Test completed with result:", result);
-        switchTest();
-    });
-}
-
 let squaresDiv, progressColorElement, startButtonColor, submitButtonEnclosingColor, resultEnclosingColor, resultColor;
 let colorProblems = [], colorTimings = [], colorResults = [];
 const NUM_OF_COLOR_TESTS = 10;
@@ -220,99 +241,65 @@ function initializeColorReactionElements() {
 
 function startColorReactionLogic(callback) {
     initializeColorReactionElements();
-    hideColorButton();
-}
+    runColorTest();
 
-function hideColorButton() {
-    document.getElementById("start-button-color").style.display = "none";
-    const squaresDiv = document.createElement("div");
-    squaresDiv.id = "squares";
-    const squareLetters = ['Z', 'X', 'C'];
-    for (let i = 0; i < 3; i++) {
-        const squareDiv = document.createElement("div");
-        squareDiv.className = "square";
-        squareDiv.textContent = squareLetters[i];
-        squaresDiv.appendChild(squareDiv);
+    function runColorTest() {
+        if (colorTestCounter < NUM_OF_COLOR_TESTS) {
+            progressColorElement.value = (colorTestCounter / NUM_OF_COLOR_TESTS) * 100;
+            squaresDiv.innerHTML = "";
+            resultColor.innerHTML = "";
+
+            let colors = ["red", "green", "blue"];
+            let randomColor = colors[Math.floor(Math.random() * colors.length)];
+            colorProblems.push(randomColor);
+
+            let square = document.createElement("div");
+            square.className = "square";
+            square.style.backgroundColor = randomColor;
+
+            let startTime = performance.now();
+            let keyMap = {
+                "z": "red",
+                "x": "green",
+                "c": "blue"
+            };
+
+            document.addEventListener("keydown", function handler(event) {
+                if (keyMap[event.key]) {
+                    let endTime = performance.now();
+                    let reactionTime = endTime - startTime;
+                    colorTimings.push(reactionTime);
+                    checkColorAnswer(event.key, keyMap[randomColor]);
+                    document.removeEventListener("keydown", handler);
+                }
+            });
+
+            squaresDiv.appendChild(square);
+            colorTestCounter++;
+        } else {
+            endColorReactionTest();
+        }
     }
-    document.body.appendChild(squaresDiv);
-    startColorTest();
-}
 
-function startColorTest() {
-    resetSquares();
-    intervalId = setInterval(() => {
-        resetSquares();
-        const randomIndex = Math.floor(Math.random() * 3);
-        document.querySelectorAll('.square')[randomIndex].style.backgroundColor = colors[randomIndex];
-        correctAnswer = randomIndex;
-        startTime = Date.now();
-    }, Math.floor(Math.random() * 2000) + 1000);
-}
-
-function resetSquares() {
-    document.querySelectorAll('.square').forEach(square => {
-        square.style.backgroundColor = 'white';
-    });
-}
-
-document.addEventListener('keydown', event => {
-    if (event.key === 'z') {
-        currentSquare = 0;
-        checkColorAnswer();
-    } else if (event.key === 'x') {
-        currentSquare = 1;
-        checkColorAnswer();
-    } else if (event.key === 'c') {
-        currentSquare = 2;
-        checkColorAnswer();
+    function checkColorAnswer(userKey, correctColor) {
+        if (keyMap[userKey] === correctColor) {
+            resultColor.innerHTML = "Correct!";
+        } else {
+            resultColor.innerHTML = "Incorrect!";
+        }
+        setTimeout(runColorTest, 1000);
     }
-});
 
-function checkColorAnswer() {
-    clearInterval(intervalId);
-    if (currentSquare === correctAnswer) {
-        reactionTime = Date.now() - startTime;
-        document.getElementById("progress-color").value = colorTestCounter * 10;
-        correctTestCounter++;
-        colorTestCounter++;
-        totalReactionTime += reactionTime;
-        results.push(reactionTime);
-
-        document.getElementById('result-color').innerHTML = `Your reaction time: ${reactionTime}ms. Correct!`;
-    } else {
-        totalReactionTime += reactionTime * 2;
-        results.push(reactionTime * 2);
-        document.getElementById('result-color').innerHTML = 'Wrong answer. Try again!';
-        colorTestCounter++;
-    }
-    if (colorTestCounter <= 10 && testPassed === false) {
-        startColorTest();
-    } else if (colorTestCounter > 10 && testPassed === false) {
-        testPassed = true;
-
-        document.getElementById("progress-color").value = 0;
-        document.getElementById('result-color').innerHTML = '';
-
-        const submitButtonEnclosingColor = document.getElementById("submit-button-enclosing-color");
-        const submitButtonColor = document.createElement("button");
-        submitButtonColor.textContent = "Отправить результат";
-        submitButtonColor.onclick = sendData;
-        submitButtonEnclosingColor.appendChild(submitButtonColor);
-
-        const restartButtonEnclosingColor = document.getElementById("restart-button-enclosing-color");
-        const restartButtonColor = document.createElement("button");
-        restartButtonColor.textContent = "Пройти заново";
-        restartButtonColor.addEventListener('click', runColorTest);
-        restartButtonEnclosingColor.appendChild(restartButtonColor);
-
-        const resultEnclosingColor = document.getElementById("result-enclosing-color");
-        resultEnclosingColor.innerHTML = `You have completed the test! Your average reaction time is ${totalReactionTime / correctTestCounter}ms. You answered ${correctTestCounter} out of 10 correctly.`;
+    function endColorReactionTest() {
+        let averageColorTime = colorTimings.reduce((a, b) => a + b, 0) / colorTimings.length;
+        colorResults.push({ colorProblems, colorTimings, averageColorTime });
+        callback({ colorProblems, colorTimings, averageColorTime });
     }
 }
 
 // Завершение тестов и отображение результатов
 function endTests() {
-    document.getElementById('sound-reaction-test').style.display = 'none';
+    document.getElementById('sound-math-test').style.display = 'none';
     document.getElementById('color-reaction-test').style.display = 'none';
     console.log('Tests completed after ' + MAX_SWITCHES + ' switches.');
 
@@ -320,8 +307,8 @@ function endTests() {
     const resultsContainer = document.createElement('div');
     resultsContainer.innerHTML = `
         <h2>Test Results Summary</h2>
-        <p>Sound Reaction Test Results: ${testResults.soundReaction.map(r => `Average Time: ${r.averageTime}ms`).join(', ')}</p>
-        <p>Color Reaction Test Results: ${testResults.colorReaction.map(r => `Average Time: ${r.averageTime}ms`).join(', ')}</p>
+        <p>Sound Math Test Results: ${testResults.soundMath.map(r => `Average Time: ${r.averageTime}ms`).join(', ')}</p>
+        <p>Color Reaction Test Results: ${testResults.colorReaction.map(r => `Average Time: ${r.averageColorTime}ms`).join(', ')}</p>
     `;
     document.body.appendChild(resultsContainer);
 
