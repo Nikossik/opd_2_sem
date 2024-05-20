@@ -41,7 +41,7 @@ h1 {
     padding: 20px;
 }
 
-#select_for_number_of_numbers select, #answer_buttons button, #start-button, #submit-button-enclosing button, #start-button-color, #submit-button-enclosing-color button, #restart-button-enclosing-color button {
+#select_for_number_of_numbers select, #answer_buttons button, #start-button, #submit-button-enclosing button, #submit-button-enclosing-color button, #restart-button-enclosing-color button {
     border: none;
     border-radius: 3px;
     background-color: white;
@@ -56,7 +56,7 @@ h1 {
     margin-top: 3em;
 }
 
-#answer_buttons button:hover, #start-button:hover, #submit-button-enclosing button:hover, #start-button-color:hover, #submit-button-enclosing-color button:hover, #restart-button-enclosing-color button:hover {
+#answer_buttons button:hover, #start-button:hover, #submit-button-enclosing button:hover, #submit-button-enclosing-color button:hover, #restart-button-enclosing-color button:hover {
     opacity: 0.7;
 }
 
