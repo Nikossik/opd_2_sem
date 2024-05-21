@@ -40,13 +40,21 @@ const testResults = {
             });
     } */
     sendData() {
-        //здесь ты можешь посчитать свою переменную результата
-        //то, что я пытаался сосчитать ничего не получалось в бд вводилось NaN, тут я думаю, сами справитесь
-        let result;
+        let totalTimings = [];
+
+        this.soundMath.forEach(test => {
+            totalTimings = totalTimings.concat(test.timings);
+        });
+
+        this.colorReaction.forEach(test => {
+            totalTimings = totalTimings.concat(test.timings);
+        });
+
+        const averageTime = totalTimings.reduce((a, b) => a + b, 0) / totalTimings.length;
+
         const data = {
             testType: "attention_assessment_test",
-            //вот здесь должна быть переменная резульатата, я вообще без понятия, что здесь должно быть
-            result: result
+            result: averageTime
         };
 
         let url = '';
