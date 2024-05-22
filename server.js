@@ -195,7 +195,6 @@ const testToQualityMap = {
     'sound': [106, 69], // Острота слуха, Способность к распознаванию небольших отклонений параметров технологических процессов по акустическим признакам
     'light': [], // Пока пусто, нужно добавить соответствующие ПВК, если они есть
     'visual_math_test': [101, 68], // Острота зрения, Способность к распознаванию небольших отклонений параметров технологических процессов по визуальным признакам
-    'pulse_test': [4, 9, 10, 11], // Нервно-эмоциональная устойчивость, Самообладание, Ответственность
     'hard_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
     'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
     'analog_tracking_test': [118], // Концентрированность внимания
@@ -1180,7 +1179,7 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
     let validTestCount = 0;
 
 
-    const maxTotalScore = Array.from({ length: totalTestsCount }, (_, i) => 10 - i)
+    const maxTotalScore = Array.from({ length: testResults.length }, (_, i) => 10 - i)
         .reduce((acc, val) => acc + val, 0);
 
     const testWeights = Array.from({ length: totalTestsCount }, (_, i) => 10 - i);
@@ -1213,7 +1212,7 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
     console.log('maxTotalScore:', maxTotalScore);
 
 
-    if (validTestCount < totalTestsCount) {
+    if (validTestCount > totalTestsCount) {
         return { metric: 4, validTestCount };
     }
 
@@ -1253,7 +1252,7 @@ server.get('/professions_:id', async (req, res) => {
             const { filteredTestResults, totalTestsCount } = await getUserTestResults(userID, relevantPvk);
             const metric = await calculateMetric(filteredTestResults, totalTestsCount, qualities);
 
-            console.log('qualities:', qualities);
+            console.log('metric:', metric);
 
             res.render('ProfessionPage', {
                 profession: profession,
@@ -1321,8 +1320,8 @@ server.get('/my_page', (req, res) => {
         return
     }
 
-    adminUser = req.user.isAdmin;
-    respondentUser = req.user.respondent;
+    let adminUser = req.user.isAdmin;
+    let respondentUser = req.user.respondent;
 
     res.render('my_page', {username: req.user.login, id: req.user.id, loggedIn: req.isAuthenticated(), adminUser: adminUser, respondentUser: respondentUser});
 });
