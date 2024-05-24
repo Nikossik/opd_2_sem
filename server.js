@@ -7,6 +7,7 @@ const crypto = require('crypto')
 const LocalStrategy = require('passport-local').Strategy;
 const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
+
 const {
     filterTest,
     getUsers,
@@ -1404,31 +1405,112 @@ server.get('/all_tests', async (req, res) => {
 });
 
 server.get('/all_users', async (req, res) => {
-    const users = await User.findAll({
-        attributes: ['id', 'login']
-    });
     try {
+        const users = await User.findAll({
+            attributes: ['id', 'login']
+        });
+
         const usersWithTestCounts = await Promise.all(users.map(async user => {
-            var countPT = await StatisticAll.count({
+            const countPT = await StatisticAll.count({
                 where: {
-                    user: req.user.id,
+                    user: user.id,
                     result: {
                         [Op.ne]: 0
                     }
                 }
-
             });
             return {
+                id: user.id,
                 login: user.login,
                 testCount: countPT
             };
-
         }));
+
         res.render('all_users', { users: usersWithTestCounts });
     } catch (error) {
+        console.error('Ошибка при получении данных пользователей:', error);
         res.status(500).send('Ошибка при получении данных пользователей');
     }
 });
+
+server.get('/user_tests/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findByPk(userId, {
+            attributes: ['login']
+        });
+
+        if (!user) {
+            return res.status(404).send('Пользователь не найден');
+        }
+
+        // Получение данных из разных таблиц
+        const abstractTests = await AbstractTest.findAll({ where: { user: userId } });
+        const accuracyTests = await AccuracyTest.findAll({ where: { user: userId } });
+        const complexReactionTests = await ComplexReactionTest.findAll({ where: { user: userId } });
+        const reactionTests = await ReactionTest.findAll({ where: { user: userId } });
+
+        console.log('abstractTests:', abstractTests);
+        console.log('accuracyTests:', accuracyTests);
+        console.log('complexReactionTests:', complexReactionTests);
+        console.log('reactionTests:', reactionTests);
+
+        const calculateStatistics = (data, field) => {
+            const count = data.length;
+            const sum = data.reduce((acc, val) => acc + val[field], 0);
+            const mean = sum / count;
+
+            const variance = data.reduce((acc, val) => acc + Math.pow(val[field] - mean, 2), 0) / count;
+            const stdDeviation = Math.sqrt(variance);
+
+            const sorted = data.map(d => d[field]).sort((a, b) => a - b);
+            const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
+
+            const mode = Object.entries(data.reduce((acc, val) => {
+                acc[val[field]] = (acc[val[field]] || 0) + 1;
+                return acc;
+            }, {})).reduce((acc, val) => val[1] > acc[1] ? val : acc, [null, 0])[0];
+
+            return { count, mean, variance, stdDeviation, median, mode };
+        };
+
+
+        // Преобразование данных тестов
+        const testResults = [
+            ...abstractTests.map(test => ({ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') })),
+            ...accuracyTests.map(test => ({ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') })),
+            ...complexReactionTests.map(test => ({ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') })),
+            ...reactionTests.map(test => ({ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') })),
+        ];
+
+        console.log('testResults:', testResults);
+
+        res.render('user_tests', { user, testResults });
+    } catch (error) {
+        console.error('Ошибка при получении данных тестов пользователя:', error);
+        res.status(500).send('Ошибка при получении данных тестов пользователя');
+    }
+});
+
+server.post('/delete_user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).send('Пользователь не найден');
+        }
+
+        await user.destroy();
+        res.redirect('/');
+    } catch (error) {
+        console.error('Ошибка при удалении пользователя:', error);
+        res.status(500).send('Ошибка при удалении пользователя');
+    }
+});
+
+
 
 sequelize.sync().then(() => {
     server.listen(3000, () => {
