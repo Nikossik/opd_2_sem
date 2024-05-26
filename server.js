@@ -1019,7 +1019,7 @@ server.get('/characteristics', async (req, res) => {
             });
         }
 
-        const complex_reaction = ['3_colors', 'math_vis'];
+        const complex_reaction = ['3_colors', 'math_vis', 'math_sound_test'];
         for (const testType of complex_reaction) {
             let result = await getResultNumberTest(user, 'complex_reaction', testType);
 
