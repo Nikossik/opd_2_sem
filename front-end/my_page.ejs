@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="my_page.css">
     <title>Профиль: <%= username %></title>
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
 </head>
 <body class="body-background">
     <section class="container">
@@ -82,8 +89,8 @@
                         <button id="allTestsButton" onclick="location.href='/all_tests'">Все тесты</button>
                     <% } %>
             <% if (adminUser) { %>
-                            <button onclick="location.href='/all_users'">Все пользователи</button>
-                        <% } %>
+                        <button onclick="location.href='/all_users'">Все пользователи</button>
+                    <% } %>
         <!-- </div>  -->
 
 
