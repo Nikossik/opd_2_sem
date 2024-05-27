@@ -4,6 +4,7 @@ const passport = require('passport');
 const flash = require('connect-flash')
 const path = require('path')
 const crypto = require('crypto')
+const { Op, Sequelize} = require('sequelize');
 const LocalStrategy = require('passport-local').Strategy;
 const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
@@ -195,12 +196,10 @@ const testToQualityMap = {
     'sound': [106, 69], // Острота слуха, Способность к распознаванию небольших отклонений параметров технологических процессов по акустическим признакам
     'light': [], // Пока пусто, нужно добавить соответствующие ПВК, если они есть
     'visual_math_test': [101, 68], // Острота зрения, Способность к распознаванию небольших отклонений параметров технологических процессов по визуальным признакам
-    'pulse_test': [4, 9, 10, 11], // Нервно-эмоциональная устойчивость, Самообладание, Ответственность
     'hard_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
     'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
     'analog_tracking_test': [118], // Концентрированность внимания
     '3_colors': [101], // Острота зрения
-    'math_sound_test': [106], // Острота слуха
     'math_vis': [101], // Острота зрения
     'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
     'short_term_memory_test': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
@@ -340,7 +339,7 @@ server.get('/attention_assessment_test', (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
     } else {
-        res.render('5th-lab-tests/AttentionAssessmentTest')
+        res.render('5th-lab-tests/combinedView.ejs')
     }
 })
 server.get('/abstract_thinking_test', (req, res) => {
@@ -1021,7 +1020,7 @@ server.get('/characteristics', async (req, res) => {
             });
         }
 
-        const complex_reaction = ['3_colors', 'math_sound_test', 'math_vis'];
+        const complex_reaction = ['3_colors', 'math_vis', 'math_sound_test'];
         for (const testType of complex_reaction) {
             let result = await getResultNumberTest(user, 'complex_reaction', testType);
 
@@ -1128,31 +1127,47 @@ async function getUserTestResults(userId, relevantPvk) {
 }
 
 
+async function getAverageAndVarianceValues() {
+    const testTypes = [
+        'light', '3_colors', 'sound', 'math_vis', 'easy_action',
+        'hard_action', 'analog_tracking_test', 'random_access_memory', 'short_term_memory_test',
+        'myunsterberg_test', 'compare_test', 'attention_assessment_test', 'abstract_thinking_test', 'abstract_test'
+    ];
+
+    const values = {};
+
+    for (const testType of testTypes) {
+        const results = await StatisticAll.findAll({
+            where: {
+                type: testType,
+                result: { [Op.ne]: 0 }
+            },
+            attributes: [
+                [Sequelize.fn('AVG', Sequelize.col('result')), 'average'],
+                [Sequelize.fn('VARIANCE', Sequelize.col('result')), 'variance']
+            ],
+            raw: true
+        });
+
+        values[testType] = {
+            average: parseFloat(results[0].average),
+            variance: parseFloat(results[0].variance)
+        };
+    }
+
+    return values;
+}
+
+
+
+
 
 function getCharDictKeyByValue(value) {
     return Object.keys(char_dict).find(key => char_dict[key] === value);
 }
 
 async function calculateMetric(testResults, totalTestsCount, qualities) {
-    const averageValues = {
-        'sound': 270,
-        'light': 0,
-        'visual_math_test': 280,
-        'pulse_test': 70,
-        'hard_action': 240,
-        'easy_action': 220,
-        'analog_tracking_test': 45,
-        '3_colors': 245,
-        'math_sound_test': 270,
-        'math_vis': 280,
-        'random_access_memory': 4,
-        'short_term_memory_test': 4,
-        'myunsterberg_test': 4,
-        'compare_test': 10,
-        'attention_assessment_test': 4,
-        'abstract_thinking_test': 4,
-        'abstract_test': 3,
-    };
+    const values = await getAverageAndVarianceValues();
 
     // Присваиваем веса на основе порядка важности ПВК
     const weights = {};
@@ -1162,45 +1177,62 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
     });
 
     let totalScore = 0;
+    let validTestCount = 0;
 
-    // Максимальный возможный вес
-    const maxTotalScore = Array.from({ length: totalTestsCount }, (_, i) => 10 - i)
+
+    const maxTotalScore = Array.from({ length: testResults.length }, (_, i) => 10 - i)
         .reduce((acc, val) => acc + val, 0);
 
-    for (const [testType, qualityIds] of Object.entries(testToQualityMap)) {
+    const testWeights = Array.from({ length: totalTestsCount }, (_, i) => 10 - i);
+
+    const relevantTests = Object.keys(testToQualityMap)
+        .filter(testType => testResults.some(result => result.type === testType));
+
+    relevantTests.forEach((testType, index) => {
         const result = testResults.find(test => test.type === testType);
-        if (result) {
+        if (result && result.result !== 0) {
+            validTestCount++;
             const userValue = parseFloat(result.result);
-            const averageValue = averageValues[testType];
-            const qualityWeights = qualityIds.map(q => weights[q] || 0);
-            const weight = Math.max(...qualityWeights);
+            const { average, variance } = values[testType];
+            const zScore = (userValue - average) / Math.sqrt(variance);
+            result.zScore = zScore;
 
-            console.log(`Calculating score for test type ${testType}: userValue = ${userValue}, averageValue = ${averageValue}, weight = ${weight}`);
+            const weight = testWeights[index];
 
-            if (userValue >= averageValue * 1.1) {
+            console.log(`Calculating score for test type ${testType}: userValue = ${userValue}, average = ${average}, variance = ${variance}, zScore = ${zScore}, weight = ${weight}`);
+
+            if (userValue >= average * 1.1) {
                 totalScore += weight;
-            } else if (userValue >= averageValue * 0.9) {
+            } else if (userValue >= average * 0.9) {
                 totalScore += weight / 2;
             }
         }
-    }
+    });
 
     console.log('totalScore:', totalScore);
     console.log('maxTotalScore:', maxTotalScore);
 
+
+    if (validTestCount > totalTestsCount) {
+        return { metric: 4, validTestCount };
+    }
+
     const scorePercentage = (totalScore / maxTotalScore) * 100;
 
     if (scorePercentage >= 75) {
-        return 1; // Профессия рекомендуется
+        return { metric: 1, validTestCount };
     } else if (scorePercentage >= 55) {
-        return 2; // Рекомендуется развить некоторые ПВК
+        return { metric: 2, validTestCount };
     } else {
-        return 3; // Профессия не рекомендуется
+        return { metric: 3, validTestCount };
     }
 }
 
-
-
+getAverageAndVarianceValues().then(averageValues => {
+    console.log('Average Values:', averageValues);
+}).catch(error => {
+    console.error('Ошибка:', error);
+});
 
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
@@ -1221,7 +1253,7 @@ server.get('/professions_:id', async (req, res) => {
             const { filteredTestResults, totalTestsCount } = await getUserTestResults(userID, relevantPvk);
             const metric = await calculateMetric(filteredTestResults, totalTestsCount, qualities);
 
-            console.log('qualities:', qualities);
+            console.log('metric:', metric);
 
             res.render('ProfessionPage', {
                 profession: profession,
@@ -1244,6 +1276,7 @@ server.get('/professions_:id', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 server.get('/add_heart_rate', (req, res) => {
     if (!req.isAuthenticated()) {
@@ -1302,6 +1335,7 @@ server.get('/my_page', async (req, res) => {
         return
     }
 
+<<<
     adminUser = req.user.isAdmin;
     respondentUser = req.user.respondent;
     var countPT = await StatisticAll.count({
@@ -1311,6 +1345,7 @@ server.get('/my_page', async (req, res) => {
                 [Op.ne]: 0
             }
         }
+===
 
     });
     let userEmail = '';

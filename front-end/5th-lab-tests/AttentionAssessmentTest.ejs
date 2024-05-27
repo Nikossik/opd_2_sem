@@ -205,45 +205,45 @@
         }
     }
 
-    async function sendData() {
-        if (testPassed) {
-            const averageReactionTimes = [
-                reactionTimings.slice(0, 3).reduce((a, b) => a + b, 0) / 3,
-                reactionTimings.slice(3, 6).reduce((a, b) => a + b, 0) / 3,
-                reactionTimings.slice(6).reduce((a, b) => a + b, 0) / 3
-            ];
+    // async function sendData() {
+    //     if (testPassed) {
+    //         const averageReactionTimes = [
+    //             reactionTimings.slice(0, 3).reduce((a, b) => a + b, 0) / 3,
+    //             reactionTimings.slice(3, 6).reduce((a, b) => a + b, 0) / 3,
+    //             reactionTimings.slice(6).reduce((a, b) => a + b, 0) / 3
+    //         ];
 
-            if (isNaN(averageReactionTimes)) {
-                averageReactionTimes = 0;
-            }
+    //         if (isNaN(averageReactionTimes)) {
+    //             averageReactionTimes = 0;
+    //         }
 
-            const data = {
-                testType: "attention_assessment_test",
-                result: averageReactionTimes
-            };
+    //         const data = {
+    //             testType: "attention_assessment_test",
+    //             result: averageReactionTimes
+    //         };
 
-            let url = '';
-            const urlObject = new URL(window.location.href);
+    //         let url = '';
+    //         const urlObject = new URL(window.location.href);
 
-            if (urlObject.searchParams.has('data')) {
-                url += '/abstract_test?data=' + encodeURIComponent(urlObject.searchParams.get('data'));
-            } else {
-                url += '/abstract_test';
-            }
+    //         if (urlObject.searchParams.has('data')) {
+    //             url += '/abstract_test?data=' + encodeURIComponent(urlObject.searchParams.get('data'));
+    //         } else {
+    //             url += '/abstract_test';
+    //         }
 
-            await fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {'Content-Type': 'application/json'},
-            })
-                .then(res => {
-                    console.log(res);
-                    // Redirect to another URL
-                    window.location.href = res.url;
-                })
-                .catch(error => console.error(error));
-        }
-    }
+    //         await fetch(url, {
+    //             method: 'POST',
+    //             body: JSON.stringify(data),
+    //             headers: {'Content-Type': 'application/json'},
+    //         })
+    //             .then(res => {
+    //                 console.log(res);
+    //                 // Redirect to another URL
+    //                 window.location.href = res.url;
+    //             })
+    //             .catch(error => console.error(error));
+    //     }
+    // }
 </script>
 
 </body>

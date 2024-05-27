@@ -86,8 +86,8 @@
                 <% testResults.forEach(function(result) { %>
                     <tr>
                         <td><%= result.type %></td>
-                        <% if (result.result) { %>
-                            <td><%= result.result %></td>
+                        <% if (result.result !== 0) { %>
+                            <td><%= result.zScore ? result.zScore.toFixed(2) : 0 %></td>
                         <% } else { %>
                             <td>Не пройден</td>
                         <% } %>
@@ -103,12 +103,14 @@
         <% } else { %>
             <p>Результаты тестов отсутствуют.</p>
         <% } %>
-        <% if (metric === 1) { %>
+        <% if (metric.metric === 1) { %>
             <h2>Профессия рекомендуется</h2>
-        <% } else if (metric === 2) { %>
+        <% } else if (metric.metric === 2) { %>
             <h2>Рекомендуется развить некоторые ПВК</h2>
-        <% } else { %>
+        <% } else if (metric.metric === 3) { %>
             <h2>Профессия не рекомендуется</h2>
+        <% } else if (metric.metric === 4) { %>
+            <h2>Следует пройти все тесты, чтобы увидеть результат</h2>
         <% } %>
     </div>
 </section>
