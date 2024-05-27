@@ -318,3 +318,53 @@ h1{
 .table tbody tr:nth-child(even){
 	background: #f3f3f3;
 }
+#becomeRespondentButton {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+button {
+    border-radius: 10px;
+    display: inline-block;
+    border: none;
+    background-color: rgb(123, 83, 234);
+    color: white;
+    padding: 1rem 2rem; 
+    transition: opacity .6s ease-in-out;
+    text-decoration: none;
+    font-size: 1rem;
+    letter-spacing: 0.2rem;
+    font-weight: 500;
+    vertical-align: middle;  
+    cursor: pointer;
+    width: 70%;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+button:hover{
+    opacity: .95;
+}

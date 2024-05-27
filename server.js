@@ -8,6 +8,7 @@ const { Op, Sequelize} = require('sequelize');
 const LocalStrategy = require('passport-local').Strategy;
 const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
+
 const {
     filterTest,
     getUsers,
@@ -990,7 +991,7 @@ server.get('/characteristics', async (req, res) => {
             if (result == null) {
                 result = 0;
             }
-            
+
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
             await StatisticAll.create({
@@ -1026,7 +1027,7 @@ server.get('/characteristics', async (req, res) => {
             if (result == null) {
                 result = 0;
             }
-            
+
             const heartRateCheck = await getHeartRateCheck(user, testType);
 
             await StatisticAll.create({
@@ -1312,18 +1313,78 @@ server.post('/add_heart_rate', async (req, res) => {
         res.render('AddHeartRate', { error: error.message });
     }
 });
+const { Op } = require('sequelize')
+/*
+async function countPassedTests(userId) {
+        count = await StatisticAll.count({
+        where: {
+            user: userId,
+            result: {
+                [Op.ne]: 0
+            }
+        }
 
+    });
+    console.log('countPassedTests:', count);
+}
+*/
 
-server.get('/my_page', (req, res) => {
+server.get('/my_page', async (req, res) => {
     if (!req.isAuthenticated()) {
         res.redirect('/login')
         return
     }
 
-    let adminUser = req.user.isAdmin;
-    let respondentUser = req.user.respondent;
+<<<
+    adminUser = req.user.isAdmin;
+    respondentUser = req.user.respondent;
+    var countPT = await StatisticAll.count({
+        where: {
+            user: req.user.id,
+            result: {
+                [Op.ne]: 0
+            }
+        }
+===
 
-    res.render('my_page', {username: req.user.login, id: req.user.id, loggedIn: req.isAuthenticated(), adminUser: adminUser, respondentUser: respondentUser});
+    });
+    let userEmail = '';
+    if (respondentUser) {
+        userEmail = req.user.email;
+    }
+
+    res.render('my_page', {
+        username: req.user.login,
+        id: req.user.id,
+        email: userEmail,
+        countPT: countPT,
+        loggedIn: req.isAuthenticated(),
+        adminUser: adminUser,
+        respondentUser: respondentUser
+    });
+});
+
+async function updateUserEmailAndRespondentStatus(userId, newEmail) {
+    await User.update(
+        { email: newEmail, respondent: true },
+        { where: { id: userId } })
+        .success(result =>
+            handleResult(result)
+        )
+        .error(err =>
+            handleError(err)
+        );
+}
+server.post('/setmail', async (req, res) => {
+    if (req.isAuthenticated()) {
+        try{
+            await updateUserEmailAndRespondentStatus(req.user.id, req.body.email)
+        }catch (error){
+            res.status(500).send('Ошибка при записи email'+error.toString());
+        }
+    }else {
+        res.redirect('/mypage');
+    }
 });
 
 async function aggregateExpertRatings(professionName) {
@@ -1358,6 +1419,133 @@ async function aggregateExpertRatings(professionName) {
         throw err;
     }
 }
+
+
+// HERE IS YOUR CODE
+server.get('/all_tests', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.respondent) {
+        res.redirect('/login');
+        return;
+    }
+
+    try {
+        const tests = await StatisticAll.findAll({
+            where: { user: req.user.id },
+            attributes: ['type', 'result']
+        });
+        res.render('all_tests', { tests });
+    } catch (error) {
+        res.status(500).send('Ошибка при получении данных тестов');
+    }
+});
+
+server.get('/all_users', async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: ['id', 'login']
+        });
+
+        const usersWithTestCounts = await Promise.all(users.map(async user => {
+            const countPT = await StatisticAll.count({
+                where: {
+                    user: user.id,
+                    result: {
+                        [Op.ne]: 0
+                    }
+                }
+            });
+            return {
+                id: user.id,
+                login: user.login,
+                testCount: countPT
+            };
+        }));
+
+        res.render('all_users', { users: usersWithTestCounts });
+    } catch (error) {
+        console.error('Ошибка при получении данных пользователей:', error);
+        res.status(500).send('Ошибка при получении данных пользователей');
+    }
+});
+
+server.get('/user_tests/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findByPk(userId, {
+            attributes: ['login']
+        });
+
+        if (!user) {
+            return res.status(404).send('Пользователь не найден');
+        }
+
+        // Получение данных из разных таблиц
+        const abstractTests = await AbstractTest.findAll({ where: { user: userId } });
+        const accuracyTests = await AccuracyTest.findAll({ where: { user: userId } });
+        const complexReactionTests = await ComplexReactionTest.findAll({ where: { user: userId } });
+        const reactionTests = await ReactionTest.findAll({ where: { user: userId } });
+
+        console.log('abstractTests:', abstractTests);
+        console.log('accuracyTests:', accuracyTests);
+        console.log('complexReactionTests:', complexReactionTests);
+        console.log('reactionTests:', reactionTests);
+
+        const calculateStatistics = (data, field) => {
+            const count = data.length;
+            const sum = data.reduce((acc, val) => acc + val[field], 0);
+            const mean = sum / count;
+
+            const variance = data.reduce((acc, val) => acc + Math.pow(val[field] - mean, 2), 0) / count;
+            const stdDeviation = Math.sqrt(variance);
+
+            const sorted = data.map(d => d[field]).sort((a, b) => a - b);
+            const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
+
+            const mode = Object.entries(data.reduce((acc, val) => {
+                acc[val[field]] = (acc[val[field]] || 0) + 1;
+                return acc;
+            }, {})).reduce((acc, val) => val[1] > acc[1] ? val : acc, [null, 0])[0];
+
+            return { count, mean, variance, stdDeviation, median, mode };
+        };
+
+
+        // Преобразование данных тестов
+        const testResults = [
+            ...abstractTests.map(test => ({ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') })),
+            ...accuracyTests.map(test => ({ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') })),
+            ...complexReactionTests.map(test => ({ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') })),
+            ...reactionTests.map(test => ({ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') })),
+        ];
+
+        console.log('testResults:', testResults);
+
+        res.render('user_tests', { user, testResults });
+    } catch (error) {
+        console.error('Ошибка при получении данных тестов пользователя:', error);
+        res.status(500).send('Ошибка при получении данных тестов пользователя');
+    }
+});
+
+server.post('/delete_user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).send('Пользователь не найден');
+        }
+
+        await user.destroy();
+        res.redirect('/');
+    } catch (error) {
+        console.error('Ошибка при удалении пользователя:', error);
+        res.status(500).send('Ошибка при удалении пользователя');
+    }
+});
+
+
 
 sequelize.sync().then(() => {
     server.listen(3000, () => {

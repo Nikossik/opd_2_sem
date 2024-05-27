@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="UserTestsPage.css">
+    <title>Тесты пользователя <%= user.login %></title>
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
+</head>
+<body class="body-background">
+    <div class="menu-wrap">
+        <input type="checkbox" class="toggler">
+        <div class="main-menu-icon"><div></div></div>
+        <div class="menu">
+            <div>
+                <div>
+                    <ul>
+                        <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
+    
+                        <% if (!loggedIn) { %>
+                            <li><a href="/login">ВОЙТИ</a></li>
+                        <% } %>
+                    
+                        <% if (loggedIn) { %>
+                            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/my_page">МОЙ ПРОФИЛЬ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/poll_1_part_1">ОПРОС</a></li>
+                        <% } %>
+    
+                        <% if (adminUser || respondentUser) { %>
+                            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/add_heart_rate">ПУЛЬС</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+                        <% } %>
+                        <% if (adminUser || respondentUser) { %>
+                            <li><a href="/tests_list">СПИСОК ТЕСТОВ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/logout">ВЫЙТИ</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="container">
+        <h1>Тесты пользователя <%= user.login %></h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Тип теста</th>
+                    <th>Количество</th>
+                    <th>Среднее</th>
+                    <th>Дисперсия</th>
+                    <th>Отклонение</th>
+                    <th>Медиана</th>
+                    <th>Мода</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (testResults && testResults.length > 0) { %>
+                    <% testResults.forEach(result => { %>
+                        <tr>
+                            <td><%= result.type %></td>
+                            <td><%= result.count %></td>
+                            <td><%= result.mean.toFixed(2) %></td>
+                            <td><%= result.variance.toFixed(2) %></td>
+                            <td><%= result.stdDeviation.toFixed(2) %></td>
+                            <td><%= result.median.toFixed(2) %></td>
+                            <td><%= result.mode %></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7">Нет данных для отображения.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <form action="/delete_user/<%= user.id %>" method="POST" onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
+                <button type="submit">Удалить пользователя</button>
+        </form>
+
+        <button onclick="location.href='/all_users'">Назад</button>
+    </section>
+</body>
+</html>

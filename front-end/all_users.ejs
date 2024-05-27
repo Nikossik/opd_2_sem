@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="AllUsersPage.css">
+    <title>Все пользователи</title>
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-wrap">
+        <input type="checkbox" class="toggler">
+        <div class="main-menu-icon"><div></div></div>
+        <div class="menu">
+            <div>
+                <div>
+                    <ul>
+                        <li><a href="/">ДОМАШНЯЯ СТРАНИЦА</a></li>
+    
+                        <% if (!loggedIn) { %>
+                            <li><a href="/login">ВОЙТИ</a></li>
+                        <% } %>
+                    
+                        <% if (loggedIn) { %>
+                            <li><a href="/characteristics">ПРОФЕССИИ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/my_page">МОЙ ПРОФИЛЬ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/poll_1_part_1">ОПРОС</a></li>
+                        <% } %>
+    
+                        <% if (adminUser || respondentUser) { %>
+                            <li><a href="/polls_results">РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/adminRegister">ДОБАВИТЬ АДМИНА</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/create_invite">ССЫЛКА-ПРИГЛАШЕНИЕ</a></li>
+                        <% } %>
+                        <% if (adminUser) { %>
+                            <li><a href="/add_heart_rate">ПУЛЬС</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/adminPage">ЭКСПЕРТЫ</a></li>
+                        <% } %>
+                        <% if (adminUser || respondentUser) { %>
+                            <li><a href="/tests_list">СПИСОК ТЕСТОВ</a></li>
+                        <% } %>
+                        <% if (loggedIn) { %>
+                            <li><a href="/logout">ВЫЙТИ</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <section class="container">
+        <h1>Все пользователи</h1>
+    
+        <ul>
+            <% users.forEach(user => { %>
+                <li>
+                    <h2><a href="/user_tests/<%= user.id %>"><%= user.login %></a> - Количество пройденных тестов: <%= user.testCount %></h2>
+                </li>
+            <% }) %>
+        </ul>
+
+        <button onclick="location.href='/my_page'">Назад</button>
+    </section>
+</body>
+</html>
