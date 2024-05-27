@@ -1334,7 +1334,6 @@ server.get('/my_page', async (req, res) => {
         return
     }
 
-<<<
     adminUser = req.user.isAdmin;
     respondentUser = req.user.respondent;
     var countPT = await StatisticAll.count({
@@ -1344,7 +1343,6 @@ server.get('/my_page', async (req, res) => {
                 [Op.ne]: 0
             }
         }
-===
 
     });
     let userEmail = '';
