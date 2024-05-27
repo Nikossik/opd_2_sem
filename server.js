@@ -1313,7 +1313,6 @@ server.post('/add_heart_rate', async (req, res) => {
         res.render('AddHeartRate', { error: error.message });
     }
 });
-const { Op } = require('sequelize')
 /*
 async function countPassedTests(userId) {
         count = await StatisticAll.count({
