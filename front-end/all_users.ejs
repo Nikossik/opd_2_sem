@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="AllUsersPage.css">
+    <title>Все пользователи</title>
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
+</head>
+<body>
+
+
+    <section class="container">
+        <h1>Все пользователи</h1>
+    
+        <ul>
+            <% users.forEach(user => { %>
+                <li>
+                    <h2><a href="/user_tests/<%= user.id %>"><%= user.login %></a> - Количество пройденных тестов: <%= user.testCount %></h2>
+                </li>
+            <% }) %>
+        </ul>
+
+        <button onclick="location.href='/my_page'">Назад</button>
+    </section>
+</body>
+</html>

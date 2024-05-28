@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="AllTestsPage.css">
+    <title>Все тесты</title>
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
+</head>
+<body class="body-background">
+
+    <section class="container">
+        <h1>Все тесты</h1>
+
+        <div class="table_list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип теста</th>
+                        <th>Результат</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tests.forEach(test => { %>
+                        <tr>
+                            <td><%= test.type %></td>
+                            <td><%= test.result %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <button onclick="location.href='/my_page'">Назад к профилю</button>
+    </section>
+</body>
+</html>
