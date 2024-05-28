@@ -196,20 +196,21 @@ const char_dict = {
 };
 
 const testToQualityMap = {
-    'sound': [106, 69], // Острота слуха, Способность к распознаванию небольших отклонений параметров технологических процессов по акустическим признакам
-    'light': [], // Пока пусто, нужно добавить соответствующие ПВК, если они есть
-    'visual_math_test': [101, 68], // Острота зрения, Способность к распознаванию небольших отклонений параметров технологических процессов по визуальным признакам
-    'hard_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
-    'easy_action': [121], // Способность к распределению внимания между несколькими объектами или видами деятельности
-    'analog_tracking_test': [118], // Концентрированность внимания
-    '3_colors': [101], // Острота зрения
-    'math_vis': [101], // Острота зрения
-    'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
-    'short_term_memory_test': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
-    'myunsterberg_test': [98, 121], // Умственная работоспособность, Способность к распределению внимания между несколькими объектами или видами деятельности
-    'compare_test': [45, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
-    'abstract_thinking_test': [45, 48, 42, 52], // Аналитичность мышления, Логичность мышления, Способность наглядно представлять себе новое явление, Образность мышления
-    'abstract_test': [45, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
+    'sound': [106, 69, 0, 50],
+    'light': [],
+    'visual_math_test': [101, 68, 50], 
+    'hard_action': [121, 57],
+    'easy_action': [121], 
+    'analog_tracking_test': [118, 0], 
+    '3_colors': [101], 
+    'math_vis': [101],
+    'random_access_memory': [73, 10, 79],
+    'short_term_memory_test': [73, 10, 0, 75], 
+    'myunsterberg_test': [98, 121, 76, 81],
+    'compare_test': [12, 98, 7, 25, 44, 22, 118],
+    'abstract_tvhinking_test': [45, 48, 42, 52], 
+    'abstract_test': [49, 42, 48, 52, 44],
+    'attention_assessment_test': [33, 120, 122]
 };
 
 server.use(express.json());
@@ -1138,7 +1139,7 @@ async function getUserTestResultsNorm(userId) {
 }
 
 
-async function getAverageAndVarianceValues() {
+async function getAverageAndVarianceValues(userId) {
     const testTypes = [
         'light', '3_colors', 'sound', 'math_vis', 'easy_action',
         'hard_action', 'analog_tracking_test', 'random_access_memory', 'short_term_memory_test',
@@ -1151,7 +1152,8 @@ async function getAverageAndVarianceValues() {
         const results = await StatisticAll.findAll({
             where: {
                 type: testType,
-                result: { [Op.ne]: 0 }
+                result: { [Op.ne]: 0},
+                user: { [Op.ne]: userId }
             },
             attributes: [
                 [Sequelize.fn('AVG', Sequelize.col('result')), 'average'],
@@ -1170,8 +1172,8 @@ async function getAverageAndVarianceValues() {
 }
 
 
-async function calculateMetricZ(testResults) {
-    const values = await getAverageAndVarianceValues();
+async function calculateMetricZ(testResults, userId) {
+    const values = await getAverageAndVarianceValues(userId);
 
     const qualityScores = {};
 
@@ -1207,7 +1209,7 @@ server.get('/pvk', async (req, res) => {
     if (req.isAuthenticated()) {
         const userID = req.user.id;
         const testResults = await getUserTestResultsNorm(userID);
-        const zScores = await calculateMetricZ(testResults);
+        const zScores = await calculateMetricZ(testResults, userID);
 
 
         let adminUser = req.user.isAdmin;
@@ -1226,8 +1228,8 @@ function getCharDictKeyByValue(value) {
     return Object.keys(char_dict).find(key => char_dict[key] === value);
 }
 
-async function calculateMetric(testResults, totalTestsCount, qualities) {
-    const values = await getAverageAndVarianceValues();
+async function calculateMetric(testResults, totalTestsCount, qualities, userId) {
+    const values = await getAverageAndVarianceValues(userId);
 
     // Присваиваем веса на основе порядка важности ПВК
     const weights = {};
@@ -1313,7 +1315,7 @@ server.get('/professions_:id', async (req, res) => {
 
             const relevantPvk = qualities.map(quality => quality.characteristic);
             const { filteredTestResults, totalTestsCount } = await getUserTestResults(userID, relevantPvk);
-            const metric = await calculateMetric(filteredTestResults, totalTestsCount, qualities);
+            const metric = await calculateMetric(filteredTestResults, totalTestsCount, qualities, userID);
 
             console.log('metric:', metric);
 
