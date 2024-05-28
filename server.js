@@ -20,6 +20,9 @@ const {
     getHeartRateCheck
 } = require('./js-scripts/databaseManipulations')
 const {login} = require("passport/lib/http/request");
+const { Server } = require('http');
+const { SourceTextModule } = require('vm');
+const { log } = require('console');
 const server = express();
 const char_dict = {
     0: 'Стремление к профессиональному совершенству',
@@ -204,9 +207,9 @@ const testToQualityMap = {
     'random_access_memory': [73, 10], // Зрительная долговременная память на условные обозначения, Оперативная память, Кратковременная память
     'short_term_memory_test': [73, 10], // Зрительная долговременная память на условные обозначения, Кратковременная память
     'myunsterberg_test': [98, 121], // Умственная работоспособность, Способность к распределению внимания между несколькими объектами или видами деятельности
-    'compare_test': [12, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
+    'compare_test': [45, 98, 7, 25, 44, 22], // Трудолюбие, Умственная работоспособность, Способность планировать свою деятельность, Способность к воссозданию образа по словесному описанию, Экстернальность
     'abstract_thinking_test': [45, 48, 42, 52], // Аналитичность мышления, Логичность мышления, Способность наглядно представлять себе новое явление, Образность мышления
-    'abstract_test': [49, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
+    'abstract_test': [45, 42, 48, 52, 44] // Креативность мышления, Способность наглядно представлять себе новое явление, Логичность мышления, Образность мышления, Способность к воссозданию образа по словесному описанию
 };
 
 server.use(express.json());
@@ -1126,6 +1129,14 @@ async function getUserTestResults(userId, relevantPvk) {
     }
 }
 
+async function getUserTestResultsNorm(userId) {
+    const testResults = await StatisticAll.findAll({
+        where: { user: userId }
+    });
+
+    return testResults
+}
+
 
 async function getAverageAndVarianceValues() {
     const testTypes = [
@@ -1159,6 +1170,55 @@ async function getAverageAndVarianceValues() {
 }
 
 
+async function calculateMetricZ(testResults) {
+    const values = await getAverageAndVarianceValues();
+
+    const qualityScores = {};
+
+    const relevantTests = Object.keys(testToQualityMap)
+        .filter(testType => testResults.some(result => result.type === testType));
+
+    relevantTests.forEach((testType) => {
+        const result = testResults.find(test => test.type === testType);
+        if (result && result.result !== 0) {
+            const userValue = parseFloat(result.result);
+            const { average, variance } = values[testType];
+            const zScore = (userValue - average) / Math.sqrt(variance);
+
+            testToQualityMap[testType].forEach((qualityId) => {
+                if (!qualityScores[qualityId]) {
+                    qualityScores[qualityId] = {
+                        characteristic: char_dict[qualityId],
+                        zScore: 0
+                    };
+                }
+                qualityScores[qualityId].zScore += zScore;
+            });
+        }
+    });
+
+    return Object.values(qualityScores).map(quality => ({
+        characteristic: quality.characteristic,
+        zScore: quality.zScore.toFixed(2)
+    }));
+}
+
+server.get('/pvk', async (req, res) => {
+    if (req.isAuthenticated()) {
+        const userID = req.user.id;
+        const testResults = await getUserTestResultsNorm(userID);
+        const zScores = await calculateMetricZ(testResults);
+
+
+        let adminUser = req.user.isAdmin;
+        let respondentUser = req.user.respondent;
+        let loggedIn = req.isAuthenticated()
+        
+        res.render('pvkPage', { zScores, adminUser, respondentUser, loggedIn});
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
@@ -1221,7 +1281,7 @@ async function calculateMetric(testResults, totalTestsCount, qualities) {
 
     if (scorePercentage >= 75) {
         return { metric: 1, validTestCount };
-    } else if (scorePercentage >= 55) {
+    } else if (scorePercentage >= 60) {
         return { metric: 2, validTestCount };
     } else {
         return { metric: 3, validTestCount };
@@ -1233,6 +1293,8 @@ getAverageAndVarianceValues().then(averageValues => {
 }).catch(error => {
     console.error('Ошибка:', error);
 });
+
+
 
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
