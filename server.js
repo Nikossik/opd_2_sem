@@ -8,6 +8,7 @@ const { Op, Sequelize} = require('sequelize');
 const LocalStrategy = require('passport-local').Strategy;
 const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
+const names = ["Витя", "Матвей", "Никита", "Юля", "Эдик", "Влад", "Стёпа", "Эля"]
 
 const {
     filterTest,
@@ -1299,6 +1300,7 @@ getAverageAndVarianceValues().then(averageValues => {
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
+
             const id = req.params.id;
             const userID = req.user.id;
             const profession = await Profession.findOne({ where: { id: id } });
@@ -1499,10 +1501,6 @@ server.get('/all_tests', async (req, res) => {
 });
 
 server.get('/all_users', async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.respondent) {
-        res.redirect('/login');
-        return;
-    }
 
     try {
         const users = await User.findAll({
@@ -1551,10 +1549,6 @@ const calculateStatistics = (data, field) => {
 };
 
 server.get('/user_tests/:userId', async (req, res) => {
-    if (!req.isAuthenticated() || !req.user.respondent) {
-        res.redirect('/login');
-        return;
-    }
     const userId = req.params.userId;
 
     try {
@@ -1573,10 +1567,10 @@ server.get('/user_tests/:userId', async (req, res) => {
         const reactionTests = await ReactionTest.findAll({ where: { user: userId }, attributes: ['reactionTime'] });
 
         const testResults = [
-            ...abstractTests.length ? [{ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') }] : [],
-            ...accuracyTests.length ? [{ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') }] : [],
-            ...complexReactionTests.length ? [{ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') }] : [],
-            ...reactionTests.length ? [{ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') }] : [],
+            ...abstractTests.length ? [{ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result'), description: 'Внимание, память и мышление' }] : [],
+            ...accuracyTests.length ? [{ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy'), description: 'Слежение за объектами' }] : [],
+            ...complexReactionTests.length ? [{ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1'), description: 'Реакция на движуциеся объекты' }] : [],
+            ...reactionTests.length ? [{ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime'), description: 'Сенсомоторная реация' }] : [],
         ];
 
         res.render('user_tests', { user, testResults });
@@ -1585,9 +1579,9 @@ server.get('/user_tests/:userId', async (req, res) => {
         res.status(500).send('Ошибка при получении данных тестов пользователя');
     }
 });
+
 server.post('/delete_user', async (req, res) => {
     const { login } = req.body;
-
     try {
         const user = await User.findOne({ where: { login } });
         if (!user) {
