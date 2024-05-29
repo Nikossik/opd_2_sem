@@ -1296,6 +1296,14 @@ getAverageAndVarianceValues().then(averageValues => {
 
 
 
+
+
+const names = {
+    '1': new Set(['Витя', 'Никита', 'Эдик', 'Эля']),
+    '3': new Set(['Витя', 'Никита', 'Эля', 'Эдик']),
+    '4': new Set(['Витя', 'Никита', 'Эдик', 'Эля'])
+};
+
 server.get('/professions_:id', async (req, res) => {
     if (req.isAuthenticated()) {
         try {
@@ -1317,6 +1325,9 @@ server.get('/professions_:id', async (req, res) => {
 
             console.log('metric:', metric);
 
+            // Преобразование множеств в массивы для удобства передачи в шаблон
+            const groupNames = Array.from(names[id] || []);
+
             res.render('ProfessionPage', {
                 profession: profession,
                 characteristics: characteristics,
@@ -1328,7 +1339,9 @@ server.get('/professions_:id', async (req, res) => {
                 adminUser: req.user.isAdmin,
                 testToQualityMap: testToQualityMap,
                 char_dict: char_dict,
-                relevantPvk: relevantPvk
+                relevantPvk: relevantPvk,
+                groupNames: groupNames,  // Передаем нужную группу респондентов
+                professionId: id         // Передаем id профессии
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
@@ -1591,24 +1604,6 @@ server.post('/delete_user', async (req, res) => {
         res.status(500).send('Ошибка при удалении пользователя');
     }
 });
-/*
-server.post('/delete_user/:userId', async (req, res) => {
-
-    const userId = req.params.userId;
-
-    try {
-        const user = await User.findByPk(userId);
-        if (!user) {
-            return res.status(404).send('Пользователь не найден');
-        }
-
-        await user.destroy();
-        res.redirect('/all_users');
-    } catch (error) {
-        console.error('Ошибка при удалении пользователя:', error);
-        res.status(500).send('Ошибка при удалении пользователя');
-    }
-});*/
 
 
 server.get('/recommend_tests/:userId', async (req, res) => {

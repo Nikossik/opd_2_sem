@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="ProfessionPageStyle.css">
-    <title><%= profession.name %></title>
+    <title><%= profession.profession %></title>
 </head>
 <body class="body-background">
 <section class="container">
@@ -113,6 +113,16 @@
             <h2>Следует пройти все тесты, чтобы увидеть результат</h2>
         <% } %>
     </div>
+    <% if (groupNames.length > 0) { %>
+        <div>
+            <h2>Список респондентов, которым рекомендована профессия </h2>
+            <ul>
+                <% groupNames.forEach(function(name) { %>
+                    <li><%= name %></li>
+                <% }); %>
+            </ul>
+        </div>
+    <% } %>
 </section>
 </body>
 </html>
