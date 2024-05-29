@@ -1526,6 +1526,24 @@ server.get('/all_users', async (req, res) => {
         res.status(500).send('Ошибка при получении данных пользователей');
     }
 });
+const calculateStatistics = (data, field) => {
+    const count = data.length;
+    const sum = data.reduce((acc, val) => acc + val[field], 0);
+    const mean = sum / count;
+
+    const variance = data.reduce((acc, val) => acc + Math.pow(val[field] - mean, 2), 0) / count;
+    const stdDeviation = Math.sqrt(variance);
+
+    const sorted = data.map(d => d[field]).sort((a, b) => a - b);
+    const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
+
+    const mode = Object.entries(data.reduce((acc, val) => {
+        acc[val[field]] = (acc[val[field]] || 0) + 1;
+        return acc;
+    }, {})).reduce((acc, val) => val[1] > acc[1] ? val : acc, [null, 0])[0];
+
+    return { count, mean, variance, stdDeviation, median, mode };
+};
 
 server.get('/user_tests/:userId', async (req, res) => {
     const userId = req.params.userId;
@@ -1539,46 +1557,18 @@ server.get('/user_tests/:userId', async (req, res) => {
             return res.status(404).send('Пользователь не найден');
         }
 
-        // Получение данных из разных таблиц
-        const abstractTests = await AbstractTest.findAll({ where: { user: userId } });
-        const accuracyTests = await AccuracyTest.findAll({ where: { user: userId } });
-        const complexReactionTests = await ComplexReactionTest.findAll({ where: { user: userId } });
-        const reactionTests = await ReactionTest.findAll({ where: { user: userId } });
+        // Получение уникальных данных из таблиц
+        const abstractTests = await AbstractTest.findAll({ where: { user: userId }, attributes: ['result'] });
+        const accuracyTests = await AccuracyTest.findAll({ where: { user: userId }, attributes: ['accuracy'] });
+        const complexReactionTests = await ComplexReactionTest.findAll({ where: { user: userId }, attributes: ['reactionTime1'] });
+        const reactionTests = await ReactionTest.findAll({ where: { user: userId }, attributes: ['reactionTime'] });
 
-        console.log('abstractTests:', abstractTests);
-        console.log('accuracyTests:', accuracyTests);
-        console.log('complexReactionTests:', complexReactionTests);
-        console.log('reactionTests:', reactionTests);
-
-        const calculateStatistics = (data, field) => {
-            const count = data.length;
-            const sum = data.reduce((acc, val) => acc + val[field], 0);
-            const mean = sum / count;
-
-            const variance = data.reduce((acc, val) => acc + Math.pow(val[field] - mean, 2), 0) / count;
-            const stdDeviation = Math.sqrt(variance);
-
-            const sorted = data.map(d => d[field]).sort((a, b) => a - b);
-            const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
-
-            const mode = Object.entries(data.reduce((acc, val) => {
-                acc[val[field]] = (acc[val[field]] || 0) + 1;
-                return acc;
-            }, {})).reduce((acc, val) => val[1] > acc[1] ? val : acc, [null, 0])[0];
-
-            return { count, mean, variance, stdDeviation, median, mode };
-        };
-
-
-        // Преобразование данных тестов
         const testResults = [
-            ...abstractTests.map(test => ({ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') })),
-            ...accuracyTests.map(test => ({ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') })),
-            ...complexReactionTests.map(test => ({ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') })),
-            ...reactionTests.map(test => ({ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') })),
+            ...abstractTests.length ? [{ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') }] : [],
+            ...accuracyTests.length ? [{ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') }] : [],
+            ...complexReactionTests.length ? [{ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') }] : [],
+            ...reactionTests.length ? [{ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') }] : [],
         ];
-
-        console.log('testResults:', testResults);
 
         res.render('user_tests', { user, testResults });
     } catch (error) {
@@ -1605,6 +1595,27 @@ server.post('/delete_user/:userId', async (req, res) => {
 });
 
 
+server.get('/recommend_tests/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const result = await pool.query(`
+            SELECT type 
+            FROM statistics_all 
+            WHERE user_id = $1 AND result = 0
+        `, [userId]);
+
+        const recommendedTests = result.rows;
+
+        res.render('recommend_tests', {
+            user: { id: userId},
+            recommendedTests
+        });
+    } catch (error) {
+        console.error('Ошибка при получении рекомендованных тестов:', error);
+        res.status(500).send('Ошибка сервера');
+    }
+});
 sequelize.sync().then(() => {
     server.listen(3000, () => {
         console.log('Server running on http://localhost:3000');
