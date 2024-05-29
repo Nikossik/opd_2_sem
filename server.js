@@ -1325,7 +1325,6 @@ server.get('/professions_:id', async (req, res) => {
 
             console.log('metric:', metric);
 
-            // Преобразование множеств в массивы для удобства передачи в шаблон
             const groupNames = Array.from(names[id] || []);
 
             res.render('ProfessionPage', {
@@ -1340,8 +1339,8 @@ server.get('/professions_:id', async (req, res) => {
                 testToQualityMap: testToQualityMap,
                 char_dict: char_dict,
                 relevantPvk: relevantPvk,
-                groupNames: groupNames,  // Передаем нужную группу респондентов
-                professionId: id         // Передаем id профессии
+                groupNames: groupNames,
+                professionId: id
             });
         } catch (error) {
             console.error('Ошибка при получении информации о профессии:', error);
@@ -1351,6 +1350,7 @@ server.get('/professions_:id', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 server.get('/add_heart_rate', (req, res) => {

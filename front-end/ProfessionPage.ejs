@@ -112,17 +112,18 @@
         <% } else if (metric.metric === 4) { %>
             <h2>Следует пройти все тесты, чтобы увидеть результат</h2>
         <% } %>
+        <% if (adminUser && groupNames.length > 0) { %>
+                <div>
+                    <h2>Список респондентов, которым рекомендована профессия </h2>
+                    <ul>
+                        <% groupNames.forEach(function(name) { %>
+                            <li><%= name %></li>
+                        <% }); %>
+                    </ul>
+                </div>
+            <% } %>
     </div>
-    <% if (groupNames.length > 0) { %>
-        <div>
-            <h2>Список респондентов, которым рекомендована профессия </h2>
-            <ul>
-                <% groupNames.forEach(function(name) { %>
-                    <li><%= name %></li>
-                <% }); %>
-            </ul>
-        </div>
-    <% } %>
+
 </section>
 </body>
 </html>
