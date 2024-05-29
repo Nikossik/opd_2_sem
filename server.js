@@ -1576,8 +1576,24 @@ server.get('/user_tests/:userId', async (req, res) => {
         res.status(500).send('Ошибка при получении данных тестов пользователя');
     }
 });
+server.post('/delete_user', async (req, res) => {
+    const { login } = req.body;
 
+    try {
+        const user = await User.findOne({ where: { login } });
+        if (!user) {
+            return res.status(404).send('Пользователь не найден');
+        }
+        await user.destroy();
+        res.redirect('/all_users');
+    } catch (error) {
+        console.error('Ошибка при удалении пользователя:', error);
+        res.status(500).send('Ошибка при удалении пользователя');
+    }
+});
+/*
 server.post('/delete_user/:userId', async (req, res) => {
+
     const userId = req.params.userId;
 
     try {
@@ -1592,7 +1608,7 @@ server.post('/delete_user/:userId', async (req, res) => {
         console.error('Ошибка при удалении пользователя:', error);
         res.status(500).send('Ошибка при удалении пользователя');
     }
-});
+});*/
 
 
 server.get('/recommend_tests/:userId', async (req, res) => {
