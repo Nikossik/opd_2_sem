@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="ProfessionPageStyle.css">
-    <title><%= profession.name %></title>
+    <title><%= profession.profession %></title>
 </head>
 <body class="body-background">
 <section class="container">
@@ -112,7 +112,18 @@
         <% } else if (metric.metric === 4) { %>
             <h2>Следует пройти все тесты, чтобы увидеть результат</h2>
         <% } %>
+        <% if (adminUser && groupNames.length > 0) { %>
+                <div>
+                    <h2>Список респондентов, которым рекомендована профессия </h2>
+                    <ul>
+                        <% groupNames.forEach(function(name) { %>
+                            <li><%= name %></li>
+                        <% }); %>
+                    </ul>
+                </div>
+            <% } %>
     </div>
+
 </section>
 </body>
 </html>

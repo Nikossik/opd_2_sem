@@ -56,9 +56,15 @@
             </div>
 
             <div id="heartRateDuringContainer">
-                <label>Частота сердечных сокращений во время прохождения теста:</label>
+                <label>Частота и критичность сердечных сокращений во время прохождения теста:</label>
                 <div class="heartRateDuringInputs">
                     <input type="text" name="heartRateDuring[]" class="input heartRateDuring">
+                    <select class="select-style" id="mistake">
+                        <option value="critacal">Критическая</option>
+                        <option value="midcritical">Среднекритическа</option>
+                        <option value="lowcritical">Малокритическа</option>
+                        <option value="nothing">Отсутсвует</option>
+                    </select>
                     <button class="addHeartRateDuring" type="button" id="addHeartRateDuring">Добавление строки!</button>
                 </div>
             </div>
@@ -89,6 +95,19 @@
             input.name = "heartRateDuring[]";
             input.className = "input heartRateDuring";
             container.appendChild(input);
+
+            var select = document.createElement("select");
+            select.className = "select-style mistake";
+            select.name = "mistake";
+            var options = ["Критическая", "Среднекритическая", "Малокритическая", "Отсутствует"];
+            options.forEach(function(optionText) {
+                var option = document.createElement("option");
+                option.value = optionText.toLowerCase().replace(/\s/g, '');
+                option.textContent = optionText;
+                select.appendChild(option);
+            });
+            container.appendChild(select);
+
             container.appendChild(document.createElement("br"));
             container.appendChild(this);
         });
