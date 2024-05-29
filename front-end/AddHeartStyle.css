@@ -226,7 +226,7 @@ select {
     font-weight: 500;
     vertical-align: middle;  
     cursor: pointer;
-    width: 100%;
+    width: 70%;
     margin-top: 50px;
 }
 .first-button:hover{

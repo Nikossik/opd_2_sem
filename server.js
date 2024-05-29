@@ -1624,11 +1624,6 @@ server.get('/recommend_tests/:userId', async (req, res) => {
     const userId = req.params.userId;
 
     try {
-        /* const result = await pool.query(`
-            SELECT type 
-            FROM statistics_all 
-            WHERE user_id = $1 AND result = 0
-        `, [userId]); */
         const recommendations = await StatisticAll.findAll({
             attributes: ['type'], 
             where: {
@@ -1636,8 +1631,6 @@ server.get('/recommend_tests/:userId', async (req, res) => {
                 result: 0
             }
         });
-
-        /* const recommendations = result.rows; */
 
         res.render('recommend_tests', {
             user: { id: userId},
