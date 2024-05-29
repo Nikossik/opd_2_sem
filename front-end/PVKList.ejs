@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="PVKList.css">
+    <title>Развитие ПВК</title>
+    <style>
+        body {
+        background-image: url('images/background_gradient.png');
+        background-size: cover; 
+        background-position: center; 
+        }
+    </style>
+</head>
+<body>
+    <section class="container">
+        <h1>Развитие ПВК</h1>
+
+        <ul>
+            <% pvkResults.forEach(pvk => { %>
+                <li><h3><%= pvk.name %>:</h3> <h2><%= pvk.description %></h2></li>
+            <% }); %>
+        </ul>
+
+        <button onclick="location.href='/my_page'">Назад к профилю</button>
+    </section>
+</body>
+</html>

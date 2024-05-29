@@ -1213,7 +1213,7 @@ server.get('/pvk', async (req, res) => {
         let adminUser = req.user.isAdmin;
         let respondentUser = req.user.respondent;
         let loggedIn = req.isAuthenticated()
-        
+
         res.render('pvkPage', { zScores, adminUser, respondentUser, loggedIn});
     } else {
         res.redirect('/login');
@@ -1604,30 +1604,7 @@ server.post('/delete_user/:userId', async (req, res) => {
     }
 });
 
-//server.use(bodyParser.urlencoded({ extended: true }));
 
-// Страница рекомендаций тестов
-server.get('/recommend_tests/:userId', async (req, res) => {
-    const userId = req.params.userId;
-
-    try {
-        const result = await pool.query(`
-            SELECT type 
-            FROM statistics_all 
-            WHERE user_id = $1 AND result = 0
-        `, [userId]);
-
-        const recommendedTests = result.rows;
-
-        res.render('recommend_tests', {
-            user: { id: userId}, 
-            recommendedTests
-        });
-    } catch (error) {
-        console.error('Ошибка при получении рекомендованных тестов:', error);
-        res.status(500).send('Ошибка сервера');
-    }
-});
 sequelize.sync().then(() => {
     server.listen(3000, () => {
         console.log('Server running on http://localhost:3000');
