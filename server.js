@@ -1616,6 +1616,111 @@ server.get('/recommend_tests/:userId', async (req, res) => {
         res.status(500).send('Ошибка сервера');
     }
 });
+
+server.get('/pvk_list', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login');
+        return;
+    }
+
+    const userId = req.user.id;
+    const averagesAndVariances = await getAverageAndVarianceValues();
+
+    const testResults = await StatisticAll.findAll({
+        where: {
+            user: userId,
+            result: { [Op.ne]: 0 }
+        },
+        raw: true
+    });
+
+    const pvks = [
+        { name: 'Трудолюбие', tests: ['light'], description: 'количество пройденных тестов на сайте' },
+        { name: 'Умственная работоспособность', tests: ['abstract_test', 'compare_test'], description: 'совокупность тестов индукции и сравнения' },
+        { name: 'Организованность, самодисциплина', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Экстернальность (ориентация на взаимодействие с людьми, общительность)', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Способность планировать свою деятельность во времени', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Способность к воссозданию образа по словесному описанию', tests: ['attention_assessment_test'], description: 'тест на концентрацию' },
+        { name: 'Логичность', tests: ['abstract_thinking_test'], description: 'абстрактное мышление' },
+        { name: 'Креативность (способность порождать необычные идеи, отклоняться от традиционных схем мышления)', tests: ['abstract_test'], description: 'тест на абстракцию' },
+        { name: 'Образность (наглядные образы, схемы, планы и т.д.)', tests: ['abstract_test'], description: 'индукция' },
+        { name: 'Зрительная долговременная память на условные обозначения (знаки, символы, планы, схемы, графики)', tests: ['random_access_memory', 'short_term_memory_test'], description: 'сумма результатов кратковременной памяти и оперативной' },
+        { name: 'Ответственность', tests: ['light'], description: 'количество пройденных тестов на сайте' },
+        { name: 'Способность к образному представлению предметов, процессов и явлений', tests: ['abstract_test'], description: 'тест на абстракцию' },
+        { name: 'Аналитичность (способность выделять отдельные элементы действительности, способность к классификации)', tests: ['compare_test'], description: 'тест на индукцию' },
+        { name: 'Креативность (способность порождать необычные идеи, отклоняться от традиционных схем мышления)', tests: ['abstract_test'], description: 'тест на абстракцию' },
+        { name: 'Острота зрения', tests: ['hard_action'], description: 'тест на переключаемость' },
+        { name: 'Острота слуха', tests: ['sound'], description: 'Sound reaction' },
+        { name: 'Способность к распределению внимания между несколькими объектами или видами деятельности', tests: ['compare_test'], description: 'тест на сравнение' },
+        { name: 'Способность к распознаванию небольших отклонений параметров технологических процессов от заданных значений по визуальным признакам', tests: ['compare_test'], description: 'тест на сравнение' },
+        { name: 'Способность к распознаванию небольших отклонений параметров технологических процессов от заданных значений по акустическим признакам', tests: ['sound'], description: 'Sound reaction' },
+        { name: 'Способность к переводу образа в словесное описание', tests: ['attention_assessment_test'], description: 'тест на абстракцию' },
+        { name: 'Оперативность (скорость мыслительных процессов, интеллектуальная лабильность)', tests: ['sound', 'math_vis'], description: 'Sound reaction, visual math test' },
+        { name: 'Нервно-эмоциональная устойчивость, выносливость по отношению к эмоциональным нагрузкам', tests: ['heartRateCheck'], description: 'пульс' },
+        { name: 'Способность организовывать свою деятельность в условиях большого потока информации и разнообразия поставленных задач', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Концентрированность внимания', tests: ['attention_assessment_test'], description: 'тест на концентрацию' },
+        { name: 'Зрительная оперативная память', tests: ['random_access_memory'], description: 'тест на оперативную память' },
+        { name: 'Способность рационально действовать в экстремальных ситуациях', tests: ['heartRateCheck'], description: 'пульс' },
+        { name: 'Самообладание, эмоциональная уравновешенность, выдержка', tests: ['heartRateCheck'], description: 'пульс' },
+        { name: 'Стремление к профессиональному совершенству', tests: ['light'], description: 'количество тестов' },
+        { name: 'Способность к переключениям с одной деятельности на другую', tests: ['attention_assessment_test'], description: 'attention assessment test' },
+        { name: 'Зрительное восприятие расстояний между предметами', tests: ['hard_action'], description: 'hard action' },
+        { name: 'Зрительная долговременная память на слова и фразы', tests: ['random_access_memory'], description: 'ram test' },
+        { name: 'Зрительная долговременная память на семантику текста', tests: ['myunsterberg_test'], description: 'myunsterberg test' },
+        { name: 'Зрительная оперативная память на слова и фразы', tests: ['myunsterberg_test'], description: 'myunsterberg test' },
+        { name: 'Переключаемость внимания', tests: ['attention_assessment_test'], description: 'attention assessment test' },
+        { name: 'Помехоустойчивость внимания', tests: ['attention_assessment_test'], description: 'attention assessment test' }
+    ];
+
+    const userResults = {};
+
+    for (const result of testResults) {
+        if (!userResults[result.type]) {
+            userResults[result.type] = [];
+        }
+        userResults[result.type].push(result.result);
+    }
+
+    for (const result of testResults) {
+        if (!userResults[result.type]) {
+            userResults[result.type] = [];
+        }
+        userResults[result.type].push(result.result);
+    }
+
+    const pvkResults = pvks.map(pvk => {
+        let userMaxResult = 0;
+        for (const test of pvk.tests) {
+            if (userResults[test]) {
+                userMaxResult = Math.max(userMaxResult, ...userResults[test]);
+            }
+        }
+
+        if (userMaxResult === 0) {
+            return null;
+        }
+
+        const avg = averagesAndVariances[pvk.tests[0]].average;
+        let description = 'Средний результат';
+        if (userMaxResult > avg + 1) {
+            description = 'Выше среднего';
+        } else if (userMaxResult < avg - 1) {
+            description = 'Ниже среднего';
+        } else if (userMaxResult > avg + 2) {
+            description = 'Высокий результат';
+        } else if (userMaxResult < avg - 2) {
+            description = 'Низкий результат';
+        }
+
+        return {
+            name: pvk.name,
+            description
+        };
+    }).filter(Boolean);
+
+    res.render('PVKList', { pvkResults });
+})
+
 sequelize.sync().then(() => {
     server.listen(3000, () => {
         console.log('Server running on http://localhost:3000');
