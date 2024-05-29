@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Рекомендации для пользователя <%= user.id %></title>
+    <style>
+        body {
+            background-image: url('/images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            border-radius: 20px;
+            padding: 2em;
+            max-width: 300px;
+            max-width: 80%;
+            text-align: center;
+            box-shadow: 0 0 1px .6em rgba(0, 0, 0, 0.004), 0 1px 1em rgba(0, 0, 0, 0.06);
+            overflow: auto;
+            overflow-y: auto;
+            padding: 2em;
+            background-color: white;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            padding: 0em 0em 1em;
+            font-family: Verdana, Geneva, sans-serif;
+            font-weight: 500;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            font-size: 1.2rem;
+        }
+        button {
+            border-radius: 10px;
+            display: inline-block;
+            border: none;
+            background-color: rgb(123, 83, 234);
+            color: white;
+            padding: 1rem 2rem;
+            transition: opacity .6s ease-in-out;
+            text-decoration: none;
+            font-size: 1rem;
+            letter-spacing: 0.2rem;
+            font-weight: 500;
+            vertical-align: middle;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            opacity: .95;
+        }
+    </style>
+</head>
+<body>
+    <section class="container">
+        <h1>Рекомендованные тесты для пользователя <%= user.id %></h1>
+        <ul>
+            <% recommendations.forEach(recommendation => { %>
+                <li><%= recommendation.type %></li>
+            <% }) %>
+        </ul>
+        <button onclick="location.href='/all_users'">Назад</button>
+    </section>
+</body>
+</html>

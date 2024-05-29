@@ -5,9 +5,9 @@
     <title>Тесты пользователя <%= user.login %></title>
     <style>
         body {
-        background-image: url('images/background_gradient.png');
-        background-size: cover; 
-        background-position: center; 
+            background-image: url('images/background_gradient.png');
+            background-size: cover;
+            background-position: center;
         }
         .menu-wrap {
             position: fixed;
@@ -15,7 +15,6 @@
             left: 0;
             z-index: 1;
         }
-
         .menu-wrap .toggler {
             position: absolute;
             top: 0;
@@ -26,7 +25,6 @@
             height: 50px;
             opacity: 0;
         }
-
         .menu-wrap .main-menu-icon {
             position: absolute;
             top: 0;
@@ -41,7 +39,6 @@
             justify-content: center;
             border-radius: 10px;
         }
-
         /*menu-icon line*/
         .menu-wrap .main-menu-icon > div {
             position: relative;
@@ -54,7 +51,6 @@
             justify-content: center;
             transition: all 0.4s ease;
         }
-
         /*menu-icon lines top/bottom*/
         .menu-wrap .main-menu-icon > div::before,
         .menu-wrap .main-menu-icon > div::after {
@@ -66,30 +62,25 @@
             height: 2px;
             background: inherit;
         }
-
         /*move lines down*/
         .menu-wrap .main-menu-icon > div::after {
             top: 10px;
         }
-
         /*toggler animation
         checked makes elem clickable*/
         .menu-wrap .toggler:checked + .main-menu-icon > div {
             transform: rotate(135deg);
         }
-
         /*turn into x*/
         .menu-wrap .toggler:checked + .main-menu-icon > div:before,
         .menu-wrap .toggler:checked + .main-menu-icon > div:after {
             top: 0;
             transform: rotate(90deg);
         }
-
         /*rotate on hover*/
         .menu-wrap .toggler:checked:hover + .main-menu-icon > div {
             transform: rotate(225deg);
         }
-
         /*show menu*/
         .menu-wrap .toggler:checked ~ .menu {
             visibility: visible;
@@ -99,12 +90,10 @@
             transform: scale(1);
             transition-duration: var(--menu-speed);
         }
-
         .menu-wrap .toggler:checked ~ .menu > div > div {
             opacity: 1;
             transition: opacity 0.4s ease 0.4s;
         }
-
         .menu-wrap .menu {
             position: fixed;
             top: 0;
@@ -117,7 +106,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .menu-wrap .menu > div {
             background: var(--overlay-color);
             border-radius: 50%;
@@ -130,7 +118,6 @@
             transform: scale(0);
             transition: all 0.4s ease;
         }
-
         .menu-wrap .menu > div > div {
             text-align: center;
             max-width: 90vw;
@@ -138,33 +125,28 @@
             opacity: 0;
             transition: opacity 0.4s ease;
         }
-
         .menu-wrap .menu > div > div > ul > li {
             list-style: none;
             color: #fff;
             font-size: 1.3rem;
             padding: .9rem;
         }
-
         .menu-wrap .menu > div > div > ul > li > a {
             color: inherit;
             text-decoration: none;
             transition: color 0.4s ease-out;
         }
-
-        h1{
+        h1 {
             font-weight: lighter;
             letter-spacing: 8px;
         }
-
-        :root{
+        :root {
             --primary-color: rgba(33, 223, 230, 0.95);
-            --overlay-color: linear-gradient(244deg, #e70af2,#009bff,#4abde3);
+            --overlay-color: linear-gradient(244deg, #e70af2, #009bff, #4abde3);
             --addl-color: rgba(74, 189, 227);
-            --font-family: Verdana, Geneva, sans-serif
+            --font-family: Verdana, Geneva, sans-serif;
         }
-
-        .container{
+        .container {
             border-radius: 20px;
             padding: 2em;
             max-width: 300px;
@@ -177,14 +159,12 @@
             background-color: white;
             margin: 0 auto;
         }
-
-        *{
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
-        body{
+        body {
             background-color: rgb(33, 223, 230);
             font-family: var(--font-family);
             line-height: 1.5;
@@ -193,48 +173,42 @@
             padding: 5vmin;
             place-items: center;
         }
-
-        h1{
+        h1 {
             font-size: 1.5rem;
             text-align: center;
             padding: 0em 0em 1em;
             font-family: var(--font-family);
             font-weight: 500;
         }
-
         button {
             border-radius: 10px;
             display: inline-block;
             border: none;
             background-color: rgb(123, 83, 234);
             color: white;
-            padding: 1rem 2rem; 
+            padding: 1rem 2rem;
             transition: opacity .6s ease-in-out;
             text-decoration: none;
             font-size: 1rem;
             letter-spacing: 0.2rem;
             font-weight: 500;
-            vertical-align: middle;  
+            vertical-align: middle;
             cursor: pointer;
             width: 40%;
             margin-top: 40px;
             margin-bottom: 20px;
         }
-
-        button:hover{
+        button:hover {
             opacity: .95;
         }
-
         .table-list {
             overflow-x: auto;
         }
-
         th, td {
             padding: 10px;
             border: 1px solid #ddd;
             text-align: left;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -247,47 +221,48 @@
 </head>
 <body class="body-background">
 
-    <section class="container">
-        <h1>Тесты пользователя <%= user.login %></h1>
+<section class="container">
+    <h1>Тесты пользователя <%= user.login %></h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Тип теста</th>
-                    <th>Количество</th>
-                    <th>Среднее</th>
-                    <th>Дисперсия</th>
-                    <th>Отклонение</th>
-                    <th>Медиана</th>
-                    <th>Мода</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (testResults && testResults.length > 0) { %>
-                    <% testResults.forEach(result => { %>
-                        <tr>
-                            <td><%= result.type %></td>
-                            <td><%= result.count %></td>
-                            <td><%= result.mean.toFixed(2) %></td>
-                            <td><%= result.variance.toFixed(2) %></td>
-                            <td><%= result.stdDeviation.toFixed(2) %></td>
-                            <td><%= result.median.toFixed(2) %></td>
-                            <td><%= result.mode %></td>
-                        </tr>
-                    <% }) %>
-                <% } else { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Тип теста</th>
+                <th>Количество</th>
+                <th>Среднее</th>
+                <th>Дисперсия</th>
+                <th>Отклонение</th>
+                <th>Медиана</th>
+                <th>Мода</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (testResults && testResults.length > 0) { %>
+                <% testResults.forEach(result => { %>
                     <tr>
-                        <td colspan="7">Нет данных для отображения.</td>
+                        <td><%= result.type %></td>
+                        <td><%= result.count %></td>
+                        <td><%= result.mean.toFixed(2) %></td>
+                        <td><%= result.variance.toFixed(2) %></td>
+                        <td><%= result.stdDeviation.toFixed(2) %></td>
+                        <td><%= result.median.toFixed(2) %></td>
+                        <td><%= result.mode %></td>
                     </tr>
-                <% } %>
-            </tbody>
-        </table>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="7">Нет данных для отображения.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 
-        <form action="/delete_user/<%= user.id %>" method="POST" onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
-                <button type="submit">Удалить пользователя</button>
-        </form>
+    <form action="/delete_user/<%= user.id %>" method="POST" onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
+        <button type="submit">Удалить пользователя</button>
+    </form>
 
-        <button onclick="location.href='/all_users'">Назад</button>
-    </section>
+    <button onclick="location.href='/all_users'">Назад</button>
+    <button onclick="location.href='/recommend_tests/<%= user.id %>'">Рекомендация</button>
+</section>
 </body>
 </html>
