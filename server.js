@@ -8,7 +8,6 @@ const { Op, Sequelize} = require('sequelize');
 const LocalStrategy = require('passport-local').Strategy;
 const {Profession, sequelize, User, Poll, ReactionTest, HeartRate, StatisticAll, AbstractTest} = require('./models/index');
 const {ComplexReactionTest, InviteLink, AccuracyTest} = require("./models");
-const names = ["Витя", "Матвей", "Никита", "Юля", "Эдик", "Влад", "Стёпа", "Эля"]
 
 const {
     filterTest,
