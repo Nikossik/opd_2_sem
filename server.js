@@ -1512,6 +1512,11 @@ server.get('/all_tests', async (req, res) => {
 });
 
 server.get('/all_users', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.respondent) {
+        res.redirect('/login');
+        return;
+    }
+
     try {
         const users = await User.findAll({
             attributes: ['id', 'login']
@@ -1559,6 +1564,10 @@ const calculateStatistics = (data, field) => {
 };
 
 server.get('/user_tests/:userId', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.respondent) {
+        res.redirect('/login');
+        return;
+    }
     const userId = req.params.userId;
 
     try {
@@ -1583,7 +1592,7 @@ server.get('/user_tests/:userId', async (req, res) => {
             ...reactionTests.length ? [{ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') }] : [],
         ];
 
-        res.render('user_tests', { user, testResults });
+        res.render('user_tests', { user, testResults, userId });
     } catch (error) {
         console.error('Ошибка при получении данных тестов пользователя:', error);
         res.status(500).send('Ошибка при получении данных тестов пользователя');
@@ -1610,17 +1619,24 @@ server.get('/recommend_tests/:userId', async (req, res) => {
     const userId = req.params.userId;
 
     try {
-        const result = await pool.query(`
+        /* const result = await pool.query(`
             SELECT type 
             FROM statistics_all 
             WHERE user_id = $1 AND result = 0
-        `, [userId]);
+        `, [userId]); */
+        const recommendations = await StatisticAll.findAll({
+            attributes: ['type'], 
+            where: {
+                user: userId,
+                result: 0
+            }
+        });
 
-        const recommendedTests = result.rows;
+        /* const recommendations = result.rows; */
 
         res.render('recommend_tests', {
             user: { id: userId},
-            recommendedTests
+            recommendations
         });
     } catch (error) {
         console.error('Ошибка при получении рекомендованных тестов:', error);
