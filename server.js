@@ -1499,6 +1499,11 @@ server.get('/all_tests', async (req, res) => {
 });
 
 server.get('/all_users', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.respondent) {
+        res.redirect('/login');
+        return;
+    }
+
     try {
         const users = await User.findAll({
             attributes: ['id', 'login']
@@ -1546,6 +1551,10 @@ const calculateStatistics = (data, field) => {
 };
 
 server.get('/user_tests/:userId', async (req, res) => {
+    if (!req.isAuthenticated() || !req.user.respondent) {
+        res.redirect('/login');
+        return;
+    }
     const userId = req.params.userId;
 
     try {

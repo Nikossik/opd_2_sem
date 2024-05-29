@@ -73,7 +73,13 @@
 
         let resultHTML = "<h2>Результаты теста:</h2>";
         results.forEach((result, index) => {
-            resultHTML += `<p>Вопрос ${index + 1}: Найдено ${result.found} из ${result.total} отличий.</p>`;
+            if (result.found == result.total){
+                resultHTML += `<p>Вопрос ${index + 1}: Верно</p>`;
+            }
+            else {
+                resultHTML += `<p>Вопрос ${index + 1}: Не верно</p>`;
+            }
+            //resultHTML += `<p>Вопрос ${index + 1}: Найдено ${result.found} из ${result.total} отличий.</p>`;
             sum += parseInt(result.found);
         });
         document.getElementById('results').innerHTML = resultHTML; // Отображаем результаты
