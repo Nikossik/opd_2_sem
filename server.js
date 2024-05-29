@@ -1526,6 +1526,24 @@ server.get('/all_users', async (req, res) => {
         res.status(500).send('Ошибка при получении данных пользователей');
     }
 });
+const calculateStatistics = (data, field) => {
+    const count = data.length;
+    const sum = data.reduce((acc, val) => acc + val[field], 0);
+    const mean = sum / count;
+
+    const variance = data.reduce((acc, val) => acc + Math.pow(val[field] - mean, 2), 0) / count;
+    const stdDeviation = Math.sqrt(variance);
+
+    const sorted = data.map(d => d[field]).sort((a, b) => a - b);
+    const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
+
+    const mode = Object.entries(data.reduce((acc, val) => {
+        acc[val[field]] = (acc[val[field]] || 0) + 1;
+        return acc;
+    }, {})).reduce((acc, val) => val[1] > acc[1] ? val : acc, [null, 0])[0];
+
+    return { count, mean, variance, stdDeviation, median, mode };
+};
 
 server.get('/user_tests/:userId', async (req, res) => {
     const userId = req.params.userId;
@@ -1539,46 +1557,18 @@ server.get('/user_tests/:userId', async (req, res) => {
             return res.status(404).send('Пользователь не найден');
         }
 
-        // Получение данных из разных таблиц
-        const abstractTests = await AbstractTest.findAll({ where: { user: userId } });
-        const accuracyTests = await AccuracyTest.findAll({ where: { user: userId } });
-        const complexReactionTests = await ComplexReactionTest.findAll({ where: { user: userId } });
-        const reactionTests = await ReactionTest.findAll({ where: { user: userId } });
+        // Получение уникальных данных из таблиц
+        const abstractTests = await AbstractTest.findAll({ where: { user: userId }, attributes: ['result'] });
+        const accuracyTests = await AccuracyTest.findAll({ where: { user: userId }, attributes: ['accuracy'] });
+        const complexReactionTests = await ComplexReactionTest.findAll({ where: { user: userId }, attributes: ['reactionTime1'] });
+        const reactionTests = await ReactionTest.findAll({ where: { user: userId }, attributes: ['reactionTime'] });
 
-        console.log('abstractTests:', abstractTests);
-        console.log('accuracyTests:', accuracyTests);
-        console.log('complexReactionTests:', complexReactionTests);
-        console.log('reactionTests:', reactionTests);
-
-        const calculateStatistics = (data, field) => {
-            const count = data.length;
-            const sum = data.reduce((acc, val) => acc + val[field], 0);
-            const mean = sum / count;
-
-            const variance = data.reduce((acc, val) => acc + Math.pow(val[field] - mean, 2), 0) / count;
-            const stdDeviation = Math.sqrt(variance);
-
-            const sorted = data.map(d => d[field]).sort((a, b) => a - b);
-            const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
-
-            const mode = Object.entries(data.reduce((acc, val) => {
-                acc[val[field]] = (acc[val[field]] || 0) + 1;
-                return acc;
-            }, {})).reduce((acc, val) => val[1] > acc[1] ? val : acc, [null, 0])[0];
-
-            return { count, mean, variance, stdDeviation, median, mode };
-        };
-
-
-        // Преобразование данных тестов
         const testResults = [
-            ...abstractTests.map(test => ({ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') })),
-            ...accuracyTests.map(test => ({ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') })),
-            ...complexReactionTests.map(test => ({ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') })),
-            ...reactionTests.map(test => ({ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') })),
+            ...abstractTests.length ? [{ type: 'AbstractTests', ...calculateStatistics(abstractTests, 'result') }] : [],
+            ...accuracyTests.length ? [{ type: 'AccuracyTests', ...calculateStatistics(accuracyTests, 'accuracy') }] : [],
+            ...complexReactionTests.length ? [{ type: 'ComplexReactionTests', ...calculateStatistics(complexReactionTests, 'reactionTime1') }] : [],
+            ...reactionTests.length ? [{ type: 'ReactionTests', ...calculateStatistics(reactionTests, 'reactionTime') }] : [],
         ];
-
-        console.log('testResults:', testResults);
 
         res.render('user_tests', { user, testResults });
     } catch (error) {
@@ -1586,8 +1576,24 @@ server.get('/user_tests/:userId', async (req, res) => {
         res.status(500).send('Ошибка при получении данных тестов пользователя');
     }
 });
+server.post('/delete_user', async (req, res) => {
+    const { login } = req.body;
 
+    try {
+        const user = await User.findOne({ where: { login } });
+        if (!user) {
+            return res.status(404).send('Пользователь не найден');
+        }
+        await user.destroy();
+        res.redirect('/all_users');
+    } catch (error) {
+        console.error('Ошибка при удалении пользователя:', error);
+        res.status(500).send('Ошибка при удалении пользователя');
+    }
+});
+/*
 server.post('/delete_user/:userId', async (req, res) => {
+
     const userId = req.params.userId;
 
     try {
@@ -1602,8 +1608,134 @@ server.post('/delete_user/:userId', async (req, res) => {
         console.error('Ошибка при удалении пользователя:', error);
         res.status(500).send('Ошибка при удалении пользователя');
     }
+});*/
+
+
+server.get('/recommend_tests/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const result = await pool.query(`
+            SELECT type 
+            FROM statistics_all 
+            WHERE user_id = $1 AND result = 0
+        `, [userId]);
+
+        const recommendedTests = result.rows;
+
+        res.render('recommend_tests', {
+            user: { id: userId},
+            recommendedTests
+        });
+    } catch (error) {
+        console.error('Ошибка при получении рекомендованных тестов:', error);
+        res.status(500).send('Ошибка сервера');
+    }
 });
 
+server.get('/pvk_list', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        res.redirect('/login');
+        return;
+    }
+
+    const userId = req.user.id;
+    const averagesAndVariances = await getAverageAndVarianceValues();
+
+    const testResults = await StatisticAll.findAll({
+        where: {
+            user: userId,
+            result: { [Op.ne]: 0 }
+        },
+        raw: true
+    });
+
+    const pvks = [
+        { name: 'Трудолюбие', tests: ['light'], description: 'количество пройденных тестов на сайте' },
+        { name: 'Умственная работоспособность', tests: ['abstract_test', 'compare_test'], description: 'совокупность тестов индукции и сравнения' },
+        { name: 'Организованность, самодисциплина', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Экстернальность (ориентация на взаимодействие с людьми, общительность)', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Способность планировать свою деятельность во времени', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Способность к воссозданию образа по словесному описанию', tests: ['attention_assessment_test'], description: 'тест на концентрацию' },
+        { name: 'Логичность', tests: ['abstract_thinking_test'], description: 'абстрактное мышление' },
+        { name: 'Креативность (способность порождать необычные идеи, отклоняться от традиционных схем мышления)', tests: ['abstract_test'], description: 'тест на абстракцию' },
+        { name: 'Образность (наглядные образы, схемы, планы и т.д.)', tests: ['abstract_test'], description: 'индукция' },
+        { name: 'Зрительная долговременная память на условные обозначения (знаки, символы, планы, схемы, графики)', tests: ['random_access_memory', 'short_term_memory_test'], description: 'сумма результатов кратковременной памяти и оперативной' },
+        { name: 'Ответственность', tests: ['light'], description: 'количество пройденных тестов на сайте' },
+        { name: 'Способность к образному представлению предметов, процессов и явлений', tests: ['abstract_test'], description: 'тест на абстракцию' },
+        { name: 'Аналитичность (способность выделять отдельные элементы действительности, способность к классификации)', tests: ['compare_test'], description: 'тест на индукцию' },
+        { name: 'Креативность (способность порождать необычные идеи, отклоняться от традиционных схем мышления)', tests: ['abstract_test'], description: 'тест на абстракцию' },
+        { name: 'Острота зрения', tests: ['hard_action'], description: 'тест на переключаемость' },
+        { name: 'Острота слуха', tests: ['sound'], description: 'Sound reaction' },
+        { name: 'Способность к распределению внимания между несколькими объектами или видами деятельности', tests: ['compare_test'], description: 'тест на сравнение' },
+        { name: 'Способность к распознаванию небольших отклонений параметров технологических процессов от заданных значений по визуальным признакам', tests: ['compare_test'], description: 'тест на сравнение' },
+        { name: 'Способность к распознаванию небольших отклонений параметров технологических процессов от заданных значений по акустическим признакам', tests: ['sound'], description: 'Sound reaction' },
+        { name: 'Способность к переводу образа в словесное описание', tests: ['attention_assessment_test'], description: 'тест на абстракцию' },
+        { name: 'Оперативность (скорость мыслительных процессов, интеллектуальная лабильность)', tests: ['sound', 'math_vis'], description: 'Sound reaction, visual math test' },
+        { name: 'Нервно-эмоциональная устойчивость, выносливость по отношению к эмоциональным нагрузкам', tests: ['heartRateCheck'], description: 'пульс' },
+        { name: 'Способность организовывать свою деятельность в условиях большого потока информации и разнообразия поставленных задач', tests: ['light'], description: 'количество пройденных тестов' },
+        { name: 'Концентрированность внимания', tests: ['attention_assessment_test'], description: 'тест на концентрацию' },
+        { name: 'Зрительная оперативная память', tests: ['random_access_memory'], description: 'тест на оперативную память' },
+        { name: 'Способность рационально действовать в экстремальных ситуациях', tests: ['heartRateCheck'], description: 'пульс' },
+        { name: 'Самообладание, эмоциональная уравновешенность, выдержка', tests: ['heartRateCheck'], description: 'пульс' },
+        { name: 'Стремление к профессиональному совершенству', tests: ['light'], description: 'количество тестов' },
+        { name: 'Способность к переключениям с одной деятельности на другую', tests: ['attention_assessment_test'], description: 'attention assessment test' },
+        { name: 'Зрительное восприятие расстояний между предметами', tests: ['hard_action'], description: 'hard action' },
+        { name: 'Зрительная долговременная память на слова и фразы', tests: ['random_access_memory'], description: 'ram test' },
+        { name: 'Зрительная долговременная память на семантику текста', tests: ['myunsterberg_test'], description: 'myunsterberg test' },
+        { name: 'Зрительная оперативная память на слова и фразы', tests: ['myunsterberg_test'], description: 'myunsterberg test' },
+        { name: 'Переключаемость внимания', tests: ['attention_assessment_test'], description: 'attention assessment test' },
+        { name: 'Помехоустойчивость внимания', tests: ['attention_assessment_test'], description: 'attention assessment test' }
+    ];
+
+    const userResults = {};
+
+    for (const result of testResults) {
+        if (!userResults[result.type]) {
+            userResults[result.type] = [];
+        }
+        userResults[result.type].push(result.result);
+    }
+
+    for (const result of testResults) {
+        if (!userResults[result.type]) {
+            userResults[result.type] = [];
+        }
+        userResults[result.type].push(result.result);
+    }
+
+    const pvkResults = pvks.map(pvk => {
+        let userMaxResult = 0;
+        for (const test of pvk.tests) {
+            if (userResults[test]) {
+                userMaxResult = Math.max(userMaxResult, ...userResults[test]);
+            }
+        }
+
+        if (userMaxResult === 0) {
+            return null;
+        }
+
+        const avg = averagesAndVariances[pvk.tests[0]].average;
+        let description = 'Средний результат';
+        if (userMaxResult > avg + 1) {
+            description = 'Выше среднего';
+        } else if (userMaxResult < avg - 1) {
+            description = 'Ниже среднего';
+        } else if (userMaxResult > avg + 2) {
+            description = 'Высокий результат';
+        } else if (userMaxResult < avg - 2) {
+            description = 'Низкий результат';
+        }
+
+        return {
+            name: pvk.name,
+            description
+        };
+    }).filter(Boolean);
+
+    res.render('PVKList', { pvkResults });
+})
 
 sequelize.sync().then(() => {
     server.listen(3000, () => {
